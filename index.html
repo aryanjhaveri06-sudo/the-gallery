@@ -761,6 +761,9 @@ const NARRATIVE_FOR = {
   "bhupen khakhar": "khakhar", "tyeb mehta": "mehta", "subodh gupta": "subodh"
 };
 
+const listOf = xs => xs.length < 2 ? (xs[0] || "")
+  : xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1];
+
 const MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtDate = iso => {
   if (!iso) return "";
@@ -1412,7 +1415,7 @@ function viewDossier(embedded) {
       <div class="sec">${sectionHead("Auction record", rows.length + " of " + a.records.length)}
         <div class="chiprow">${houses.map(h => `<button class="chip" data-house="${esc(h)}" aria-pressed="${S.houseFilter === h}">${esc(h)}</button>`).join("")}</div>
         <div class="rows">${recs}</div>
-        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them. Source: ${esc(REAL.coverage.houses.join(" and "))} public results. ${esc(REAL.caveats.sell_through)}</div>
+        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them. Source: ${esc(listOf(REAL.coverage.houses))} public results. ${esc(REAL.caveats.sell_through)}</div>
       </div>
 
       <div class="sec">${sectionHead("Look up elsewhere")}
@@ -1476,7 +1479,7 @@ function marketFx() {
 
 function viewMarket() {
   const head = `<div class="view-head"><h1>Market</h1>
-    <p>${REAL.coverage.lots.toLocaleString()} lots \u00b7 ${esc(REAL.coverage.houses.join(" and "))} \u00b7 ${esc(REAL.coverage.from.slice(0, 4))}\u2013${esc(REAL.coverage.to.slice(0, 4))}</p></div>`;
+    <p>${REAL.coverage.lots.toLocaleString()} lots \u00b7 ${esc(listOf(REAL.coverage.houses))} \u00b7 ${esc(REAL.coverage.from.slice(0, 4))}\u2013${esc(REAL.coverage.to.slice(0, 4))}</p></div>`;
 
   if (isSplit) {
     return head + `<div class="view-body market-grid">
@@ -1722,7 +1725,7 @@ function viewMore() {
           <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">Desk of</span><span class="row-meta">${esc(DESK.owner)}</span></div></div>
           <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">Coverage</span><span class="row-meta">${artistKeys.length} artists \u00b7 ${REAL.coverage.lots.toLocaleString()} lots</span></div></div>
         </div>
-        <div class="foot-note">The Gallery \u00b7 internal use. Auction data derived from ${esc(REAL.coverage.houses.join(" and "))} public results, generated ${esc(REAL.generated_at.slice(0, 10))}. Clients, calendar and scripts are still sample data.</div>
+        <div class="foot-note">The Gallery \u00b7 internal use. Auction data derived from ${esc(listOf(REAL.coverage.houses))} public results, generated ${esc(REAL.generated_at.slice(0, 10))}. Clients, calendar and scripts are still sample data.</div>
       </div>
     </div>`;
 }

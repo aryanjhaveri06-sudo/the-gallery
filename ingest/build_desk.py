@@ -165,10 +165,19 @@ def artist_stats(rows, today):
 
     # Work in whichever medium class this artist actually trades in most, so the
     # comparison holds one market constant instead of averaging three.
+    #
+    # Count over the two windows the delta actually measures, not the whole
+    # history: picking the basis from all-time made the headline flip between
+    # nightly runs as the Saffronart backfill added old lots — Husain read +51%
+    # on canvas one night and +108% on paper the next, off the same market.
     counts = defaultdict(int)
-    for r in sold:
+    for r in sold12 + sold24:
         if r["_class"] and r["_sqin"]:
             counts[r["_class"]] += 1
+    if not counts:                      # nothing recent: fall back to all-time
+        for r in sold:
+            if r["_class"] and r["_sqin"]:
+                counts[r["_class"]] += 1
     basis = max(counts, key=counts.get) if counts else None
     comparable = [r for r in sold if r["_class"] == basis and r["_sqin"]] if basis else []
 
