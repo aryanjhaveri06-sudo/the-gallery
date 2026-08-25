@@ -107,3 +107,96 @@ and conversation notes are not, and are sensitive under India's DPDP Act. When t
 CRM is built it needs a private, authenticated backend with encryption at rest —
 Cloudflare Workers plus KV covers it inside their free tier, and unlike GitHub
 Pages it supports a private repository.
+
+---
+
+# The private half — Cloudflare
+
+The client book cannot live on the public site, so it lives on Cloudflare Pages
+with the same repo behind it. Two sites, one codebase:
+
+| | GitHub Pages | Cloudflare Pages |
+|---|---|---|
+| URL | `aryanjhaveri06-sudo.github.io/the-gallery/` | `the-gallery.pages.dev` |
+| Market data | yes | yes |
+| Client book | sample only | **real, behind sign-in** |
+| Her calendar | no | yes |
+| Who can open it | anyone | only allowlisted emails |
+
+The app detects which one it is on: `/api` answers on Cloudflare and 404s on
+GitHub, so the public copy quietly shows the sample book instead of breaking.
+
+## Why the same origin
+
+Safari on iPad blocks third-party cookies. An API on `*.workers.dev` with the app
+on `github.io` would lose the Access session on exactly the device this is for.
+Pages Functions run on the app's own domain, so the cookie is first-party.
+
+## Setup
+
+```bash
+npm install
+npx wrangler login                       # opens a browser; authorises this machine
+
+# 1. the database
+npx wrangler d1 create gallery-crm       # copy the database_id into wrangler.toml
+npm run schema:remote                    # create the tables
+npx wrangler d1 execute gallery-crm --remote --file=db/seed.sql   # optional demo rows
+
+# 2. the site
+npx wrangler pages project create the-gallery --production-branch main
+npm run deploy
+```
+
+Then in the dashboard, **Zero Trust → Access → Applications → Add → Self-hosted**:
+
+- Application domain: `the-gallery.pages.dev`, path `api`
+- Policy: *Allow*, rule **Emails** → Aashna's address (and yours)
+- Copy the **Application Audience (AUD) tag**
+
+Put those into `wrangler.toml` under `[vars]` — `ACCESS_TEAM_DOMAIN`,
+`ACCESS_AUD`, `ALLOWED_EMAILS` — and redeploy. Until both the team domain and the
+AUD are set the API refuses every request, so a half-finished setup cannot leak
+the book.
+
+Finally, her calendar:
+
+```bash
+npx wrangler pages secret put CALENDAR_ICS_URL
+```
+
+Paste the secret iCal address — Google Calendar → *Settings for my calendars* →
+*Integrate calendar* → **Secret address in iCal format**; or iCloud → share the
+calendar → **Public Calendar** and copy the `webcal://` link, changed to
+`https://`. It is a secret because it grants read access to her whole diary,
+which is why it is a Worker secret and never a var.
+
+## Local development
+
+```bash
+npm run seed:local
+npx wrangler pages dev . --port 8788 --binding CRM_DEV_IDENTITY=you@example.com
+```
+
+`CRM_DEV_IDENTITY` bypasses Access for local work only. It must never be set on
+the deployed project — if it is, anyone reaching the API is treated as signed in.
+
+## What is protected, and how
+
+- Access runs the login (email one-time code). No password is handled by this
+  code, or by me.
+- The Worker **verifies the Access JWT** — RS256 against the team's published
+  keys, plus audience, issuer and expiry — rather than trusting the email header,
+  which is forgeable by anything that reaches the Worker around Access.
+- `ALLOWED_EMAILS` is a second lock, so a mis-scoped Access policy alone cannot
+  open the book.
+- Every write records the verified email in `audit`.
+- Responses are `no-store, private` — a client book must not sit in any cache.
+- `.gitignore` blocks `crm/`, `.wrangler/` and `.dev.vars`. Note that
+  `.gitignore` has no trailing-comment syntax: `.wrangler/ # note` is a literal
+  pattern that matches nothing. Comments go on their own line.
+
+## Costs
+
+Free. D1 allows 5 GB and 5 million row reads a day; Pages Functions allow 100,000
+requests a day; Access is free to 50 users. One desk is nowhere near any of them.
