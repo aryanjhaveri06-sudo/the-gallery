@@ -1,0 +1,122 @@
+"""Emit a compact dataset the iPad/iPhone app can carry inline.
+
+`desk.json` is the full derived set (~3.5 MB, 215 artists) and is what a server
+would serve. The app bundle wants something much smaller, because a published
+Artifact cannot fetch across origins — the data has to travel inside the page.
+
+So this trims to the artists the desk actually shows, keeps a bounded number of
+records each, and drops every field the UI never reads.
+
+Usage:  python3 ingest/export_app.py [--artists N] [--records N]
+"""
+
+import argparse
+import json
+import sys
+
+from common import ROOT
+
+
+def inr(n):
+    """The trade's own units — crore above 1 cr, lakh below."""
+    if not n:
+        return None
+    if n >= 10_000_000:
+        v = n / 10_000_000
+        return f"₹{v:.2f} cr" if v < 10 else f"₹{v:.1f} cr"
+    if n >= 100_000:
+        return f"₹{n / 100_000:.0f} lakh"
+    return f"₹{n:,.0f}"
+
+
+def band(lo, hi):
+    if not (lo and hi):
+        return None
+    if hi >= 10_000_000:
+        return f"₹{lo / 10_000_000:.1f}–{hi / 10_000_000:.1f} cr"
+    return f"₹{lo / 100_000:.0f}–{hi / 100_000:.0f} lakh"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--artists", type=int, default=40)
+    ap.add_argument("--records", type=int, default=24)
+    ap.add_argument("--out", default=str(ROOT / "data" / "app_data.json"))
+    args = ap.parse_args()
+
+    desk = json.loads((ROOT / "data" / "desk.json").read_text())
+    artists = desk["artists"]
+
+    # Rank by market weight, not by mover: the desk is a reference tool first.
+    ranked = sorted(artists.values(),
+                    key=lambda a: (a["stats"]["high_inr"] or 0), reverse=True)
+    keep = {a["key"] for a in ranked[:args.artists]}
+    keep |= set(desk.get("trending", [])[:15])
+
+    out_artists = {}
+    for key in keep:
+        a = artists.get(key)
+        if not a:
+            continue
+        s = a["stats"]
+        recs = [r for r in a["records"] if r["sold"]][:args.records]
+        out_artists[key] = {
+            "key": key,
+            "name": a["name"],
+            "stats": {
+                "high": inr(s["high_inr"]),
+                "high_lot": s["high_lot"],
+                "median_12mo": inr(s["median_12mo_inr"]),
+                "median_all": inr(s["median_all_inr"]),
+                "lots_12mo": s["lots_12mo"],
+                "sold_12mo": s["sold_12mo"],
+                "lots_total": s["lots_recorded_total"],
+                "delta_12mo": s["delta_12mo_pct"],
+                "delta_basis": s["delta_basis"],
+                "above_high_rate": s["above_high_est_rate"],
+                "sell_through": s["sell_through"],
+                "sell_through_basis": s["sell_through_basis"],
+                "non_exportable": s["non_exportable_count"],
+                "index_houses": s.get("index_houses") or [],
+            },
+            "index": s["index"],
+            "records": [{
+                "date": r["date"], "house": r["house"], "lot": r["lot"],
+                "title": r["title"], "medium": r["medium"], "size": r["size"],
+                "est": band(r["est_low"], r["est_high"]),
+                "price": inr(r["price"]),
+                "above": r["above_high"],
+                "nat": r["non_exportable"],
+                "url": r["url"],
+            } for r in recs],
+        }
+
+    feed = [{
+        "date": f["date"], "house": f["house"], "artist": f["artist"],
+        "artist_key": f["artist_key"] if f["artist_key"] in out_artists else None,
+        "title": f["title"], "price": inr(f["price"]),
+        "est": band(f["est_low"], f["est_high"]), "above": f["above_high"],
+    } for f in desk["feed"][:40]]
+
+    trending = [k for k in desk.get("trending", []) if k in out_artists][:20]
+
+    app = {
+        "generated_at": desk["generated_at"],
+        "coverage": desk["coverage"],
+        "caveats": desk["caveats"],
+        "fx": desk["fx"],
+        "artists": out_artists,
+        "trending": trending,
+        "feed": feed,
+        "recent_sales": desk["recent_sales"][:16],
+    }
+
+    blob = json.dumps(app, ensure_ascii=False, separators=(",", ":"))
+    with open(args.out, "w") as f:
+        f.write(blob)
+    print(f"{len(out_artists)} artists, {len(feed)} feed rows -> {args.out}")
+    print(f"{len(blob) / 1024:.0f} KB")
+
+
+if __name__ == "__main__":
+    sys.exit(main())

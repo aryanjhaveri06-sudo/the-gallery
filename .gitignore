@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# NEVER COMMIT CLIENT DATA.
+#
+# If this repo is public (which it must be for GitHub Pages on a free account),
+# anything here is world-readable and stays in git history even after deletion.
+# Collector holdings, budgets and conversation notes are sensitive personal and
+# commercial data under India's DPDP Act. The CRM belongs on a private,
+# authenticated backend — never in this repository.
+# ---------------------------------------------------------------------------
+clients/
+crm/
+*client*.json
+*clients*.csv
+*.crm.json
+secrets.json
+.env
+.env.*
+credentials*
+*token*
+*.key
+*.pem
+
+# ---------------------------------------------------------------------------
+# Build state
+# ---------------------------------------------------------------------------
+# The accumulated auction history. Cached by the workflow between runs rather
+# than committed — at 11 MB, a nightly binary commit would add roughly 4 GB of
+# git history a year. Rebuild with: workflow_dispatch -> mode: full
+data/artdesk.db
+data/artdesk.db-wal
+data/artdesk.db-shm
+
+# The full derivation (~3.5 MB). Only app_data.json is read by the app, and
+# desk.json regenerates from the database in seconds — committing it nightly
+# would be pure churn.
+data/desk.json
+
+# Run logs
+data/*.log
+
+# ---------------------------------------------------------------------------
+# Local noise
+# ---------------------------------------------------------------------------
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/

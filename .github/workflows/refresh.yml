@@ -1,0 +1,134 @@
+name: Refresh auction data
+
+# Auction results only change when a sale closes, so nightly is ample.
+# 20:30 UTC = 02:00 IST, well clear of Indian saleroom hours.
+#
+# GitHub's scheduler is best-effort: runs can be delayed under load, and cron is
+# disabled entirely on a repo with no activity for 60 days. This workflow commits
+# on most runs, which keeps it alive.
+on:
+  schedule:
+    - cron: "30 20 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "incremental = recent sales only; full = re-pull everything"
+        type: choice
+        options: [incremental, full]
+        default: incremental
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # No pip install step on purpose: the ingesters are stdlib-only, so there
+      # is no dependency that can break a scheduled run months from now.
+
+      # The SQLite database is the accumulated history and must survive between
+      # runs. It is cached rather than committed: at 11 MB, a nightly binary
+      # commit would add roughly 4 GB of git history a year.
+      - name: Restore database
+        id: db
+        uses: actions/cache/restore@v4
+        with:
+          path: data/artdesk.db
+          key: artdesk-db-${{ github.run_id }}
+          restore-keys: artdesk-db-
+
+      - name: Report starting point
+        run: |
+          if [ -f data/artdesk.db ]; then
+            python3 - <<'PY'
+          import sqlite3
+          c = sqlite3.connect("data/artdesk.db")
+          n = c.execute("SELECT COUNT(*) FROM lot").fetchone()[0]
+          print(f"restored database with {n} lots")
+          PY
+          else
+            echo "no cached database — this run rebuilds from scratch"
+          fi
+
+      - name: Pull auction results
+        env:
+          MODE: ${{ inputs.mode || 'incremental' }}
+        run: |
+          cd ingest
+          if [ "$MODE" = "full" ] || [ ! -f ../data/artdesk.db ]; then
+            echo "::notice::full rebuild"
+            python3 astaguru.py
+            python3 saffronart.py --discover 6
+            python3 pundoles.py
+          else
+            # Newest sales sit at the top of each house's list, so a shallow
+            # pull catches anything that closed since the last run. Re-ingesting
+            # a sale is harmless — every write is INSERT OR REPLACE.
+            python3 astaguru.py   --limit 4
+            python3 saffronart.py --discover 6 --limit 4
+            python3 pundoles.py   --limit 4
+          fi
+
+      - name: Fill Saffronart medium and size
+        run: |
+          # Resumable and capped, so it chips away nightly instead of running for
+          # hours. Lots that already have a medium are skipped.
+          cd ingest && python3 enrich_saffronart.py --limit 250 || true
+
+      - name: Rebuild derived figures
+        run: |
+          cd ingest
+          python3 build_desk.py
+          python3 export_app.py
+          python3 embed_app.py
+
+      - name: Commit refreshed data
+        run: |
+          git config user.name  "art-desk-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/app_data.json data/saffronart_sales.json index.html
+          if git diff --staged --quiet; then
+            echo "nothing changed"
+          else
+            git commit -m "Refresh auction data ($(date -u +%Y-%m-%d))"
+            git push
+          fi
+
+      - name: Save database
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/artdesk.db
+          key: artdesk-db-${{ github.run_id }}
+
+      - name: Summary
+        if: always()
+        run: |
+          python3 - <<'PY' >> $GITHUB_STEP_SUMMARY
+          import sqlite3, json, pathlib
+          c = sqlite3.connect("data/artdesk.db")
+          print("## The Gallery refresh\n")
+          print("| House | Lots | Sales | Earliest | Latest |")
+          print("|---|---:|---:|---|---|")
+          for h, n, s, a, b in c.execute(
+              "SELECT house, COUNT(*), COUNT(DISTINCT sale_id), MIN(sale_date), MAX(sale_date) "
+              "FROM lot GROUP BY house ORDER BY COUNT(*) DESC"):
+              print(f"| {h} | {n:,} | {s} | {a} | {b} |")
+          p = pathlib.Path("data/app_data.json")
+          if p.exists():
+              d = json.loads(p.read_text())
+              print(f"\n{len(d['artists'])} artists in the app bundle, "
+                    f"generated {d['generated_at']}.")
+          PY
