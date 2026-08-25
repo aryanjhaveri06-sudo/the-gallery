@@ -1,0 +1,28 @@
+# Cloudflare Pages project for The Gallery.
+#
+# The static app (index.html, data/, calendar.ics) is served straight from the
+# repo; everything under functions/ becomes a Pages Function on the SAME origin,
+# which is what keeps the Access session alive in Safari on iPad.
+
+name = "the-gallery"
+compatibility_date = "2026-08-01"
+pages_build_output_dir = "."
+
+# The client book. Create it once with:
+#   wrangler d1 create gallery-crm
+# then paste the returned database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "gallery-crm"
+database_id = "00000000-0000-4000-8000-000000000001"  # replaced by the real id after `wrangler d1 create`
+
+[vars]
+# Filled in after the Access application exists. Until both are set the API
+# refuses every request rather than serving the client book unprotected.
+ACCESS_TEAM_DOMAIN = ""      # e.g. aryanjhaveri.cloudflareaccess.com
+ACCESS_AUD = ""              # the Access application's Application Audience tag
+ALLOWED_EMAILS = ""          # comma-separated; a second lock behind the policy
+
+# CALENDAR_ICS_URL is a SECRET, never a var — it is a bearer capability for her
+# whole calendar. Set it with:
+#   wrangler pages secret put CALENDAR_ICS_URL

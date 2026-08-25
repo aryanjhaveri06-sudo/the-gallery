@@ -8,6 +8,8 @@
 # authenticated backend — never in this repository.
 # ---------------------------------------------------------------------------
 clients/
+# Keep this directory blocked and use it for any local client export or dump.
+# The schema and demo seed live in db/ precisely so this rule can stay absolute.
 crm/
 *client*.json
 *clients*.csv
@@ -37,6 +39,17 @@ data/desk.json
 
 # Run logs
 data/*.log
+
+# ---------------------------------------------------------------------------
+# Cloudflare
+# ---------------------------------------------------------------------------
+node_modules/
+# Local D1 state — holds real client rows the moment the CRM is used locally.
+.wrangler/
+# Local secrets: CALENDAR_ICS_URL is a bearer capability for her whole calendar.
+.dev.vars
+*.sqlite
+*.sqlite-journal
 
 # ---------------------------------------------------------------------------
 # Local noise

@@ -770,6 +770,11 @@ const fmtDate = iso => {
   const [y, m, d] = iso.split("-");
   return `${d} ${MON3[+m - 1]} ${y.slice(2)}`;
 };
+const inrShort = n => !n ? "\u2014"
+  : n >= 1e7 ? `\u20b9${(n / 1e7).toFixed(n / 1e7 < 10 ? 2 : 1)} cr`
+  : n >= 1e5 ? `\u20b9${Math.round(n / 1e5)} lakh`
+  : `\u20b9${n.toLocaleString()}`;
+
 const pctLabel = v => v == null ? null : (v >= 0 ? "+" : "") + v.toFixed(0) + "%";
 
 function buildArtists() {
@@ -1064,6 +1069,42 @@ const CLOSING = [
    fails too — in both cases the embedded REAL below is what renders, so the
    desk always works, just as fresh as its last embed.
    ------------------------------------------------------------ */
+/* ------------------------------------------------------------
+   The private half. /api is Access-protected and same-origin, so a 401 simply
+   means she is not signed in (or this is the public GitHub Pages mirror, which
+   has no API at all). Either way the desk keeps working on the sample book
+   rather than breaking — the market data is the part that must never fail.
+   ------------------------------------------------------------ */
+const CRM = { live: false, who: null, clients: null, followups: null, diary: null, detail: {} };
+
+async function api(path, opts) {
+  const r = await fetch("api" + path, {
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    ...opts,
+  });
+  if (r.status === 401 || r.status === 503) return null;
+  if (!r.ok) throw new Error(`api ${path} -> ${r.status}`);
+  return r.json();
+}
+
+async function loadCRM() {
+  try {
+    const me = await api("/me");
+    if (!me) return false;
+    const [clients, brief] = await Promise.all([api("/clients"), api("/brief")]);
+    if (!clients) return false;
+    CRM.live = true;
+    CRM.who = me.email;
+    CRM.clients = clients.clients || [];
+    CRM.followups = (brief && brief.followups) || [];
+    CRM.diary = (brief && brief.diary) || null;
+    return true;
+  } catch (e) {
+    return false;                    // sample book stands
+  }
+}
+
 async function loadLiveData() {
   try {
     const r = await fetch("data/app_data.json", { cache: "no-cache" });
@@ -1234,14 +1275,40 @@ function renderTabbar() {
    ============================================================ */
 function viewToday() {
   const due = dueCount();
-  const diary = `<div class="rows">` + DIARY.map(d => `
+  const liveDiary = CRM.live && CRM.diary && CRM.diary.configured && CRM.diary.today;
+  const diary = liveDiary
+    ? (CRM.diary.today.length
+        ? `<div class="rows">` + CRM.diary.today.map(e => `
+            <div class="diary">
+              <div class="t tnum">${esc(e.allDay ? "all day" : (e.time || ""))}</div>
+              <div><div class="ti">${esc(e.title)}</div>
+              ${e.location ? `<div class="wh">${esc(e.location)}</div>` : ""}</div>
+            </div>`).join("") + `</div>`
+        : '<div class="empty">Nothing in the diary today.</div>')
+    : `<div class="rows">` + DIARY.map(d => `
     <div class="diary">
       <div class="t tnum">${esc(d.time)}</div>
       <div><div class="ti">${esc(d.title)}</div>
       <div class="wh">${esc(d.where)}</div><div class="pr">${esc(d.prep)}</div></div>
     </div>`).join("") + `</div>`;
 
-  const fups = `<div class="rows">` + FOLLOWUPS.map(f => {
+  const liveFups = CRM.live ? CRM.followups : null;
+  const fups = liveFups
+    ? (liveFups.length
+        ? `<div class="rows">` + liveFups.map(f => `
+            <div class="fu">
+              <div class="row-top">
+                <button class="fu-name" data-open-client="${esc(f.client_id)}">${esc(f.client_name)}</button>
+                <span class="fu-age ${f.overdue ? "over" : ""}">${esc(f.age)}</span>
+              </div>
+              <div class="fu-why">${esc(f.reason || "")}</div>
+              <div class="btnrow">
+                <button class="chip" data-clear-followup="${esc(f.id)}">Mark done</button>
+                <button class="btn" data-open-client="${esc(f.client_id)}">Open card</button>
+              </div>
+            </div>`).join("") + `</div>`
+        : '<div class="empty">Nothing owed. Rare.</div>')
+    : `<div class="rows">` + FOLLOWUPS.map(f => {
     const done = !!S.done[f.key];
     return `<div class="fu ${done ? "done" : ""}">
       <div class="row-top">
@@ -1512,6 +1579,16 @@ function viewMarket() {
    SCREEN: CLIENTS + CARD
    ============================================================ */
 function clientListRows() {
+  if (CRM.live) {
+    return `<div class="rows">` + CRM.clients.map(c => {
+      const sel = isSplit && S.client === c.id;
+      return `<button class="row" data-open-client="${esc(c.id)}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
+        <div class="row-top"><span class="row-name">${esc(c.name)}</span>
+          <span class="cl-tier ${c.tier === "Principal" ? "principal" : ""}">${esc(c.tier || "")}</span></div>
+        <div class="row-sub">${[c.city, c.focus].filter(Boolean).map(esc).join(" \u00b7 ")}${c.open_followups ? ` \u00b7 <span style="color:var(--gold-ink)">${c.open_followups} due</span>` : ""}</div>
+      </button>`;
+    }).join("") + `</div>`;
+  }
   return `<div class="rows">` + clientKeys.map(k => {
     const c = C(k), sel = isSplit && S.client === k;
     return `<button class="row" data-open-client="${k}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
@@ -1525,8 +1602,11 @@ function clientListRows() {
 function viewClients() {
   const list = `
     <div class="view-head"><h1>Clients</h1>
-      <p>${clientKeys.length} active</p></div>
-    <div class="view-body"><div class="sec">${sectionHead("The book", clientKeys.length + " active")}${clientListRows()}</div></div>`;
+      <p>${CRM.live ? `${CRM.clients.length} active \u00b7 signed in as ${esc(CRM.who)}` : `${clientKeys.length} active \u00b7 sample book`}</p></div>
+    <div class="view-body">
+      ${CRM.live ? "" : `<div class="accent-box"><div class="when">Sample book</div><div class="what">The real client book lives behind sign-in. On the private site it loads here automatically; this public copy shows the invented collectors instead.</div></div>`}
+      <div class="sec">${sectionHead("The book", (CRM.live ? CRM.clients.length : clientKeys.length) + " active")}${clientListRows()}</div>
+    </div>`;
   if (!isSplit) return list;
   return `<div class="split">
     <div class="list"><div class="sec" style="margin-top:26px">${sectionHead("Book", clientKeys.length + " active")}${clientListRows()}</div></div>
@@ -1535,7 +1615,27 @@ function viewClients() {
 }
 
 function viewClient(embedded) {
-  const c = C(S.client);
+  const d = CRM.live ? CRM.detail[S.client] : null;
+
+  // Map the live record onto the shape the card already renders, so there is one
+  // template rather than two that can drift apart.
+  const c = d ? {
+    name: d.name, title: d.title || "", city: d.city || "", tier: d.tier || "",
+    since: d.since || "", lifetime: d.lifetime_inr ? inrShort(d.lifetime_inr) : "—",
+    focus: d.focus || "", brief: d.brief || "", wants: d.wants || [],
+    holdings: (d.holdings || []).map(h => ({
+      artist: h.artist_name, work: h.work || "", acquired: h.acquired || "" })),
+    referrals: (d.referrals || []).map(r => ({ name: r.name, tie: r.tie || "" })),
+    next: { when: d.next_when || "", what: d.next_what || "" },
+    log: (d.log || []).map(l => ({ date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
+  } : C(S.client);
+
+  if (CRM.live && !d) {
+    return `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
+      <h1>${esc((CRM.clients.find(x => x.id === S.client) || {}).name || "Client")}</h1></div>
+      <div class="view-body"><div class="empty">Opening the card\u2026</div></div>`;
+  }
+
   const first = c.name.split(" ")[0];
 
   const holdings = c.holdings.map(h => {
@@ -1860,13 +1960,28 @@ document.addEventListener("click", e => {
     return go(isSplit ? "artists" : "dossier", { artist: attr("data-open-artist"), houseFilter: "All", bioOpen: false });
   }
   if (attr("data-open-client")) {
+    const ck = attr("data-open-client");
     S.searchOpen = false;
-    return go(isSplit ? "clients" : "client", { client: attr("data-open-client"), openTemplate: null });
+    go(isSplit ? "clients" : "client", { client: ck, openTemplate: null });
+    if (CRM.live && !CRM.detail[ck]) {
+      api(`/clients/${encodeURIComponent(ck)}`)
+        .then(d => { if (d) { CRM.detail[ck] = d; render(true); } })
+        .catch(() => {});
+    }
+    return;
   }
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
   if (attr("data-market")) { S.marketTab = attr("data-market"); return render(true); }
   if (attr("data-cal")) { S.calFilter = attr("data-cal"); return render(true); }
   if (attr("data-rsvp")) { const id = attr("data-rsvp"); S.rsvp[id] = !S.rsvp[id]; persist(); return render(true); }
+  if (attr("data-clear-followup")) {
+    const fid = attr("data-clear-followup");
+    CRM.followups = CRM.followups.filter(f => f.id !== fid);
+    render(true);
+    api(`/followups/${encodeURIComponent(fid)}/done`, { method: "POST", body: "{}" })
+      .catch(() => { loadCRM().then(() => render(true)); });   // put it back if the write failed
+    return;
+  }
   if (attr("data-toggle-done")) { const k = attr("data-toggle-done"); S.done[k] = !S.done[k]; persist(); return render(true); }
   if (attr("data-tpl")) { const i = +attr("data-tpl"); S.openTemplate = S.openTemplate === i ? null : i; return render(true); }
   if (attr("data-obj")) { const i = +attr("data-obj"); S.openObjection = S.openObjection === i ? null : i; return render(true); }
@@ -1900,9 +2015,8 @@ rebuildFromReal();
 render(false);
 
 // paint from the embedded copy first so the desk is never blank, then upgrade
-loadLiveData().then(fresh => {
-  if (!fresh) return;
-  rebuildFromReal();
+Promise.allSettled([loadLiveData(), loadCRM()]).then(([data]) => {
+  if (data.status === "fulfilled" && data.value) rebuildFromReal();
   render(true);
 });
 </script>

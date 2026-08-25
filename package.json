@@ -1,0 +1,14 @@
+{
+  "name": "the-gallery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev . --d1 DB=gallery-crm --port 8788",
+    "seed:local": "wrangler d1 execute gallery-crm --local --file=db/schema.sql && wrangler d1 execute gallery-crm --local --file=db/seed.sql",
+    "schema:remote": "wrangler d1 execute gallery-crm --remote --file=db/schema.sql",
+    "deploy": "wrangler pages deploy ."
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
+}
