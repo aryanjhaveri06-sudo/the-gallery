@@ -8,8 +8,72 @@ X-WR-TIMEZONE:Asia/Kolkata
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
+UID:sale:saffronart:5044@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20260828
+DTEND;VALUE=DATE:20260829
+SUMMARY:Saffronart — Friday Five
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5044
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5044
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Friday Five tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:sale:saffronart:5054@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20260911
+DTEND;VALUE=DATE:20260912
+SUMMARY:Saffronart — Friday Five
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5054
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5054
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Friday Five tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:sale:saffronart:5040@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20260922
+DTEND;VALUE=DATE:20260923
+SUMMARY:Saffronart — Absolute Tuesdays
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5040
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5040
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Absolute Tuesdays tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:sale:saffronart:5055@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20260925
+DTEND;VALUE=DATE:20260926
+SUMMARY:Saffronart — Friday Five
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5055
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5055
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Friday Five tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
 UID:astaguru:221@the-gallery
-DTSTAMP:20260825T163452Z
+DTSTAMP:20260825T164153Z
 DTSTART;VALUE=DATE:20260927
 DTEND;VALUE=DATE:20260928
 SUMMARY:AstaGuru — Modern & Contemporary Indian Art
@@ -23,6 +87,38 @@ BEGIN:VALARM
 TRIGGER:-P1D
 ACTION:DISPLAY
 DESCRIPTION:Modern & Contemporary Indian Art tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:sale:saffronart:5053@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20261006
+DTEND;VALUE=DATE:20261007
+SUMMARY:Saffronart — Absolute Tuesdays
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5053
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5053
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Absolute Tuesdays tomorrow
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:sale:saffronart:5048@the-gallery
+DTSTAMP:20260825T164153Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:Saffronart — Absolute Tuesdays
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
+ lts.aspx?eid=5048
+URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5048
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Absolute Tuesdays tomorrow
 END:VALARM
 END:VEVENT
 END:VCALENDAR
