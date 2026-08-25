@@ -14,7 +14,7 @@ import argparse
 import json
 import sys
 
-from common import ROOT
+from common import ROOT, connect
 
 
 def inr(n):
@@ -100,6 +100,16 @@ def main():
 
     trending = [k for k in desk.get("trending", []) if k in out_artists][:20]
 
+    # Forthcoming sales, for the Calendar tab and the "next up" strip.
+    con = connect()
+    try:
+        events = [dict(r) for r in con.execute(
+            "SELECT house, title, starts, ends, kind, city, url, lot_count "
+            "FROM event ORDER BY starts")]
+    except Exception:
+        events = []                      # diary not built yet
+    con.close()
+
     app = {
         "generated_at": desk["generated_at"],
         "coverage": desk["coverage"],
@@ -109,12 +119,14 @@ def main():
         "trending": trending,
         "feed": feed,
         "recent_sales": desk["recent_sales"][:16],
+        "events": events,
     }
 
     blob = json.dumps(app, ensure_ascii=False, separators=(",", ":"))
     with open(args.out, "w") as f:
         f.write(blob)
-    print(f"{len(out_artists)} artists, {len(feed)} feed rows -> {args.out}")
+    print(f"{len(out_artists)} artists, {len(feed)} feed rows, "
+          f"{len(events)} forthcoming events -> {args.out}")
     print(f"{len(blob) / 1024:.0f} KB")
 
 

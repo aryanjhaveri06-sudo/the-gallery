@@ -1,0 +1,28 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//The Gallery//Auction Diary//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:The Gallery — Auctions
+X-WR-TIMEZONE:Asia/Kolkata
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+BEGIN:VEVENT
+UID:astaguru:221@the-gallery
+DTSTAMP:20260825T163452Z
+DTSTART;VALUE=DATE:20260927
+DTEND;VALUE=DATE:20260928
+SUMMARY:AstaGuru — Modern & Contemporary Indian Art
+DESCRIPTION:Online sale · https://www.astaguru.com/auctions/2026/modern-c
+ ontemporary-indian-art-221
+LOCATION:Mumbai
+URL:https://www.astaguru.com/auctions/2026/modern-contemporary-indian-art-
+ 221
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+TRIGGER:-P1D
+ACTION:DISPLAY
+DESCRIPTION:Modern & Contemporary Indian Art tomorrow
+END:VALARM
+END:VEVENT
+END:VCALENDAR
