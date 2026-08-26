@@ -610,7 +610,7 @@ const ICON = {
 /* ============================================================
    DATA
    ============================================================ */
-const DESK = { house: "AstaGuru", owner: "Aashna Jhaveri", city: "Mumbai", today: "Tuesday, 25 August 2026" };
+const DESK = { house: "AstaGuru", owner: "Aashna Jhaveri", city: "Mumbai" };
 
 const NARRATIVE = {
   gaitonde: {
@@ -1053,7 +1053,7 @@ const normName = n => String(n || "").toLowerCase().replace(/[.'`,]/g, "").repla
 let _byName = {};
 const artistKeyByName = name => _byName[normName(name)] || null;
 const houseTag = h => `<span class="house" data-h="${esc(h)}">${esc(h)}</span>`;
-const dueCount = () => FOLLOWUPS.filter(f => !S.done[f.key]).length;
+const dueCount = () => (CRM.live && CRM.followups) ? CRM.followups.length : 0;
 
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 const stamp = d => { const p = d.split(" "); return new Date(2000 + (+p[2]), MON[p[1]], +p[0]).getTime(); };
@@ -1086,7 +1086,7 @@ function sparkline(values, width) {
    NAV DEFINITION
    ============================================================ */
 const NAV = [
-  { id: "today",     label: "Today",    icon: "today",     badge: () => `${DIARY.length} mtgs` },
+  { id: "today",     label: "Today",    icon: "today",     badge: () => `${dueCount()} due` },
   { id: "artists",   label: "Artists",  icon: "artists",   badge: () => `${artistKeys.length}` },
   { id: "market",    label: "Market",   icon: "market",    badge: () => "live" },
   { id: "clients",   label: "Clients",  icon: "clients",   badge: () => CRM.live ? `${CRM.clients.length}` : "\u2014" },
@@ -1873,14 +1873,26 @@ function view() {
   }
 }
 
+// A throw inside any one of these used to take the whole desk down with it:
+// renderRail() ran first, so one stale reference in a nav badge left `main`
+// untouched and the site opened blank. Paint the content first, then the
+// chrome, and let each piece fail alone and loudly.
+function guard(label, fn) {
+  try { fn(); } catch (e) { console.error("render: " + label + " failed", e); }
+}
+
 function render(keepScroll) {
   const main = document.getElementById("main");
   const y = keepScroll ? main.scrollTop : 0;
-  renderRail(); renderTopbar(); renderTabbar();
   const split = (S.screen === "artists" || S.screen === "dossier" || S.screen === "clients" || S.screen === "client") && isSplit;
-  main.innerHTML = `<div class="wrap ${split ? "wide" : ""}">${view()}</div>`;
-  main.scrollTop = y;
-  drawSparks();
+  guard("main", () => {
+    main.innerHTML = `<div class="wrap ${split ? "wide" : ""}">${view()}</div>`;
+    main.scrollTop = y;
+  });
+  guard("rail", renderRail);
+  guard("topbar", renderTopbar);
+  guard("tabbar", renderTabbar);
+  guard("sparks", drawSparks);
   document.title = "The Gallery";
 }
 
