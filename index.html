@@ -458,6 +458,11 @@ input[data-ed][type=date]{min-height:46px}
 .panel .fld{margin-top:16px}
 .panel .fld:first-of-type{margin-top:10px}
 .panel .chiprow{padding:0;margin:10px 0 0}
+.row-actions{margin-top:2px;gap:8px}
+.row-actions .chip{font-size:10px;padding:5px 10px}
+/* An armed delete looks different from an idle one, so the second tap is never
+   a surprise. */
+.chip.danger{border-color:var(--gold);color:var(--gold-ink)}
 
 /* ---- theme toggle ---- */
 .theme-btn{
@@ -1065,6 +1070,7 @@ const S = {
   panel: null,            // which inline editor is open on the client card
   draft: {},              // its working copy, discarded on cancel
   draftError: null,
+  confirmDelete: null,    // "<kind>:<id>" once armed; a delete takes two taps
   openTemplate: null,
   bioOpen: false,
   query: "",
@@ -1602,10 +1608,10 @@ function viewClient(embedded) {
     since: d.since || "", lifetime: d.lifetime_inr ? inrShort(d.lifetime_inr) : "—",
     focus: d.focus || "", brief: d.brief || "", wants: d.wants || [],
     holdings: (d.holdings || []).map(h => ({
-      artist: h.artist_name, work: h.work || "", acquired: h.acquired || "" })),
+      id: h.id, artist: h.artist_name, work: h.work || "", acquired: h.acquired || "" })),
     referrals: (d.referrals || []).map(r => ({ name: r.name, tie: r.tie || "" })),
     next: { when: d.next_when || "", what: d.next_what || "" },
-    log: (d.log || []).map(l => ({ date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
+    log: (d.log || []).map(l => ({ id: l.id, date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
     followups: d.followups || [],
   } : null;
 
@@ -1624,19 +1630,7 @@ function viewClient(embedded) {
 
   const first = c.name.split(" ")[0];
 
-  const holdings = c.holdings.map(h => {
-    const ak = artistKeyByName(h.artist);
-    return `<button class="row hold" ${ak ? `data-open-artist="${ak}"` : ""}>
-      <div class="row-top"><span class="a">${esc(h.artist)}</span>${ak ? I(ICON.chev, 15) : ""}</div>
-      <div class="w"><em>${esc(h.work)}</em> · <span class="tnum">${esc(h.acquired)}</span></div>
-    </button>`;
-  }).join("");
-
   const refs = c.referrals.map(r => `<div class="ref"><b>${esc(r.name)}</b><br><span>${esc(r.tie)}</span></div>`).join("");
-
-  const log = c.log.map(l => `<div class="log">
-    <div><div class="d tnum">${esc(l.date)}</div><div class="ch">${esc(l.channel)}</div></div>
-    <div class="nt">${esc(l.note)}</div></div>`).join("");
 
   const tpls = TEMPLATES.map((t, i) => {
     const open = S.openTemplate === i;
@@ -1690,6 +1684,39 @@ function viewClient(embedded) {
       ${S.draftError ? `<div class="foot-note" style="color:var(--gold-ink)">${esc(S.draftError)}</div>` : ""}
     </div>`;
 
+  // Editing an existing row reuses the same fields as adding one; only where the
+  // panel appears and where it posts differ. S.panel carries "<kind>:<id>".
+  const rowFields = kind =>
+      kind === "holding" ? fld("artist_name", "Artist", "V. S. Gaitonde")
+                         + fld("work", "Work", "Untitled, 1974")
+                         + dateFld("acquired", "Acquired")
+                         + fld("paid_inr", "Paid (\u20b9)", "Whole rupees; leave blank if not known")
+    : kind === "log"     ? dateFld("happened", "When")
+                         + chips("channel", "Channel", ["Call", "Email", "Viewing", "Meeting", "Sale", "Lunch", "WhatsApp"], "data-ed-channel")
+                         + fld("note", "What was said", "Keep it factual \u2014 this is the record.", true)
+    :                      dateFld("due", "Due")
+                         + fld("reason", "What is owed", "Send the November comparables.", true);
+
+  const rowPanel = (kind, rid) => S.panel !== `${kind}:${rid}` ? "" : `
+    <div class="panel">
+      ${rowFields(kind)}
+      <div class="btnrow" style="margin-top:20px">
+        <button class="btn btn-primary" data-act="save-row">Save changes</button>
+        <button class="btn" data-panel="close">Cancel</button>
+      </div>
+      ${S.draftError ? `<div class="foot-note" style="color:var(--gold-ink)">${esc(S.draftError)}</div>` : ""}
+    </div>`;
+
+  // Two taps to delete: the first arms the chip, the second does it. Cheaper
+  // than a modal and it cannot be triggered by one stray tap on a small screen.
+  const rowActions = (kind, rid) => {
+    const armed = S.confirmDelete === `${kind}:${rid}`;
+    return `<div class="btnrow row-actions">
+      <button class="chip" data-edit-row="${kind}:${esc(rid)}">Edit</button>
+      <button class="chip${armed ? " danger" : ""}" data-del-row="${kind}:${esc(rid)}">${armed ? "Really delete?" : "Delete"}</button>
+    </div>${rowPanel(kind, rid)}`;
+  };
+
   const editPanel = panel("client", "save-edit", "Save changes",
       fld("name", "Name", "Full name")
     + fld("title", "Title", "Trustee, Nanda Family Collection")
@@ -1718,6 +1745,24 @@ function viewClient(embedded) {
       dateFld("due", "Due")
     + fld("reason", "What is owed", "Send the November comparables.", true));
 
+  /* The row lists are built here, below rowActions, because they use it. A row
+     cannot be a <button> wrapping more <button>s, so the actions sit beside the
+     row rather than inside it. */
+  const holdings = c.holdings.map(h => {
+    const ak = artistKeyByName(h.artist);
+    return `<div>
+      <button class="row hold" ${ak ? `data-open-artist="${ak}"` : ""}>
+        <div class="row-top"><span class="a">${esc(h.artist)}</span>${ak ? I(ICON.chev, 15) : ""}</div>
+        <div class="w"><em>${esc(h.work)}</em> \u00b7 <span class="tnum">${esc(h.acquired)}</span></div>
+      </button>
+      ${rowActions("holding", h.id)}
+    </div>`;
+  }).join("");
+
+  const log = c.log.map(l => `<div class="log">
+    <div><div class="d tnum">${esc(l.date)}</div><div class="ch">${esc(l.channel)}</div></div>
+    <div class="nt">${esc(l.note)}${rowActions("log", l.id)}</div></div>`).join("");
+
   const today = todayIso();
   const fuRows = c.followups.length
     ? `<div class="rows">` + c.followups.map(f => `
@@ -1727,7 +1772,12 @@ function viewClient(embedded) {
             <div class="ch">${f.done ? "done" : (f.due < today ? "overdue" : "open")}</div>
           </div>
           <div class="nt">${esc(f.reason || "")}
-            <div class="btnrow"><button class="chip" data-card-followup="${esc(f.id)}">${f.done ? "Reopen" : "Mark done"}</button></div>
+            <div class="btnrow row-actions">
+              <button class="chip" data-card-followup="${esc(f.id)}">${f.done ? "Reopen" : "Mark done"}</button>
+              <button class="chip" data-edit-row="followup:${esc(f.id)}">Edit</button>
+              <button class="chip${S.confirmDelete === `followup:${f.id}` ? " danger" : ""}" data-del-row="followup:${esc(f.id)}">${S.confirmDelete === `followup:${f.id}` ? "Really delete?" : "Delete"}</button>
+            </div>
+            ${rowPanel("followup", f.id)}
           </div>
         </div>`).join("") + `</div>`
     : `<div class="empty">Nothing owed.</div>`;
@@ -1742,10 +1792,11 @@ function viewClient(embedded) {
       </div>
     </div>
     <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
+      ${(c.next.when || c.next.what) ? `
       <div class="accent-box">
-        <div class="when">${esc(c.next.when)}</div>
-        <div class="what">${esc(c.next.what)}</div>
-      </div>
+        ${c.next.when ? `<div class="when">${esc(c.next.when)}</div>` : ""}
+        ${c.next.what ? `<div class="what">${esc(c.next.what)}</div>` : ""}
+      </div>` : ""}
       <div class="btnrow">
         <button class="btn btn-primary" data-act="pitch-for" data-client="${S.client}">Draft a pitch</button>
         <button class="btn" data-panel="client">Edit card</button>
@@ -2057,7 +2108,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -2102,12 +2153,13 @@ document.addEventListener("click", e => {
   if (attr("data-panel")) {
     const which = attr("data-panel");
     if (which === "close" || S.panel === which) {
-      S.panel = null; S.draft = {}; S.draftError = null;
+      S.panel = null; S.draft = {}; S.draftError = null; S.confirmDelete = null;
       return render(true);
     }
     const d = CRM.detail[S.client] || {};
     S.panel = which;
     S.draftError = null;
+    S.confirmDelete = null;
     S.draft =
       which === "client" ? {
         name: d.name || "", title: d.title || "", city: d.city || "",
@@ -2123,6 +2175,47 @@ document.addEventListener("click", e => {
   }
   if (attr("data-ed-tier"))    { S.draft = { ...S.draft, tier: attr("data-ed-tier") }; return render(true); }
   if (attr("data-ed-channel")) { S.draft = { ...S.draft, channel: attr("data-ed-channel") }; return render(true); }
+
+  if (attr("data-edit-row")) {
+    const token = attr("data-edit-row");
+    const kind = token.slice(0, token.indexOf(":"));
+    const rid = token.slice(token.indexOf(":") + 1);
+    const d = CRM.detail[S.client] || {};
+    const row = (kind === "holding" ? (d.holdings || [])
+               : kind === "log"     ? (d.log || [])
+               :                      (d.followups || [])).find(x => x.id === rid);
+    if (!row) return;
+    S.panel = `${kind}:${rid}`;
+    S.confirmDelete = null;
+    S.draftError = null;
+    S.draft = kind === "holding"
+      ? { artist_name: row.artist_name || "", work: row.work || "",
+          acquired: row.acquired || "", paid_inr: row.paid_inr == null ? "" : String(row.paid_inr) }
+      : kind === "log"
+      ? { happened: row.happened || "", channel: row.channel || "", note: row.note || "" }
+      : { due: row.due || "", reason: row.reason || "" };
+    return render(true);
+  }
+
+  if (attr("data-del-row")) {
+    const token = attr("data-del-row");
+    // First tap arms it, second does it. Nothing is deleted on one tap.
+    if (S.confirmDelete !== token) {
+      S.confirmDelete = token; S.panel = null; S.draft = {}; S.draftError = null;
+      return render(true);
+    }
+    const kind = token.slice(0, token.indexOf(":"));
+    const rid = token.slice(token.indexOf(":") + 1);
+    const route = kind === "holding" ? "/holdings/" : kind === "log" ? "/log/" : "/followups/";
+    const cid = S.client;
+    S.confirmDelete = null;
+    render(true);
+    api(route + encodeURIComponent(rid), { method: "DELETE" })
+      .then(res => { if (!res) throw new Error("not signed in"); return refreshClient(cid); })
+      .then(() => { if (S.client === cid) render(true); })
+      .catch(() => { S.draftError = "Could not delete. Check you are still signed in."; render(true); });
+    return;
+  }
 
   if (attr("data-card-followup")) {
     const fid = attr("data-card-followup");
@@ -2178,7 +2271,7 @@ document.addEventListener("click", e => {
       .then(res => { if (!res) throw new Error("not signed in"); return refreshClient(cid); })
       .then(() => {
         if (S.client !== cid) return;      // she moved on; do not yank the card back
-        S.panel = null; S.draft = {}; S.draftError = null;
+        S.panel = null; S.draft = {}; S.draftError = null; S.confirmDelete = null;
         render(true);
       })
       .catch(() => {
@@ -2239,6 +2332,36 @@ document.addEventListener("click", e => {
       due: f.due,
       reason: blankToNull(f.reason),
     }) }));
+  }
+
+  if (act === "save-row") {
+    const which = S.panel || "";
+    const i = which.indexOf(":");
+    if (i < 0) return;
+    const kind = which.slice(0, i), rid = which.slice(i + 1);
+    const f = S.draft || {};
+    let route, body;
+    if (kind === "holding") {
+      if (!f.artist_name || !f.artist_name.trim()) {
+        S.draftError = "A holding needs an artist."; return render(true);
+      }
+      const name = f.artist_name.trim();
+      route = "/holdings/";
+      body = { artist_name: name, artist_key: artistKeyByName(name),
+               work: blankToNull(f.work), acquired: blankToNull(f.acquired),
+               paid_inr: intOrNull(f.paid_inr) };
+    } else if (kind === "log") {
+      if (!f.happened) { S.draftError = "A note needs a date."; return render(true); }
+      if (!f.note || !f.note.trim()) { S.draftError = "A note needs something in it."; return render(true); }
+      route = "/log/";
+      body = { happened: f.happened, channel: blankToNull(f.channel), note: f.note.trim() };
+    } else {
+      if (!f.due) { S.draftError = "A follow-up needs a date."; return render(true); }
+      route = "/followups/";
+      body = { due: f.due, reason: blankToNull(f.reason) };
+    }
+    return saveDraft(t, () => api(route + encodeURIComponent(rid),
+      { method: "PATCH", body: JSON.stringify(body) }));
   }
 
   if (act === "toggle-theme") { toggleTheme(); return; }

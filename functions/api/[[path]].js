@@ -28,15 +28,50 @@ const json = (data, status = 200) =>
 const now = () => new Date().toISOString();
 const id = () => crypto.randomUUID();
 
-async function audit(env, who, action, entity, entityId) {
+async function audit(env, who, action, entity, entityId, before) {
   try {
     await env.DB.prepare(
-      "INSERT INTO audit (at, who, action, entity, entity_id) VALUES (?,?,?,?,?)"
-    ).bind(now(), who, action, entity, entityId ?? null).run();
+      "INSERT INTO audit (at, who, action, entity, entity_id, detail) VALUES (?,?,?,?,?,?)"
+    ).bind(now(), who, action, entity, entityId ?? null,
+           before ? JSON.stringify(before) : null).run();
   } catch {
     /* auditing must never break the request it is recording */
   }
 }
+
+/* -------------------------------------------------- rows hanging off a client
+
+   Holdings, log entries and follow-ups are all leaf rows owned by one client,
+   so they edit and delete identically. The table and column names below are
+   the ONLY thing interpolated into SQL, and they come from this frozen map via
+   a regex-matched key — never from the request. Values always go through bind().
+   ---------------------------------------------------------------------------- */
+const CHILD = {
+  holdings: {
+    table: "holding", entity: "holding",
+    editable: ["artist_key", "artist_name", "work", "acquired", "paid_inr"],
+    numeric: ["paid_inr"],
+    required: { artist_name: "A holding needs an artist." },
+  },
+  log: {
+    table: "log", entity: "log",
+    editable: ["happened", "channel", "note"],
+    numeric: [],
+    required: { happened: "A note needs a date." },
+  },
+  followups: {
+    table: "followup", entity: "followup",
+    editable: ["due", "reason"],          // `done` is a state change, handled apart
+    numeric: [],
+    required: { due: "A follow-up needs a date." },
+  },
+};
+
+const numOrNull = v => {
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(String(v).replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? Math.round(n) : null;
+};
 
 /* ------------------------------------------------------------------ clients */
 
@@ -240,6 +275,56 @@ export async function onRequest(context) {
              b.work ?? null, b.acquired ?? null, b.paid_inr ?? null).run();
       await audit(env, who.email, "create", "holding", hid);
       return json({ id: hid }, 201);
+    }
+
+    /* --- edit or remove one row under a client --------------------------- */
+    const child = path.match(/^\/(holdings|log|followups)\/([^/]+)$/);
+    if (child && (method === "PATCH" || method === "DELETE")) {
+      const spec = CHILD[child[1]];
+      const rowId = decodeURIComponent(child[2]);
+
+      // Read it first: it decides 404 vs 200, and it is what goes in the audit
+      // trail. A delete here is permanent, so the snapshot is the only record
+      // of what the row said.
+      const before = await env.DB.prepare(
+        `SELECT * FROM ${spec.table} WHERE id = ?`).bind(rowId).first();
+      if (!before) return json({ error: "No such record." }, 404);
+
+      if (method === "DELETE") {
+        await env.DB.prepare(`DELETE FROM ${spec.table} WHERE id = ?`).bind(rowId).run();
+        await audit(env, who.email, "delete", spec.entity, rowId, before);
+        return json({ ok: true, deleted: rowId });
+      }
+
+      const b = await request.json().catch(() => null);
+      if (!b || typeof b !== "object") return json({ error: "Expected a JSON body." }, 400);
+
+      // Refuse to blank a NOT NULL column rather than letting SQLite throw.
+      for (const [field, message] of Object.entries(spec.required)) {
+        if (field in b && !String(b[field] ?? "").trim()) return json({ error: message }, 400);
+      }
+
+      const sets = [], vals = [];
+      for (const k of spec.editable) {
+        if (!(k in b)) continue;                      // absent means "leave alone"
+        sets.push(`${k} = ?`);
+        vals.push(spec.numeric.includes(k) ? numOrNull(b[k])
+                : (b[k] === "" ? null : b[k]));       // blank means cleared
+      }
+      // done and done_at move together, so the timestamp can never disagree
+      // with the flag. POST /followups/:id/done stays as the one-tap route.
+      if (spec.table === "followup" && "done" in b) {
+        const done = b.done ? 1 : 0;
+        sets.push("done = ?", "done_at = ?");
+        vals.push(done, done ? now() : null);
+      }
+      if (!sets.length) return json({ error: "Nothing to update." }, 400);
+
+      vals.push(rowId);
+      await env.DB.prepare(
+        `UPDATE ${spec.table} SET ${sets.join(", ")} WHERE id = ?`).bind(...vals).run();
+      await audit(env, who.email, "update", spec.entity, rowId, before);
+      return json({ ok: true, id: rowId });
     }
 
     return json({ error: `No route for ${method} /api${path}` }, 404);

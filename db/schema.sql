@@ -67,12 +67,20 @@ CREATE INDEX IF NOT EXISTS idx_followup_due ON followup(done, due);
 
 -- Every write is recorded. A client book is commercially sensitive; knowing who
 -- read or changed what, and when, is part of holding it responsibly.
+--
+-- `detail` carries a JSON snapshot of the row as it stood BEFORE an update or a
+-- delete. Deletes here are hard — there is no tombstone column — so this is the
+-- only thing standing between a mis-tapped delete and a conversation note that
+-- is simply gone. Read it back with:
+--   SELECT at, who, action, entity, detail FROM audit
+--    WHERE action = 'delete' ORDER BY at DESC;
 CREATE TABLE IF NOT EXISTS audit (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   at         TEXT NOT NULL,
   who        TEXT,                      -- the Access-verified email
   action     TEXT NOT NULL,
   entity     TEXT,
-  entity_id  TEXT
+  entity_id  TEXT,
+  detail     TEXT                       -- JSON of the row before it changed
 );
 CREATE INDEX IF NOT EXISTS idx_audit_at ON audit(at DESC);
