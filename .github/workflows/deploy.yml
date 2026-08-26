@@ -8,6 +8,9 @@ on:
     branches: [main]
     paths-ignore:
       - "**.md"
+  # So the private site can be re-pushed without inventing a commit — needed the
+  # day the API token was finally added, with nothing else to ship.
+  workflow_dispatch:
 
 concurrency:
   group: deploy
