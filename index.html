@@ -1594,11 +1594,15 @@ function viewClient(embedded) {
 
   const tpls = TEMPLATES.map((t, i) => {
     const open = S.openTemplate === i;
+    // A prospect has no holdings, so there may be no artist to name — and the
+    // estimate and the movement are per-lot facts this app does not hold. Leave
+    // a blank she fills rather than a number she might paste into a client email.
+    const blank = "\u2014\u2014\u2014\u2014";
     const body = t.body
       .replace(/\{\{first\}\}/g, first)
-      .replace(/\{\{artist\}\}/g, c.holdings[0].artist)
-      .replace(/\{\{estimate\}\}/g, "₹28–35 cr")
-      .replace(/\{\{delta\}\}/g, "+34%");
+      .replace(/\{\{artist\}\}/g, (c.holdings[0] && c.holdings[0].artist) || blank)
+      .replace(/\{\{estimate\}\}/g, blank)
+      .replace(/\{\{delta\}\}/g, blank);
     return `<div class="tpl">
       <button class="tpl-hd" data-tpl="${i}" aria-expanded="${open}">
         <span class="n">${esc(t.name)}</span><span class="ac">${open ? "Close" : "Preview"}</span></button>
@@ -1609,9 +1613,9 @@ function viewClient(embedded) {
   return `
     <div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
       <div class="card-head">
-        <span class="kicker">${esc(c.tier)} · since ${esc(c.since)}</span>
+        <span class="kicker">${[c.tier, c.since ? "since " + c.since : ""].filter(Boolean).map(esc).join(" · ")}</span>
         <h1>${esc(c.name)}</h1>
-        <div class="ti">${esc(c.title)} · ${esc(c.city)}</div>
+        <div class="ti">${[c.title, c.city].filter(Boolean).map(esc).join(" · ")}</div>
         <div class="lv"><span class="amt tnum">${esc(c.lifetime)}</span><span class="cap">lifetime with the house</span></div>
       </div>
     </div>
