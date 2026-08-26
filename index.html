@@ -2012,9 +2012,14 @@ function viewMore() {
 /* ============================================================
    SEARCH SHEET
    ============================================================ */
-function renderSheet() {
-  const el = document.getElementById("sheet");
-  if (!S.searchOpen) { el.innerHTML = ""; return; }
+/* The search sheet is built ONCE per opening. It used to re-render itself on
+   every keystroke, which replaced the <input> the caret was sitting in — so on
+   an iPad each letter tore down the field, dropped focus and dismissed the
+   keyboard, and typing "Gaitonde" meant nine separate taps on the search icon.
+   Only the results list is allowed to redraw while she types. */
+function renderSheetResults() {
+  const el = document.getElementById("sheet-body");
+  if (!el) return;
   const q = S.query.trim().toLowerCase();
   const matches = artistKeys.filter(k =>
     A(k).name.toLowerCase().includes(q) || A(k).movement.toLowerCase().includes(q)).slice(0, 8);
@@ -2030,23 +2035,32 @@ function renderSheet() {
           <span class="m tnum">${esc(A(k).years)} · ${esc(A(k).stats.lots12)} lots / 12 mo</span></button>`).join("")
       : `<div class="empty">No artist matches “${esc(S.query)}”. Try Gaitonde, Raza or Baroda.</div>`;
 
+  el.innerHTML = `<div class="label" style="padding:18px 0 4px">${q === "" ? artistKeys.length + " artists \u00b7 " + REAL.coverage.lots.toLocaleString() + " lots" : matches.length + " match" + (matches.length === 1 ? "" : "es")}</div>${body}`;
+}
+
+function renderSheet() {
+  const el = document.getElementById("sheet");
+  if (!S.searchOpen) { el.innerHTML = ""; return; }
+
   el.innerHTML = `<div class="sheet-bg" data-act="close-search-bg">
     <div class="sheet" role="dialog" aria-label="Search artists">
       <div class="sheet-top">
         <span class="g">${I(ICON.search, 21)}</span>
-        <input id="q" type="search" autocomplete="off" autocorrect="off" spellcheck="false"
+        <input id="q" data-q="1" type="search" autocomplete="off" autocorrect="off" spellcheck="false"
           placeholder="Gaitonde, Raza, Sher-Gil, Khakhar…" value="${esc(S.query)}">
         <button class="cancel" data-act="close-search">Cancel</button>
       </div>
-      <div class="sheet-body">
-        <div class="label" style="padding:18px 0 4px">${q === "" ? artistKeys.length + " artists \u00b7 " + REAL.coverage.lots.toLocaleString() + " lots" : matches.length + " match" + (matches.length === 1 ? "" : "es")}</div>
-        ${body}
-      </div>
+      <div class="sheet-body" id="sheet-body"></div>
     </div></div>`;
+  renderSheetResults();
 
+  // Typing is handled by the delegated input listener, so no per-render
+  // addEventListener here — that used to stack a fresh one on every keystroke.
   const inp = document.getElementById("q");
-  inp.focus();
-  inp.addEventListener("input", e => { S.query = e.target.value; renderSheet(); });
+  if (inp) {
+    inp.focus();
+    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
+  }
 }
 
 /* ============================================================
@@ -2391,6 +2405,8 @@ document.addEventListener("click", e => {
 });
 
 document.addEventListener("input", e => {
+  const q = e.target.closest("[data-q]");
+  if (q) { S.query = q.value; renderSheetResults(); return; }   // never redraws the field
   const nc = e.target.closest("[data-nc]");
   if (nc) { S.newClient = { ...S.newClient, [nc.getAttribute("data-nc")]: nc.value }; return; }
   const ed = e.target.closest("[data-ed]");
