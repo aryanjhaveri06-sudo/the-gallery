@@ -13,8 +13,12 @@ no leading zero, no collapse of distinct values, monotonic, no inverted band.
 ## `render_matrix.js`
 
 Paste into the browser console with the app open (works on the local server or
-either live site). Sweeps ~470 combinations of **viewport × auth state × screen ×
-panel × adverse data shape**.
+either live site). Sweeps ~1,200 combinations of **viewport × auth state × screen
+× panel × calendar month/day × adverse data shape**, in about six seconds.
+
+That it *finishes* is part of the test. One case feeds the calendar a sale ending
+in the year 9999; before the day-spanning loop was bounded, that spun ~2.9 million
+iterations and hung the tab rather than failing.
 
 `node --check` proves only that the file parses. Every runtime bug this desk has
 shipped lived on one of those axes.

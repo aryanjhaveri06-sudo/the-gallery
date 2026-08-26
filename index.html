@@ -421,6 +421,68 @@ button.row:active{background:var(--gold-tint)}
    SCREEN: CALENDAR
    ============================================================ */
 .month{font-family:var(--font-heading);font-weight:600;font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-ink);padding:24px 0 8px;border-bottom:1px solid var(--divider)}
+
+/* ---- month grid ------------------------------------------------------------
+   A sale calendar she can actually plan around, rather than a list she has to
+   read end to end. One house gets one colour, so a month reads at a glance. */
+.cal-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-top:20px}
+.cal-title{font-family:var(--font-heading);font-weight:500;font-size:26px;letter-spacing:.01em;margin:0;flex:1 1 auto}
+.cal-nav{display:flex;gap:6px}
+.cal-nav .chip{min-width:34px;justify-content:center;text-align:center}
+.cal-dows{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:20px}
+.cal-dow{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-50);text-align:center;padding-bottom:7px}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+.cal-cell{
+  min-height:94px;border:1px solid var(--divider-soft);border-radius:var(--r-md);
+  padding:6px 7px;background:var(--raised);text-align:left;overflow:hidden;
+  font:inherit;color:inherit;display:block;width:100%;
+}
+.cal-cell.pad{background:transparent;border-color:transparent}
+.cal-cell.has{cursor:pointer;border-color:var(--divider);transition:border-color .12s ease}
+.cal-cell.has:hover{border-color:var(--gold)}
+.cal-cell.sel{border-color:var(--gold);background:var(--gold-tint)}
+.cal-cell .dn{font-family:var(--font-heading);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.cal-cell .hd{display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:5px}
+.cal-now{font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--paper);background:var(--gold-ink);padding:2px 5px;border-radius:999px}
+.cal-ev{display:flex;align-items:center;gap:5px;margin-bottom:3px;font-size:10.5px;
+  line-height:1.25;overflow:hidden;white-space:nowrap}
+.cal-ev .t{overflow:hidden;text-overflow:ellipsis;color:var(--ink-72)}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex:none}
+.cal-more{font-size:9.5px;color:var(--ink-50);margin-top:2px}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px;font-size:11px;color:var(--ink-60);align-items:center}
+.cal-legend .k{display:inline-flex;align-items:center;gap:6px}
+.cal-day-detail{margin-top:22px;padding:18px;border:1px solid var(--divider);
+  border-radius:var(--r-md);background:var(--raised)}
+
+/* One colour per house. Unknown houses fall back to plain ink. */
+.cal-dot.h-astaguru{background:var(--gold)}
+.cal-dot.h-saffronart{background:#7a6096}
+.cal-dot.h-pundoles{background:#4a7c6f}
+.cal-dot.h-giftex{background:#b5544a}
+.cal-dot.h-other{background:var(--ink-40)}
+
+/* Seven columns means the cell width, not the viewport, decides what fits.
+   At 1280 a cell is ~129px and a title reads in full; on an iPad in portrait it
+   is ~55px, where a single ellipsed line said only "Inte...". Between those the
+   title wraps to two short lines instead of being cut to nothing. */
+@media (max-width:900px){
+  .cal-ev{white-space:normal;align-items:flex-start}
+  .cal-ev .t{
+    font-size:9px;line-height:1.15;text-overflow:clip;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  }
+  .cal-dot{margin-top:2px}
+  .cal-cell{min-height:104px}
+}
+@media (max-width:560px){
+  /* ~44px a cell: nothing readable fits, so dots only and tap for the detail. */
+  .cal-cell{min-height:52px;padding:5px 4px}
+  .cal-ev .t, .cal-more{display:none}
+  .cal-ev{gap:3px;margin-bottom:2px;display:inline-flex}
+  .cal-cell .hd{margin-bottom:3px}
+  .cal-title{font-size:21px}
+}
 .ev{display:grid;grid-template-columns:1fr auto;gap:14px;padding:16px 0;align-items:start}
 .ev .day{font-family:var(--font-heading);font-weight:600;font-size:16px;margin-bottom:5px}
 .ev .ti{font-family:var(--font-heading);font-weight:500;font-size:19px;line-height:1.22;margin-top:6px}
@@ -1103,6 +1165,8 @@ const S = {
   marketTab: "results",
   knowTab: "scripts",
   calFilter: "All",
+  calMonth: 0,            // months from the current one, for the grid
+  calDay: null,           // the day whose detail is open
   pitchClient: "sethi",
   openObjection: 0,
   newClient: {},
@@ -1961,6 +2025,118 @@ function viewCalendar() {
         `<button class="chip" data-cal="${esc(h)}" aria-pressed="${active === h}">${esc(h)}</button>`).join("")}
     </div>` : "";
 
+  /* ---- the month grid ------------------------------------------------------
+     Sales are not all one-day: her own September dates run two days each, so a
+     sale is painted on every day it covers, not just the day it opens. */
+  const houseClass = h => {
+    const k = String(h || "").toLowerCase().replace(/[^a-z]/g, "");
+    return ["astaguru", "saffronart", "pundoles", "giftex"].includes(k) ? "h-" + k : "h-other";
+  };
+  const iso = (y, m, d) =>
+    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+
+  const byDate = {};
+  evs.forEach(e => {
+    if (!e.starts) return;
+    const start = new Date(e.starts + "T00:00:00");
+    if (isNaN(start)) return;
+    let end = new Date((e.ends || e.starts) + "T00:00:00");
+    // data/manual_events.json is hand-edited, and no sale runs for a month. An
+    // end date typed as 2036 instead of 2026 would otherwise spin this loop
+    // three thousand times; 9999 would hang the tab outright. Bound it.
+    if (isNaN(end) || end < start) end = start;
+    const cap = new Date(start); cap.setDate(cap.getDate() + 30);
+    if (end > cap) end = cap;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const k = iso(d.getFullYear(), d.getMonth(), d.getDate());
+      (byDate[k] = byDate[k] || []).push(e);
+    }
+  });
+
+  const todayKey = todayIso();
+  const anchor = new Date(todayKey + "T00:00:00");
+  const base = new Date(anchor.getFullYear(), anchor.getMonth() + (S.calMonth || 0), 1);
+  const yr = base.getFullYear(), mo = base.getMonth();
+  const monthLabel = base.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  const daysInMonth = new Date(yr, mo + 1, 0).getDate();
+  const startPad = (new Date(yr, mo, 1).getDay() + 6) % 7;   // weeks start Monday
+
+  const cells = [];
+  for (let i = 0; i < startPad; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    const k = iso(yr, mo, d);
+    cells.push({ d, key: k, list: byDate[k] || [] });
+  }
+  while (cells.length % 7) cells.push(null);
+
+  const cellHtml = c => {
+    if (!c) return `<div class="cal-cell pad"></div>`;
+    const shown = c.list.slice(0, 3);
+    const extra = c.list.length - shown.length;
+    const cls = ["cal-cell", c.list.length ? "has" : "", S.calDay === c.key ? "sel" : ""]
+      .filter(Boolean).join(" ");
+    const inner = `
+      <div class="hd">
+        <span class="dn">${c.d}</span>
+        ${c.key === todayKey ? `<span class="cal-now">Today</span>` : ""}
+      </div>
+      ${shown.map(e => `
+        <div class="cal-ev">
+          <span class="cal-dot ${houseClass(e.house)}"></span>
+          <span class="t">${esc(e.title || "Sale")}</span>
+        </div>`).join("")}
+      ${extra > 0 ? `<div class="cal-more">+${extra} more</div>` : ""}`;
+    return c.list.length
+      ? `<button class="${cls}" data-cal-day="${c.key}" aria-pressed="${S.calDay === c.key}">${inner}</button>`
+      : `<div class="${cls}">${inner}</div>`;
+  };
+
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+  const grid = `
+    <div class="cal-head">
+      <h3 class="cal-title">${esc(monthLabel)}</h3>
+      <div class="cal-nav">
+        <button class="chip" data-cal-nav="prev" aria-label="Previous month">\u2039</button>
+        <button class="chip" data-cal-nav="today">Today</button>
+        <button class="chip" data-cal-nav="next" aria-label="Next month">\u203a</button>
+      </div>
+    </div>
+    ${filterChips}
+    <div class="cal-dows">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+      .map(d => `<div class="cal-dow">${d}</div>`).join("")}</div>
+    ${weeks.map(w => `<div class="cal-week">${w.map(cellHtml).join("")}</div>`).join("")}
+    <div class="cal-legend">
+      ${(houses.length ? houses : ["\u2014"]).map(h =>
+        `<span class="k"><span class="cal-dot ${houseClass(h)}"></span>${esc(h)}</span>`).join("")}
+      <span style="margin-left:auto">${evs.length} forthcoming \u00b7 tap a day for the detail</span>
+    </div>`;
+
+  /* ---- the selected day ---------------------------------------------------- */
+  const selList = S.calDay ? (byDate[S.calDay] || []) : [];
+  const dayDetail = !selList.length ? "" : `
+    <div class="cal-day-detail">
+      <div class="label">${esc(new Date(S.calDay + "T00:00:00")
+        .toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</div>
+      <div class="rows">${selList.map(e => {
+        const multi = e.ends && e.ends !== e.starts;
+        return `<div class="ev">
+          <div>
+            ${houseTag(e.house)}
+            <div class="ti">${esc(e.title || "Sale")}</div>
+            <div class="ci">${[e.city, e.kind,
+              multi ? `${fmtDate(e.starts)}\u2013${fmtDate(e.ends)}` : ""]
+              .filter(Boolean).map(esc).join(" \u00b7 ")}</div>
+            ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots</div>` : ""}
+          </div>
+          <div class="rs">${e.url
+            ? `<a class="chip" href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Catalogue</a>`
+            : ""}</div>
+        </div>`;
+      }).join("")}</div>
+    </div>`;
+
   const byMonth = {};
   evs.forEach(e => {
     const d = new Date(e.starts + "T00:00:00");
@@ -1991,8 +2167,9 @@ function viewCalendar() {
   return `<div class="view-head"><h1>Calendar</h1>
       <p>${evs.length} forthcoming ${evs.length === 1 ? "sale" : "sales"} \u00b7 ${esc(listOf(REAL.coverage.houses))}</p></div>
     <div class="view-body">
-      <div class="sec">${sectionHead("Forthcoming sales", evs.length === all.length ? "" : `${evs.length} of ${all.length}`)}
-        ${filterChips}${real}</div>
+      <div class="sec" style="margin-top:8px">${grid}${dayDetail}</div>
+
+      <div class="sec">${sectionHead("All forthcoming", evs.length === all.length ? "" : `${evs.length} of ${all.length}`)}${real}</div>
 
       <div class="sec">${sectionHead("Add to her calendar")}
         <div class="btnrow" style="margin-top:16px">
@@ -2146,7 +2323,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -2168,7 +2345,18 @@ document.addEventListener("click", e => {
   }
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
   if (attr("data-market")) { S.marketTab = attr("data-market"); return render(true); }
-  if (attr("data-cal")) { S.calFilter = attr("data-cal"); return render(true); }
+  if (attr("data-cal")) { S.calFilter = attr("data-cal"); S.calDay = null; return render(true); }
+  if (attr("data-cal-nav")) {
+    const dir = attr("data-cal-nav");
+    S.calMonth = dir === "today" ? 0 : (S.calMonth || 0) + (dir === "next" ? 1 : -1);
+    S.calDay = null;                       // a day from another month must not stay open
+    return render(true);
+  }
+  if (attr("data-cal-day")) {
+    const k = attr("data-cal-day");
+    S.calDay = S.calDay === k ? null : k;  // tapping the open day closes it
+    return render(true);
+  }
   if (attr("data-clear-followup")) {
     const fid = attr("data-clear-followup");
     CRM.followups = CRM.followups.filter(f => f.id !== fid);

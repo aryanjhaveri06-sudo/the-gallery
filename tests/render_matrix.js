@@ -76,6 +76,16 @@
           S.confirmDelete = p && p.includes(':') ? p : null;
           runs++; attempt(`${vp}/${auth}/${sc}${p ? '/' + p : ''}`, () => render(false));
         }
+        // the month grid carries its own state: which month, which day open
+        if (sc === 'calendar') {
+          for (const m of [-14, -1, 0, 1, 3, 18]) {
+            for (const day of [null, '2026-09-10', '2026-02-30', 'not-a-date', '']) {
+              S.calMonth = m; S.calDay = day;
+              runs++; attempt(`${vp}/${auth}/calendar/m${m}/d:${day}`, () => render(false));
+            }
+          }
+          S.calMonth = 0; S.calDay = null;
+        }
       }
       for (const q of ['', 'gaitonde', 'zzzz']) {
         caught = []; S.searchOpen = true; S.query = q; runs++;
@@ -111,6 +121,12 @@
     'caveats stripped': r => { r.caveats = {}; },
     'generated_at missing': r => { delete r.generated_at; },
     'everything stripped': r => { for (const k of Object.keys(r)) delete r[k]; },
+    // A hand-typed end date is the one input nobody validates. Before the cap,
+    // "9999-12-31" spun the day-spanning loop ~2.9M times and hung the tab.
+    'event ends in 9999': r => { r.events = [{ starts: '2026-09-01', ends: '9999-12-31', title: 'Runaway', house: 'AstaGuru', city: null, kind: null, url: null, lot_count: null }]; },
+    'event ends before it starts': r => { r.events = [{ starts: '2026-09-10', ends: '2026-09-01', title: 'Backwards', house: 'AstaGuru', city: null, kind: null, url: null, lot_count: null }]; },
+    'event with no start': r => { r.events = [{ starts: null, ends: null, title: 'No date', house: 'AstaGuru', city: null, kind: null, url: null, lot_count: null }]; },
+    'event with junk dates': r => { r.events = [{ starts: 'not-a-date', ends: 'also-not', title: 'Junk', house: null, city: null, kind: null, url: null, lot_count: null }]; },
   };
   for (const [label, mutate] of Object.entries(CASES)) {
     const r = JSON.parse(JSON.stringify(savedREAL));
@@ -121,8 +137,10 @@
     for (const sc of ['today', 'artists', 'market', 'clients', 'calendar', 'knowledge', 'more', 'dossier']) {
       S.screen = sc; S.marketTab = 'results'; S.panel = null; S.searchOpen = false;
       S.artist = Object.keys(ARTISTS)[0] || 'missing';
+      S.calMonth = sc === 'calendar' ? 1 : 0; S.calDay = null;
       runs++; attempt(`data:${label}/${sc}`, () => render(false));
     }
+    S.calMonth = 0;
     for (const mt of ['trending', 'news']) {
       S.screen = 'market'; S.marketTab = mt;
       runs++; attempt(`data:${label}/market:${mt}`, () => render(false));
@@ -139,6 +157,7 @@
   REAL = savedREAL; rebuildFromReal();
   Object.assign(S, savedS);
   S.panel = null; S.draft = {}; S.confirmDelete = null; S.searchOpen = false;
+  S.calMonth = 0; S.calDay = null;
   render(false); renderSheet();
   console.error = realErr;
   return { combinationsRun: runs, failureCount: failures.length, failures: failures.slice(0, 40) };
