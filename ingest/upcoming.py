@@ -102,6 +102,30 @@ def pundoles(con):
     return n
 
 
+def catalogue_url(house, name, url):
+    """The link a forthcoming sale should actually open.
+
+    `sale.url` is the RESULTS page, which is correct for a closed sale and
+    useless for one that has not happened: "Catalogue" on a future Friday Five
+    opened a results page with nothing on it.
+
+    Saffronart's catalogue lives at /auctions/<slug>-<eid>, and the slug is
+    decorative — /auctions/completely-made-up-4960 serves the same page as the
+    real slug, verified 2026-08-26. So the eid out of the results URL is enough,
+    and a readable slug is built from the sale name for the look of the thing.
+
+    Note these catalogues sit behind a Saffronart login for the online sales.
+    That is their gate, not ours; signed in, it opens on the lots.
+    """
+    if house != "Saffronart" or not url:
+        return url
+    m = re.search(r"eid=(\d+)", url)
+    if not m:
+        return url
+    slug = re.sub(r"[^a-z0-9]+", "-", (name or "auction").lower()).strip("-") or "auction"
+    return f"https://www.saffronart.com/auctions/{slug}-{m.group(1)}"
+
+
 def from_discovered_sales(con):
     """Saffronart's forthcoming sales arrive as future-dated rows in `sale`."""
     today = datetime.now(timezone.utc).date().isoformat()
@@ -117,7 +141,8 @@ def from_discovered_sales(con):
               (id, house, title, starts, ends, kind, city, url, lot_count, updated_at)
             VALUES (?,?,?,?,?,?,?,?,?,?)
         """, (f"sale:{s['id']}", s["house"], s["name"], s["start_date"],
-              s["start_date"], "Online sale", None, s["url"], None,
+              s["start_date"], "Online sale", None,
+              catalogue_url(s["house"], s["name"], s["url"]), None,
               datetime.now(timezone.utc).isoformat(timespec="seconds")))
         n += 1
     return n

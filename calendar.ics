@@ -9,13 +9,13 @@ REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
 BEGIN:VEVENT
 UID:sale:saffronart:5044@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260828
 DTEND;VALUE=DATE:20260829
 SUMMARY:Saffronart — Friday Five
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5044
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5044
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/friday-five
+ -5044
+URL:https://www.saffronart.com/auctions/friday-five-5044
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -25,7 +25,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:manual:astaguru-interiors-2026-09@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260910
 DTEND;VALUE=DATE:20260912
 SUMMARY:AstaGuru — Interiors
@@ -40,13 +40,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5054@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260911
 DTEND;VALUE=DATE:20260912
 SUMMARY:Saffronart — Friday Five
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5054
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5054
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/friday-five
+ -5054
+URL:https://www.saffronart.com/auctions/friday-five-5054
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -56,7 +56,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:manual:giftex-art-2026-09@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260916
 DTEND;VALUE=DATE:20260918
 SUMMARY:Giftex — Art
@@ -70,7 +70,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:manual:giftex-watches-jewellery-2026-09@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260921
 DTEND;VALUE=DATE:20260923
 SUMMARY:Giftex — Watches & Jewellery
@@ -84,13 +84,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5040@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260922
 DTEND;VALUE=DATE:20260923
 SUMMARY:Saffronart — Absolute Tuesdays
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5040
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5040
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/absolute-tu
+ esdays-5040
+URL:https://www.saffronart.com/auctions/absolute-tuesdays-5040
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -100,13 +100,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5055@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260925
 DTEND;VALUE=DATE:20260926
 SUMMARY:Saffronart — Friday Five
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5055
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5055
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/friday-five
+ -5055
+URL:https://www.saffronart.com/auctions/friday-five-5055
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -116,7 +116,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:manual:theme-auction-2026-09@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260925
 DTEND;VALUE=DATE:20260927
 SUMMARY:AstaGuru — Theme auction
@@ -131,7 +131,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:astaguru:221@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260927
 DTEND;VALUE=DATE:20260928
 SUMMARY:AstaGuru — Modern & Contemporary Indian Art
@@ -149,7 +149,7 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:manual:astaguru-masters-2026-09@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20260929
 DTEND;VALUE=DATE:20261001
 SUMMARY:AstaGuru — Masters
@@ -164,13 +164,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5053@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20261006
 DTEND;VALUE=DATE:20261007
 SUMMARY:Saffronart — Absolute Tuesdays
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5053
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5053
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/absolute-tu
+ esdays-5053
+URL:https://www.saffronart.com/auctions/absolute-tuesdays-5053
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -180,13 +180,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5048@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20261027
 DTEND;VALUE=DATE:20261028
 SUMMARY:Saffronart — Absolute Tuesdays
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5048
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5048
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/absolute-tu
+ esdays-5048
+URL:https://www.saffronart.com/auctions/absolute-tuesdays-5048
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -196,13 +196,14 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5057@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20261111
 DTEND;VALUE=DATE:20261112
 SUMMARY:Saffronart — Framing India: An Exhibition Of Modern Indian Art
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5057
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5057
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/framing-ind
+ ia-an-exhibition-of-modern-indian-art-5057
+URL:https://www.saffronart.com/auctions/framing-india-an-exhibition-of-mod
+ ern-indian-art-5057
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
@@ -212,13 +213,13 @@ END:VALARM
 END:VEVENT
 BEGIN:VEVENT
 UID:sale:saffronart:5056@the-gallery
-DTSTAMP:20260826T113055Z
+DTSTAMP:20260826T170234Z
 DTSTART;VALUE=DATE:20261209
 DTEND;VALUE=DATE:20261210
 SUMMARY:Saffronart — Winter Online Auction
-DESCRIPTION:Online sale · https://www.saffronart.com/auctions/AuctionResu
- lts.aspx?eid=5056
-URL:https://www.saffronart.com/auctions/AuctionResults.aspx?eid=5056
+DESCRIPTION:Online sale · https://www.saffronart.com/auctions/winter-onli
+ ne-auction-5056
+URL:https://www.saffronart.com/auctions/winter-online-auction-5056
 TRANSP:TRANSPARENT
 BEGIN:VALARM
 TRIGGER:-P1D
