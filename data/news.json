@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-26T08:36:06+00:00",
+ "generated_at": "2026-08-26T11:31:12+00:00",
  "on_market": [
   {
    "date": "2026-08-25",
@@ -89,6 +89,20 @@
  "wider": [
   {
    "date": "2026-08-26",
+   "source": "Hyperallergic",
+   "headline": "Artist's Device Slows Down Citi Bikes in Less Affordable Neighborhoods",
+   "why": "Justin Blinder's latest project examines New York City’s affordability crisis and makes the disparities felt on a physical level.",
+   "url": "https://hyperallergic.com/artists-device-slows-down-citi-bikes-in-less-affordable-neighborhoods/"
+  },
+  {
+   "date": "2026-08-26",
+   "source": "Hyperallergic",
+   "headline": "Goodbye, Dolly, Artists Love You",
+   "why": "From the heart-wrenching dulcet tones of \"Jolene\" to the boppy proletarianism of “9 to 5,” Dolly Parton has given us a soundtrack for every possible…",
+   "url": "https://hyperallergic.com/goodbye-dolly-artists-love-you/"
+  },
+  {
+   "date": "2026-08-26",
    "source": "artnet News",
    "headline": "An Art-Statesman’s Heel Turn—and Other Art World Matters",
    "why": "Plus, Laurie Simmons does Zyn, while Jim Nollman makes entrancing art with orcas. The post An Art-Statesman’s Heel Turn—and Other Art World Matters…",
@@ -156,20 +170,6 @@
    "headline": "Trump Threatens to Demolish Kennedy Center if He Can’t Close It for Renovations",
    "why": "“The Kennedy Center is in terrible trouble,” says the administration.",
    "url": "https://www.artnews.com/art-news/news/trump-threatens-demolish-kennedy-center-1234795735/"
-  },
-  {
-   "date": "2026-08-25",
-   "source": "artnet News",
-   "headline": "Elizabeth Peyton Sued Over Alleged Copyright Infringement of Oasis Photograph",
-   "why": "Photographer Justin Thomas claims that one of her paintings is a 'slavish copy' of his own image. The post Elizabeth Peyton Sued Over Alleged…",
-   "url": "https://news.artnet.com/art-world/thomas-elizabeth-peyton-oasis-painting-lawsuit-2802351"
-  },
-  {
-   "date": "2026-08-25",
-   "source": "Hyperallergic",
-   "headline": "Chinese Artist Gao Zhen Gets 3-Year Prison Sentence for Mao Sculptures",
-   "why": "Prosecutors used sculptures depicting the Chinese Communist Party founder repenting and aiming fire at Jesus in evidence.",
-   "url": "https://hyperallergic.com/chinese-artist-gao-zhen-gets-3-year-prison-sentence-for-mao-sculptures/"
   }
  ]
 }
