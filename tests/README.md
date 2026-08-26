@@ -39,3 +39,25 @@ disagreed twice: Python rounds half-to-even where JS rounds half-up, and
 `(1.035).toFixed(2)` is `"1.03"` because the float is really 1.0349999…. Both now
 round half-up on the integer rupee value. To re-check, dump `inr()` for a sample
 to JSON, serve it beside the app, and compare against `inrShort()` in the console.
+
+## `safeurl.js`
+
+    node tests/safeurl.js
+
+Unit-tests the URL guard in `index.html`. `esc()` stops a value breaking OUT of
+an attribute; it does not stop the value BEING a script, and a `javascript:` URL
+from a hand-typed `manual_events.json` or an RSS `<link>` rendered as a live link
+that ran on click — measured, three of them.
+
+The cases that matter are the ones where a browser is more permissive than it
+looks: it strips TAB, LF and CR out of a URL *before* parsing the scheme, so a
+scheme split across a newline still executes. The guard strips the control range
+first, then requires http(s).
+
+## Injection sweep (manual)
+
+Paste into the console with the app open: poison every text field a person can
+type — client name, title, brief, wants, holdings, log notes, follow-up reasons,
+plus event and news fields — with `<img src=x onerror=...>` and `"><svg onload=...>`,
+then render every screen, panel and viewport and check nothing executed. Last run
+2026-08-26: 63 renders, 0 executions.
