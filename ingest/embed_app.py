@@ -29,7 +29,11 @@ def main():
     if i < 0 or j < 0:
         sys.exit(f"markers not found in {args.html}")
 
-    block = f"{START}\nconst REAL = {data};\n"
+    # `let`, not `const`: loadLiveData() reassigns REAL when the fetched
+    # data/app_data.json is newer than this embed. With `const` that assignment
+    # threw, the throw was swallowed by loadLiveData's own try/catch, and the
+    # app silently ran on the embedded copy forever.
+    block = f"{START}\nlet REAL = {data};\n"
     Path(args.html).write_text(html[:i] + block + html[j:], encoding="utf-8")
     print(f"embedded {len(data) / 1024:.0f} KB into {args.html}")
 

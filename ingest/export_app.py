@@ -14,6 +14,22 @@ import argparse
 import json
 import sys
 
+from decimal import Decimal, ROUND_HALF_UP
+
+
+def _q(n, divisor, places):
+    """Divide and round HALF-UP, as a string.
+
+    Python rounds half to even and JavaScript's toFixed rounds half away from
+    zero, so ₹22,50,000 printed "₹22 lakh" from the pipeline and "₹23 lakh" from
+    inrShort() in the browser — the same number, two prices, depending on which
+    side rendered it. Exact decimal arithmetic on the integer paise-free rupee
+    value keeps both in step.
+    """
+    v = Decimal(n) / Decimal(divisor)
+    return str(v.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP))
+
+
 from common import ROOT, connect
 
 
@@ -21,36 +37,48 @@ def inr(n):
     """The trade's own units — crore above 1 cr, lakh below.
 
     Lakh carries a decimal under 10, for the same reason crore does: rounding to
-    whole lakh printed ₹1,08,000 / ₹1,32,000 / ₹1,92,000 as "₹1 lakh", "₹1 lakh"
-    and "₹2 lakh", so three different results read as the same price and one was
-    8% adrift. Below a lakh the exact rupee figure is short enough to just show.
+    whole lakh printed 1.08, 1.32 and 1.92 lakh all as "1 lakh" or "2 lakh", so
+    three different results read as one price.
     """
     if not n:
         return None
-    if n >= 10_000_000:
+    if n >= 10_000_000 or int(_q(n, 100_000, 0)) >= 100:
+        # 99,99,999 is "₹1 cr", never "₹100 lakh" — nobody in the trade says that.
         v = n / 10_000_000
-        return f"₹{v:.2f} cr" if v < 10 else f"₹{v:.1f} cr"
+        return f"₹{_q(n, 10_000_000, 2 if v < 10 else 1)} cr"
     if n >= 100_000:
         v = n / 100_000
-        return f"₹{v:.1f} lakh" if v < 10 else f"₹{v:.0f} lakh"
+        return f"₹{_q(n, 100_000, 1 if v < 10 else 0)} lakh"
     return f"₹{n:,.0f}"
 
 
-def band(lo, hi):
-    """An estimate band, in one unit chosen by the TOP of the band.
+def _unit(n):
+    return "cr" if n >= 10_000_000 else "lakh" if n >= 100_000 else "rupees"
 
-    This used to divide by a lakh unconditionally and round to whole, so a
-    ₹30,000–50,000 estimate printed as "₹0–1 lakh" and ₹20,000–40,000 printed as
-    "₹0–0 lakh" — a estimate of nothing to nothing, on real lots in Saffronart's
-    online sales.
+
+def band(lo, hi):
+    """An estimate band. Each end is named in its OWN unit when they straddle a
+    boundary: the trade writes "₹80 lakh–1.2 cr", never "₹0.8–1.2 cr", and a
+    price that starts with a zero reads like a bug.
+
+    This used to divide by a lakh unconditionally and round to whole, so a real
+    ₹30,000–50,000 estimate printed "₹0–1 lakh" and ₹20,000–40,000 printed
+    "₹0–0 lakh" — an estimate of nothing to nothing.
     """
     if not (lo and hi):
         return None
-    if hi >= 10_000_000:
-        return f"₹{lo / 10_000_000:.1f}–{hi / 10_000_000:.1f} cr"
-    if hi >= 100_000:
-        # Decide on the LOW end: a ₹7.5–10 lakh band must not print "₹8–10 lakh".
-        fmt = (lambda v: f"{v / 100_000:.1f}") if lo < 1_000_000 else (lambda v: f"{v / 100_000:.0f}")
+    if lo > hi:
+        # Two lots in 21,942 carry an inverted estimate (AstaGuru, 2021: 2,00,000
+        # low against 30,000 high). It is wrong at the house, not in the parse.
+        # Publishing nothing is honest; swapping would assert a range nobody set.
+        return None
+    if _unit(lo) != _unit(hi):
+        return f"{inr(lo)}–{inr(hi)[1:]}"          # drop the second ₹
+    if _unit(hi) == "cr":
+        return f"₹{_q(lo, 10_000_000, 1)}–{_q(hi, 10_000_000, 1)} cr"
+    if _unit(hi) == "lakh":
+        places = 1 if lo < 1_000_000 else 0
+        fmt = lambda v: _q(v, 100_000, places)
         return f"₹{fmt(lo)}–{fmt(hi)} lakh"
     return f"₹{lo:,.0f}–{hi:,.0f}"
 

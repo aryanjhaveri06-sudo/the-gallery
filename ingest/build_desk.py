@@ -50,6 +50,22 @@ import sys
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 
+from decimal import Decimal, ROUND_HALF_UP
+
+
+def _q(n, divisor, places):
+    """Divide and round HALF-UP, as a string.
+
+    Python rounds half to even and JavaScript's toFixed rounds half away from
+    zero, so ₹22,50,000 printed "₹22 lakh" from the pipeline and "₹23 lakh" from
+    inrShort() in the browser — the same number, two prices, depending on which
+    side rendered it. Exact decimal arithmetic on the integer paise-free rupee
+    value keeps both in step.
+    """
+    v = Decimal(n) / Decimal(divisor)
+    return str(v.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP))
+
+
 from common import ROOT, connect, get
 
 MIN_YEAR_LOTS = 4        # a year needs this many comparable lots to anchor an index point
@@ -107,18 +123,18 @@ def inr(n):
     """The trade's own units — crore above 1 cr, lakh below.
 
     Lakh carries a decimal under 10, for the same reason crore does: rounding to
-    whole lakh printed ₹1,08,000 / ₹1,32,000 / ₹1,92,000 as "₹1 lakh", "₹1 lakh"
-    and "₹2 lakh", so three different results read as the same price and one was
-    8% adrift. Below a lakh the exact rupee figure is short enough to just show.
+    whole lakh printed 1.08, 1.32 and 1.92 lakh all as "1 lakh" or "2 lakh", so
+    three different results read as one price.
     """
-    if n is None:
+    if not n:
         return None
-    if n >= 10_000_000:
+    if n >= 10_000_000 or int(_q(n, 100_000, 0)) >= 100:
+        # 99,99,999 is "₹1 cr", never "₹100 lakh" — nobody in the trade says that.
         v = n / 10_000_000
-        return f"₹{v:.2f} cr" if v < 10 else f"₹{v:.1f} cr"
+        return f"₹{_q(n, 10_000_000, 2 if v < 10 else 1)} cr"
     if n >= 100_000:
         v = n / 100_000
-        return f"₹{v:.1f} lakh" if v < 10 else f"₹{v:.0f} lakh"
+        return f"₹{_q(n, 100_000, 1 if v < 10 else 0)} lakh"
     return f"₹{n:,.0f}"
 
 
