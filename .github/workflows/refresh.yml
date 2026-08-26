@@ -113,6 +113,18 @@ jobs:
             git push
           fi
 
+      # Cloudflare is not git-connected, so the nightly commit would otherwise
+      # only reach GitHub Pages. This pushes the same build to the private site.
+      # Skipped automatically when the token secret is absent.
+      - name: Deploy to Cloudflare Pages
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages deploy . \
+            --project-name the-gallery --commit-dirty=true
+
       - name: Save database
         if: always()
         uses: actions/cache/save@v4

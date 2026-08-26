@@ -1,0 +1,31 @@
+name: Deploy on push
+
+# Ships whatever lands on main to the private Cloudflare site, so a change made
+# in conversation reaches her iPad without anyone running a command.
+# GitHub Pages updates itself from the same commit.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Cloudflare Pages
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_API_TOKEN not set — skipping. Add it in Settings → Secrets."
+            exit 0
+          fi
+          npx --yes wrangler@3 pages deploy . \
+            --project-name the-gallery --commit-dirty=true
