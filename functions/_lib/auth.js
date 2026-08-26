@@ -117,3 +117,49 @@ export function unauthorised(message = "Sign in to reach the client book.") {
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
+
+/* ---------------------------------------------------------------------------
+ * Shared-key authentication.
+ *
+ * The alternative to Cloudflare Access, chosen because Access requires a card on
+ * file even on its free tier. One long random key, held as a Worker secret and
+ * entered once per device.
+ *
+ * It is honestly weaker than Access: a single shared secret, no per-person
+ * identity, and revoking means rotating the key for everyone. It is reasonable
+ * for a two-person desk over HTTPS with a 256-bit key, and writes are still
+ * audited — just against the device rather than a verified person.
+ * ------------------------------------------------------------------------- */
+
+/** Constant-time compare, so a wrong key cannot be found one character at a time. */
+function safeEqual(a, b) {
+  const ab = new TextEncoder().encode(a || "");
+  const bb = new TextEncoder().encode(b || "");
+  // Compare a fixed number of bytes regardless of input, then fold in the length.
+  let diff = ab.length ^ bb.length;
+  const n = Math.max(ab.length, bb.length, 1);
+  for (let i = 0; i < n; i++) diff |= (ab[i] || 0) ^ (bb[i] || 0);
+  return diff === 0;
+}
+
+export function verifyKey(request, env) {
+  const expected = env.CRM_TOKEN;
+  if (!expected) return null;                    // not configured: fail closed
+
+  const header = request.headers.get("Authorization") || "";
+  const presented = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+  if (!presented) return null;
+  if (!safeEqual(presented, expected)) return null;
+
+  return { email: env.DESK_LABEL || "the desk", viaKey: true };
+}
+
+/**
+ * Whichever guard is configured. Access wins when it is set up, so moving to it
+ * later is a matter of filling in the variables — no code change.
+ */
+export async function authenticate(request, env) {
+  if (env.CRM_DEV_IDENTITY) return { email: env.CRM_DEV_IDENTITY, dev: true };
+  if (env.ACCESS_TEAM_DOMAIN && env.ACCESS_AUD) return verifyAccess(request, env);
+  return verifyKey(request, env);
+}

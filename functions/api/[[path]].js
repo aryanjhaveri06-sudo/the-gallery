@@ -10,7 +10,7 @@
  * exposed by a misconfiguration.
  */
 
-import { verifyAccess, unauthorised } from "../_lib/auth.js";
+import { authenticate, unauthorised } from "../_lib/auth.js";
 import { parseIcs } from "../_lib/ics.js";
 
 const json = (data, status = 200) =>
@@ -130,11 +130,16 @@ export async function onRequest(context) {
 
   if (method === "OPTIONS") return new Response(null, { status: 204 });
 
+  // Lets the app tell "wrong key" from "no desk here" without exposing anything.
+  if (method === "GET" && path === "/health") {
+    return json({ ok: true, guard: env.ACCESS_AUD ? "access" : (env.CRM_TOKEN ? "key" : "unconfigured") });
+  }
+
   if (!env.DB) {
     return json({ error: "The client book is not connected yet (no D1 binding)." }, 503);
   }
 
-  const who = await verifyAccess(request, env);
+  const who = await authenticate(request, env);
   if (!who) return unauthorised();
 
   try {

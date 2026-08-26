@@ -133,7 +133,7 @@ svg{display:block}
   border-bottom:1px solid var(--rule);
 }
 .topbar-in{
-  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;
+  display:grid;grid-template-columns:44px 1fr auto;align-items:center;
   gap:8px;padding:6px var(--pad) 7px;min-height:48px;
 }
 .wordmark{
@@ -434,6 +434,24 @@ button.row:active{background:var(--gold-tint)}
 .hub .hrow .tt{font-family:var(--font-heading);font-weight:500;font-size:18px}
 .hub .hrow .sb{font-size:12.5px;color:var(--ink-60);margin-top:2px}
 
+/* ---- form fields ---- */
+input[data-nc], input[data-key], textarea[data-nc]{
+  width:100%;margin-top:9px;padding:12px 14px;
+  font-family:var(--font-body);font-size:16px;   /* 16px stops iOS zooming on focus */
+  color:var(--ink);background:var(--raised);
+  border:1px solid var(--divider);border-radius:var(--r-md);
+  -webkit-appearance:none;appearance:none;
+}
+input[data-nc]:focus, input[data-key]:focus, textarea[data-nc]:focus{outline:none;border-color:var(--gold)}
+textarea[data-nc]{resize:vertical;line-height:1.6}
+
+/* ---- theme toggle ---- */
+.theme-btn{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-60);border-radius:var(--r-md);
+}
+.theme-btn:active{background:var(--gold-tint);color:var(--gold-ink)}
+
 /* ============================================================
    SEARCH SHEET
    ============================================================ */
@@ -581,6 +599,8 @@ const ICON = {
   clients:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
   calendar:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/>',
   knowledge:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  sun:    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>',
+  moon:   '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
   more:   '<circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/><circle cx="5" cy="12" r="1.4"/>',
   back:   '<path d="m15 18-6-6 6-6"/>',
   chev:   '<path d="m9 18 6-6-6-6"/>',
@@ -764,6 +784,9 @@ const NARRATIVE_FOR = {
 const listOf = xs => xs.length < 2 ? (xs[0] || "")
   : xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1];
 
+const todayLong = () => new Date().toLocaleDateString("en-GB",
+  { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
 const MON3 = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const fmtDate = iso => {
   if (!iso) return "";
@@ -837,106 +860,6 @@ function rebuildFromReal() {
   if (!ARTISTS[S.artist]) S.artist = artistKeys[0];
 }
 
-const CLIENTS = {
-  nanda: {
-    name: "Aditi Nanda", title: "Trustee, Nanda Family Collection", city: "Mumbai", tier: "Principal",
-    since: "2014", lifetime: "₹68.4 cr", focus: "Moderns, trophy",
-    brief: "Building a twenty-work museum-grade survey of the Progressives, one purchase a year, no repetition of names already held. Buys on scarcity and provenance, never on price. Will not consider anything with a restoration history.",
-    wants: ["Gaitonde 1970s", "Tyeb diagonal", "Sher-Gil paper"],
-    holdings: [
-      { artist: "V. S. Gaitonde", work: "Untitled, 1968", acquired: "acq. 2019" },
-      { artist: "S. H. Raza", work: "Bindu, 1986", acquired: "acq. 2016" },
-      { artist: "Tyeb Mehta", work: "Untitled (Bull)", acquired: "acq. 2022" }
-    ],
-    referrals: [{ name: "Farhad Irani", tie: "introduced 2021, Bombay Gymkhana" }, { name: "Meher Sethi", tie: "co-trustee, Kala Ghoda Trust" }],
-    next: { when: "Today, 4:30 pm", what: "Walk her the Pundole’s Gaitonde before the catalogue goes public." },
-    log: [
-      { date: "22 Aug 26", channel: "Call", note: "Asked unprompted about the Gaitonde rumour. Wants first refusal, not a bidding contest." },
-      { date: "04 Aug 26", channel: "Viewing", note: "Saw the Tyeb at the office. Liked it; the scale is wrong for the Worli wall." },
-      { date: "19 Jul 26", channel: "Email", note: "Sent the 2016–2026 Gaitonde index. She forwarded it to her family office." }
-    ]
-  },
-  irani: {
-    name: "Farhad Irani", title: "Founder, Irani Capital", city: "Mumbai", tier: "Principal",
-    since: "2018", lifetime: "₹31.2 cr", focus: "Souza, Khakhar",
-    brief: "Collects the difficult work — Souza heads, Khakhar narratives — and enjoys the argument as much as the object. Responds to art-historical reasoning and international validation; allergic to anything that sounds like an investment pitch.",
-    wants: ["Souza 1955–65", "Khakhar oil", "Baroda school"],
-    holdings: [
-      { artist: "F. N. Souza", work: "Head, 1962", acquired: "acq. 2019" },
-      { artist: "Bhupen Khakhar", work: "Untitled (Two Men)", acquired: "acq. 2026" }
-    ],
-    referrals: [{ name: "Aditi Nanda", tie: "introduced him to the desk" }],
-    next: { when: "Overdue by 6 days", what: "Send the Tate Khakhar catalogue essay he asked for; then propose the London viewing." },
-    log: [
-      { date: "19 Aug 26", channel: "WhatsApp", note: "Asked for the Tate essay. Still owed." },
-      { date: "15 Jun 26", channel: "Sale", note: "Bought the Khakhar watercolour at ₹1.15 cr. Underbid the oil deliberately." },
-      { date: "30 Apr 26", channel: "Lunch", note: "Wants to go deeper on Baroda — Sheikh, Patel, not only Khakhar." }
-    ]
-  },
-  sethi: {
-    name: "Meher Sethi", title: "Collector, Sethi Trust", city: "Delhi", tier: "Senior",
-    since: "2016", lifetime: "₹24.7 cr", focus: "Raza, Husain",
-    brief: "Decorative-led and colour-driven; buys for specific walls in the Delhi and Kasauli houses. Will pay up for red-period Raza. Needs the size conversation settled before price is discussed.",
-    wants: ["Raza Bindu red", "Husain 1960s", "Large format"],
-    holdings: [
-      { artist: "S. H. Raza", work: "Germination, 1988", acquired: "acq. 2018" },
-      { artist: "M. F. Husain", work: "Untitled (Horses)", acquired: "acq. 2021" },
-      { artist: "Tyeb Mehta", work: "Untitled, 1997", acquired: "acq. 2024" }
-    ],
-    referrals: [{ name: "Aditi Nanda", tie: "Kala Ghoda Trust" }],
-    next: { when: "Overdue by 11 days", what: "She asked for a Raza under ₹5 cr. Send the Saffronart Village au Bord comparable." },
-    log: [
-      { date: "14 Aug 26", channel: "Call", note: "Budget ₹4–5 cr for the Kasauli dining room. Wants red, wants signed and dated." },
-      { date: "02 Jul 26", channel: "Email", note: "Declined the ₹16.4 cr Bindu — over budget, not over taste." }
-    ]
-  },
-  chaudhri: {
-    name: "Nikhil Chaudhri", title: "Managing Partner, Ashwin Ventures", city: "Bengaluru", tier: "Growth",
-    since: "2022", lifetime: "₹6.9 cr", focus: "Contemporary, first-time",
-    brief: "Four years in, learning fast, treats the collection like a portfolio and asks for data. Best served with the compounding story on Khakhar and Souza paper, and with honesty about liquidity.",
-    wants: ["Under ₹1 cr", "Works on paper", "Contemporary"],
-    holdings: [
-      { artist: "Subodh Gupta", work: "Bucket, bronze", acquired: "acq. 2026" },
-      { artist: "F. N. Souza", work: "Crucifixion Study", acquired: "acq. 2025" }
-    ],
-    referrals: [{ name: "Farhad Irani", tie: "met at the Kochi preview" }],
-    next: { when: "Tomorrow", what: "Send three works on paper under ₹1 cr with five-year comparables attached." },
-    log: [
-      { date: "21 Aug 26", channel: "Email", note: "Asked how quickly he could sell if he needed to. Answer honestly — 6–9 months for paper." },
-      { date: "10 Jul 26", channel: "Viewing", note: "Kochi preview. Drawn to the Baroda narrative work over the abstraction." }
-    ]
-  },
-  rao: {
-    name: "Sunanda Rao", title: "Director, Rao Foundation", city: "Hyderabad", tier: "Senior",
-    since: "2019", lifetime: "₹18.3 cr", focus: "Contemporary, institutional",
-    brief: "Buying toward a public foundation space opening 2028 — needs scale, needs names that read on a wall label, and needs museum-standard documentation on everything.",
-    wants: ["Sculpture", "Institutional scale", "Khakhar"],
-    holdings: [
-      { artist: "Subodh Gupta", work: "Untitled (Utensils)", acquired: "acq. 2023" },
-      { artist: "M. F. Husain", work: "Yatra", acquired: "acq. 2026" }
-    ],
-    referrals: [{ name: "Nikhil Chaudhri", tie: "Kochi Biennale circle" }],
-    next: { when: "Fri 28 Aug", what: "Confirm the foundation walkthrough date and send the loan-agreement template." },
-    log: [
-      { date: "18 Aug 26", channel: "Meeting", note: "Foundation build slips to Q2 2028. Storage needed for two years — offer the house facility." },
-      { date: "17 Apr 26", channel: "Sale", note: "Bought Yatra at £2.4 m. Wants a second Husain of comparable scale." }
-    ]
-  },
-  banerjee: {
-    name: "Rohan Banerjee", title: "Private client, Singapore", city: "Singapore", tier: "Growth",
-    since: "2023", lifetime: "₹4.2 cr", focus: "NRI, diaspora moderns",
-    brief: "Non-resident buyer, so export clearance is the first question on every lot. Prefers mid-size canvases that ship well and pays in SGD — always quote landed cost, not hammer.",
-    wants: ["Export-clear", "Mid-size canvas", "Raza"],
-    holdings: [{ artist: "S. H. Raza", work: "Untitled (Rajasthan)", acquired: "acq. 2025" }],
-    referrals: [{ name: "Sunanda Rao", tie: "Singapore Art Week dinner" }],
-    next: { when: "Mon 31 Aug", what: "Send SGD-landed quotes for the two AstaGuru Raza lots including freight and insurance." },
-    log: [
-      { date: "20 Aug 26", channel: "Email", note: "Confirmed SGD budget of 400k. Asked about Art Treasure restrictions — explain clearly." },
-      { date: "22 Nov 25", channel: "Sale", note: "Bought the Raza gouache at ₹68 lakh. Shipping took nine weeks; manage that expectation." }
-    ]
-  }
-};
-
 const TEMPLATES = [
   { name: "Pre-catalogue first look", body: "Dear {{first}},\n\nBefore the catalogue is public on Monday, I wanted you to see lot 24 — a {{artist}} of the period we discussed. Estimate {{estimate}}.\n\nI have held the viewing room Thursday between 11 and 4. Say the word and I will keep it quiet until then.\n\nWarm regards," },
   { name: "Underbid follow-up", body: "Dear {{first}},\n\nThank you for bidding last night. It went one increment past where we agreed, which was the right discipline.\n\nTwo comparable works come up in the November sales and I would rather bring you those than chase this one in the aftermarket. May I send them next week?\n\nWarm regards," },
@@ -952,57 +875,6 @@ const OBJECTIONS = [
   { q: "My advisor says art is not an asset class.", answer: "Your advisor is largely right, and I would not argue with them on portfolio construction. What art does is behave differently — no yield, wide spreads, and returns concentrated in a few names. I would rather you bought this because you want to live with it and it happens to hold value, than because a spreadsheet told you to. That is also how the best collections in this category were built.", proof: "Index vs. Nifty chart, cost-of-ownership sheet." },
   { q: "Can I take it out of India?", answer: "For this lot, yes — it is not registered as a National Art Treasure and we will handle the ASI clearance and export permit. For Sher-Gil, Amrita Sher-Gil specifically, and for pre-1947 registered works, the answer is no, and I would rather say so now than at shipping. Landed cost including freight and insurance is what I will quote you.", proof: "ASI registration status, export permit precedent, landed-cost quote." }
 ];
-
-const PITCH = {
-  sethi: {
-    subject: "A red Raza that fits Kasauli, and stays inside your number",
-    body: "Dear Meher,\n\nYou told me ₹4–5 crore and a red canvas that can carry a dining wall. Two lots in the September sales do that honestly, and I would put the Saffronart Village au Bord first: oil on board, 21 by 26, the Provence palette running warm, and it sold at ₹4.6 crore in April against a ₹3.2–4.0 estimate — so the band is proven, not hoped for.\n\nThe second is quieter and better value. I can hold both for a private view before the catalogue is public.",
-    lots: [
-      { artist: "S. H. Raza", work: "Village au Bord (comparable)", sale: "Saffronart, 10 Sep", est: "₹3.6–4.4 cr", why: "Red-period, proven band, right scale for the Kasauli wall" },
-      { artist: "M. F. Husain", work: "Untitled (Horses), 1968", sale: "AstaGuru, 03 Sep", est: "₹4.0–5.0 cr", why: "Bombay-period, the only Husain she does not already own" }
-    ]
-  },
-  nanda: {
-    subject: "The Gaitonde, before the catalogue",
-    body: "Dear Aditi,\n\nThe 1974 canvas we spoke about is confirmed for the Pundole's sale — 40 by 25, unrestored, three owners, the vertical registers you have been waiting for. It is the first 1970s Gaitonde on an Indian rostrum in two years.\n\nYour collection has a 1968; this is the decade you told me was missing. I have held Thursday 11 to 4 and will keep it quiet until then.",
-    lots: [
-      { artist: "V. S. Gaitonde", work: "Untitled, 1974", sale: "Pundole's, 26 Sep", est: "₹28–35 cr", why: "Fills the 1970s gap; unrestored; scarcity name at the top of her brief" },
-      { artist: "Amrita Sher-Gil", work: "Untitled (Study of a Head)", sale: "Saffronart, 05 Nov", est: "₹60–80 lakh", why: "Only realistic Sher-Gil entry; paper, no export question for a domestic buyer" }
-    ]
-  },
-  irani: {
-    subject: "Two arguments worth having in October",
-    body: "Dear Farhad,\n\nThe Tate essay is attached — you were right that the reading of the trade portraits is the interesting part, and wrong that nobody else had noticed.\n\nTwo lots follow from it. Christie's has a 1962 Souza priest, London period, the years you and I agree are the only ones that matter. And Sotheby's may carry an estate Khakhar oil on 30 October. If you are in London that week, the two viewings are three days apart.",
-    lots: [
-      { artist: "F. N. Souza", work: "Head of a Priest, 1962", sale: "Christie's, 08 Oct", est: "$2.2–3.0 m", why: "London period, cleric subject — the pocket that outperforms by 60%" },
-      { artist: "Bhupen Khakhar", work: "Trade portrait (estate consignment)", sale: "Sotheby's, 30 Oct", est: "On request", why: "Estate provenance, 1970s narrative work, post-Tate demand" }
-    ]
-  },
-  chaudhri: {
-    subject: "Three works on paper under a crore — with the honest liquidity answer",
-    body: "Dear Nikhil,\n\nYou asked how fast you could sell. Paper takes six to nine months for a fair price; I would rather you knew that before buying than after.\n\nWith that said, paper is also where the compounding has been. Khakhar's index is up more than four times since 2016 and his watercolours still clear under ₹1.2 crore. The November Saffronart sale is the deepest supply of the year — I have marked three lots and attached the five-year comparables for each.",
-    lots: [
-      { artist: "Bhupen Khakhar", work: "Untitled (Two Men), watercolour", sale: "Saffronart, 05 Nov", est: "₹80 lakh–1.1 cr", why: "Fastest compounder in the category, still inside his band" },
-      { artist: "F. N. Souza", work: "Crucifixion Study, ink", sale: "AstaGuru, 15 Oct", est: "₹25–35 lakh", why: "Second Souza on paper; builds a coherent two-name position" }
-    ]
-  },
-  rao: {
-    subject: "Scale for the foundation, and storage until 2028",
-    body: "Dear Sunanda,\n\nWith the build slipping to Q2 2028, the two-year storage question comes before the acquisition question — our Mumbai facility is museum-standard and I can put that in writing this week.\n\nOn the wall labels: Sotheby's October sale may carry an estate Khakhar, and there is a large Husain of comparable scale to Yatra in the November Collectors' Sale. Both come with full documentation.",
-    lots: [
-      { artist: "M. F. Husain", work: "Large processional canvas", sale: "AstaGuru, 14 Nov", est: "₹6–8 cr", why: "Matches Yatra in scale; second Husain she asked for" },
-      { artist: "Bhupen Khakhar", work: "Trade portrait (estate)", sale: "Sotheby's, 30 Oct", est: "On request", why: "Institutional-grade provenance, reads on a wall label" }
-    ]
-  },
-  banerjee: {
-    subject: "Two Razas, quoted landed in SGD",
-    body: "Dear Rohan,\n\nBoth lots below are export-clear — neither is a registered Art Treasure — and the figures are landed in Singapore dollars, freight and insurance included, so there is no second number later.\n\nOn timing: allow eight to ten weeks from hammer to your wall. The last one took nine and I would rather repeat that than promise better.",
-    lots: [
-      { artist: "S. H. Raza", work: "Untitled (Rajasthan), gouache", sale: "AstaGuru, 03 Sep", est: "SGD 96k landed", why: "Export-clear, ships flat, matches his existing holding" },
-      { artist: "S. H. Raza", work: "Bindu, 1989, mid-size canvas", sale: "AstaGuru, 15 Oct", est: "SGD 340k landed", why: "Inside his 400k budget, mid-size crate, no ASI restriction" }
-    ]
-  }
-};
 
 const EVENTS = [
   { month: "September 2026", items: [
@@ -1024,19 +896,6 @@ const EVENTS = [
   ]}
 ];
 
-const DIARY = [
-  { time: "10.00", title: "Condition report — Pundole’s Gaitonde", where: "Viewing room, Ballard Estate", prep: "Take the 1974 vs 1979 comparable sheet." },
-  { time: "13.30", title: "Lunch, Nikhil Chaudhri", where: "The Table, Colaba", prep: "He will ask about liquidity. Answer 6–9 months for paper." },
-  { time: "16.30", title: "Aditi Nanda — first look", where: "Her office, Worli", prep: "Do not open with price. Open with the 1970s gap in her collection." }
-];
-
-const FOLLOWUPS = [
-  { key: "irani", client: "Farhad Irani", age: "overdue 6d", over: true, reason: "Owed the Tate Khakhar catalogue essay, then propose the 30 Oct London viewing." },
-  { key: "sethi", client: "Meher Sethi", age: "overdue 11d", over: true, reason: "Wants a red-period Raza under ₹5 cr — send the Village au Bord comparable." },
-  { key: "chaudhri", client: "Nikhil Chaudhri", age: "due today", over: false, reason: "Three works on paper under ₹1 cr with five-year comparables attached." },
-  { key: "banerjee", client: "Rohan Banerjee", age: "due today", over: false, reason: "SGD landed-cost quotes on the two AstaGuru Raza lots, freight and insurance included." }
-];
-
 const BRIEF_NEWS = [
   { date: "25 Aug", source: "Desk note", headline: "Pundole’s to offer a 1974 Gaitonde on 26 September", why: "First 1970s canvas on an Indian rostrum in two years. Nanda and Irani both have standing interest." },
   { date: "24 Aug", source: "MutualArt", headline: "Khakhar index passes 4× its 2016 base", why: "The compounding line Chaudhri asked for. Watercolours still under ₹1.2 cr." },
@@ -1053,34 +912,27 @@ const NEWS = [
   { date: "15 Aug", source: "MutualArt", headline: "Contemporary Indian sculpture demand shifts to institutions", why: "Explains the Subodh chart. Private buyers should be steered to the paintings." }
 ];
 
-const CLOSING = [
-  { lot: "Lot 24", artist: "S. H. Raza", sale: "AstaGuru · Modern Treasures", est: "₹3.6–4.4 cr", match: "Meher Sethi" },
-  { lot: "Lot 07", artist: "Bhupen Khakhar", sale: "Saffronart · Autumn Evening", est: "₹80 lakh–1.1 cr", match: "Nikhil Chaudhri" },
-  { lot: "Lot 31", artist: "M. F. Husain", sale: "AstaGuru · Modern Treasures", est: "₹4.0–5.0 cr", match: "Meher Sethi · Sunanda Rao" },
-  { lot: "Lot 12", artist: "Subodh Gupta", sale: "AstaGuru · Contemporary", est: "₹1.6–2.2 cr", match: "Sunanda Rao" }
-];
-
-/* ------------------------------------------------------------
-   Live data, with the embedded copy as the floor.
-
-   On a normal host (GitHub Pages) the page pulls data/app_data.json, so the
-   nightly refresh only has to rewrite a 283 KB JSON rather than this whole
-   file. Inside a published Artifact the CSP blocks that fetch, and offline it
-   fails too — in both cases the embedded REAL below is what renders, so the
-   desk always works, just as fresh as its last embed.
-   ------------------------------------------------------------ */
 /* ------------------------------------------------------------
    The private half. /api is Access-protected and same-origin, so a 401 simply
    means she is not signed in (or this is the public GitHub Pages mirror, which
    has no API at all). Either way the desk keeps working on the sample book
    rather than breaking — the market data is the part that must never fail.
    ------------------------------------------------------------ */
-const CRM = { live: false, who: null, clients: null, followups: null, diary: null, detail: {} };
+const CRM = { live: false, who: null, clients: null, followups: null, diary: null,
+              detail: {}, guard: null, needsKey: false, keyError: null };
+
+const KEY_STORE = "gallery.key";
+const deskKey = () => { try { return localStorage.getItem(KEY_STORE) || ""; } catch (e) { return ""; } };
+const setDeskKey = k => { try { k ? localStorage.setItem(KEY_STORE, k) : localStorage.removeItem(KEY_STORE); } catch (e) {} };
 
 async function api(path, opts) {
+  const key = deskKey();
   const r = await fetch("api" + path, {
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(key ? { Authorization: "Bearer " + key } : {}),
+    },
     ...opts,
   });
   if (r.status === 401 || r.status === 503) return null;
@@ -1090,8 +942,15 @@ async function api(path, opts) {
 
 async function loadCRM() {
   try {
+    // /health needs no key, so an unconfigured host is distinguishable from a
+    // wrong key — the difference between "no desk here" and "try again".
+    const h = await fetch("api/health").then(r => r.ok ? r.json() : null).catch(() => null);
+    CRM.guard = h ? h.guard : null;
+    if (!h) return false;
+
     const me = await api("/me");
-    if (!me) return false;
+    if (!me) { CRM.needsKey = true; return false; }
+    CRM.needsKey = false;
     const [clients, brief] = await Promise.all([api("/clients"), api("/brief")]);
     if (!clients) return false;
     CRM.live = true;
@@ -1123,6 +982,36 @@ async function loadLiveData() {
    ============================================================ */
 document.documentElement.lang = "en";
 
+/* ------------------------------------------------------------
+   Theme. Three states, matching how the page is written: "system" leaves the
+   root unstamped so prefers-color-scheme decides, and an explicit choice stamps
+   data-theme so it wins in both directions. The choice is remembered, and the
+   toggle icon shows what tapping it will give you, not what you are on.
+   ------------------------------------------------------------ */
+const THEME_KEY = "gallery.theme";
+
+function systemPrefersDark() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+function currentTheme() {
+  const saved = (() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })();
+  if (saved === "dark" || saved === "light") return saved;
+  return systemPrefersDark() ? "dark" : "light";
+}
+function applyTheme(theme) {
+  if (theme) document.documentElement.setAttribute("data-theme", theme);
+  else document.documentElement.removeAttribute("data-theme");
+}
+function toggleTheme() {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  applyTheme(next);
+  renderTopbar();
+}
+const themeIcon = () => currentTheme() === "dark" ? ICON.sun : ICON.moon;
+
+applyTheme((() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })());
+
 const SAVED_KEY = "artdesk.v1";
 const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || {}; } catch (e) { return {}; } })();
 
@@ -1136,6 +1025,8 @@ const S = {
   calFilter: "All",
   pitchClient: "sethi",
   openObjection: 0,
+  newClient: {},
+  newClientError: null,
   openTemplate: null,
   bioOpen: false,
   query: "",
@@ -1155,9 +1046,9 @@ let isSplit = splitQ.matches;
    ============================================================ */
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const A = k => ARTISTS[k];
-const C = k => CLIENTS[k];
+const C = k => (CRM.clients || []).find(c => c.id === k) || null;
 let artistKeys = Object.keys(ARTISTS);
-const clientKeys = Object.keys(CLIENTS);
+const clientKeys = () => (CRM.clients || []).map(c => c.id);
 const normName = n => String(n || "").toLowerCase().replace(/[.'`,]/g, "").replace(/\s+/g, " ").trim();
 let _byName = {};
 const artistKeyByName = name => _byName[normName(name)] || null;
@@ -1198,7 +1089,7 @@ const NAV = [
   { id: "today",     label: "Today",    icon: "today",     badge: () => `${DIARY.length} mtgs` },
   { id: "artists",   label: "Artists",  icon: "artists",   badge: () => `${artistKeys.length}` },
   { id: "market",    label: "Market",   icon: "market",    badge: () => "live" },
-  { id: "clients",   label: "Clients",  icon: "clients",   badge: () => `${clientKeys.length}` },
+  { id: "clients",   label: "Clients",  icon: "clients",   badge: () => CRM.live ? `${CRM.clients.length}` : "\u2014" },
   { id: "calendar",  label: "Calendar", icon: "calendar",  badge: () => "Sep–Nov" },
   { id: "knowledge", label: "Knowledge",icon: "knowledge", badge: () => "scripts" }
 ];
@@ -1217,6 +1108,7 @@ const TITLES = {
 
 /* which screen a back chevron returns to, or null when nothing is pushed */
 function backTarget() {
+  if (S.screen === "newclient" || S.screen === "unlock") return "clients";
   if (!isSplit && S.screen === "dossier") return "artists";
   if (!isSplit && S.screen === "client") return "clients";
   if (!isPad && (S.screen === "calendar" || S.screen === "knowledge")) return "more";
@@ -1254,7 +1146,10 @@ function renderTopbar() {
         ? `<button class="icon-btn back" data-nav="${back}" aria-label="Back">${I(ICON.back, 22)}</button>`
         : `<div></div>`}
       ${isPad ? "" : `<div class="wordmark">The Gallery</div>`}
-      <button class="icon-btn" data-act="open-search" aria-label="Search artists">${I(ICON.search, 20)}</button>
+      <div style="display:flex;align-items:center">
+        <button class="theme-btn" data-act="toggle-theme" aria-label="Switch between light and dark">${I(themeIcon(), 19)}</button>
+        <button class="icon-btn" data-act="open-search" aria-label="Search artists">${I(ICON.search, 20)}</button>
+      </div>
     </div>
 `;
 }
@@ -1274,28 +1169,24 @@ function renderTabbar() {
    SCREEN: TODAY
    ============================================================ */
 function viewToday() {
-  const due = dueCount();
   const liveDiary = CRM.live && CRM.diary && CRM.diary.configured && CRM.diary.today;
-  const diary = liveDiary
-    ? (CRM.diary.today.length
-        ? `<div class="rows">` + CRM.diary.today.map(e => `
-            <div class="diary">
-              <div class="t tnum">${esc(e.allDay ? "all day" : (e.time || ""))}</div>
-              <div><div class="ti">${esc(e.title)}</div>
-              ${e.location ? `<div class="wh">${esc(e.location)}</div>` : ""}</div>
-            </div>`).join("") + `</div>`
-        : '<div class="empty">Nothing in the diary today.</div>')
-    : `<div class="rows">` + DIARY.map(d => `
-    <div class="diary">
-      <div class="t tnum">${esc(d.time)}</div>
-      <div><div class="ti">${esc(d.title)}</div>
-      <div class="wh">${esc(d.where)}</div><div class="pr">${esc(d.prep)}</div></div>
-    </div>`).join("") + `</div>`;
+  const diary = !CRM.live
+    ? `<div class="empty">Sign in on the private site to see today\u2019s diary.</div>`
+    : !liveDiary
+      ? `<div class="empty">Her calendar is not connected yet.</div>`
+      : (CRM.diary.today.length
+          ? `<div class="rows">` + CRM.diary.today.map(e => `
+              <div class="diary">
+                <div class="t tnum">${esc(e.allDay ? "all day" : (e.time || ""))}</div>
+                <div><div class="ti">${esc(e.title)}</div>
+                ${e.location ? `<div class="wh">${esc(e.location)}</div>` : ""}</div>
+              </div>`).join("") + `</div>`
+          : '<div class="empty">Nothing in the diary today.</div>');
 
-  const liveFups = CRM.live ? CRM.followups : null;
-  const fups = liveFups
-    ? (liveFups.length
-        ? `<div class="rows">` + liveFups.map(f => `
+  const fups = !CRM.live
+    ? `<div class="empty">Follow-ups live with the client book.</div>`
+    : (CRM.followups.length
+        ? `<div class="rows">` + CRM.followups.map(f => `
             <div class="fu">
               <div class="row-top">
                 <button class="fu-name" data-open-client="${esc(f.client_id)}">${esc(f.client_name)}</button>
@@ -1307,59 +1198,37 @@ function viewToday() {
                 <button class="btn" data-open-client="${esc(f.client_id)}">Open card</button>
               </div>
             </div>`).join("") + `</div>`
-        : '<div class="empty">Nothing owed. Rare.</div>')
-    : `<div class="rows">` + FOLLOWUPS.map(f => {
-    const done = !!S.done[f.key];
-    return `<div class="fu ${done ? "done" : ""}">
-      <div class="row-top">
-        <button class="fu-name" data-open-client="${f.key}">${esc(f.client)}</button>
-        <span class="fu-age ${!done && f.over ? "over" : ""}">${done ? "cleared" : esc(f.age)}</span>
-      </div>
-      <div class="fu-why">${esc(f.reason)}</div>
-      <div class="btnrow">
-        <button class="chip" data-toggle-done="${f.key}" aria-pressed="${done}">${done ? "Cleared" : "Mark done"}</button>
-        <button class="btn" data-open-client="${f.key}">Open card</button>
-      </div>
-    </div>`;
-  }).join("") + `</div>`;
+        : '<div class="empty">Nothing owed. Rare.</div>');
 
   const news = `<div class="rows">` + BRIEF_NEWS.map(n => `
     <div class="news">
-      <div class="kick">${esc(n.date)} · ${esc(n.source)}</div>
+      <div class="kick">${esc(n.date)} \u00b7 ${esc(n.source)}</div>
       <h3>${esc(n.headline)}</h3><p>${esc(n.why)}</p>
     </div>`).join("") + `</div>`;
 
-  const lots = `<div class="lots">` + CLOSING.map(l => {
-    const ak = artistKeyByName(l.artist);
-    return `<button class="lot" ${ak ? `data-open-artist="${ak}"` : ""}>
-      <div class="n tnum">${esc(l.lot)}</div>
-      <div class="a">${esc(l.artist)}</div>
-      <div class="s">${esc(l.sale)}</div>
-      <div class="e tnum">${esc(l.est)}</div>
-      <div class="m">${esc(l.match)}</div>
+  const next = (REAL.events || []).slice(0, 3).map(e => {
+    const d = new Date(e.starts + "T00:00:00");
+    const day = `${String(d.getDate()).padStart(2, "0")} ${MON3[d.getMonth()]}`;
+    return `<button class="row" data-nav="calendar">
+      <div class="row-top"><span class="row-name">${esc(e.title || "Sale")}</span>${I(ICON.chev, 16)}</div>
+      <div class="row-sub">${houseTag(e.house)} <span class="tnum">\u00b7 ${esc(day)}${e.city ? " \u00b7 " + esc(e.city) : ""}</span></div>
     </button>`;
-  }).join("") + `</div>`;
+  }).join("");
 
-  const next2 = EVENTS[0].items.slice(0, 2).map(e => `
-    <button class="row" data-nav="calendar">
-      <div class="row-top"><span class="row-name">${esc(e.title)}</span>${I(ICON.chev, 16)}</div>
-      <div class="row-sub">${houseTag(e.house)} <span class="tnum">· ${esc(e.day)} · ${esc(e.city)}</span></div>
-    </button>`).join("");
-
+  const due = CRM.live ? CRM.followups.length : 0;
   return `
     <div class="view-head">
-      <span class="date tnum">${esc(DESK.today)}</span>
+      <span class="date tnum">${esc(todayLong())}</span>
       <h1>Start my day</h1>
-      <p>${DIARY.length} meetings \u00b7 ${due} follow-up${due === 1 ? "" : "s"} owed \u00b7 ${CLOSING.length} lots closing</p>
+      <p>${CRM.live ? `${due} follow-up${due === 1 ? "" : "s"} owed` : "Market data live \u00b7 client book private"} \u00b7 ${(REAL.events || []).length} sales ahead</p>
     </div>
     <div class="view-body">
       <div class="cols three">
-        <div class="col sec">${sectionHead("Today’s diary", DESK.city)}${diary}</div>
-        <div class="col sec">${sectionHead("Follow-ups due", due + " open")}${fups}</div>
-        <div class="col sec">${sectionHead("Relevant to your book")}${news}</div>
+        <div class="col sec">${sectionHead("Today\u2019s diary")}${diary}</div>
+        <div class="col sec">${sectionHead("Follow-ups due")}${fups}</div>
+        <div class="col sec">${sectionHead("Market news")}${news}</div>
       </div>
-      <div class="sec">${sectionHead("Closing within 48 hours")}${lots}</div>
-      <div class="sec">${sectionHead("Next up", "calendar")}<div class="rows">${next2}</div></div>
+      <div class="sec">${sectionHead("Next up", "calendar")}<div class="rows">${next || '<div class="empty">No sale scheduled.</div>'}</div></div>
     </div>`;
 }
 
@@ -1449,10 +1318,16 @@ function viewDossier(embedded) {
     { n: "Saffronart", u: `https://www.saffronart.com/artist/artistsearch.aspx?q=${q}` }
   ].map(x => `<a class="btn" href="${x.u}" target="_blank" rel="noopener noreferrer">${x.n}</a>`).join("");
 
-  const collectors = (a.collectors || []).map(k => `
-    <button class="row" data-open-client="${k}">
-      <div class="row-top"><span class="row-name">${esc(C(k).name)}</span>${I(ICON.chev, 16)}</div>
-      <div class="row-sub">${C(k).holdings.length} works held · ${esc(C(k).tier)} · ${esc(C(k).city)}</div>
+  const holders = CRM.live
+    ? CRM.clients.filter(cl => {
+        const d = CRM.detail[cl.id];
+        return d && (d.holdings || []).some(h => h.artist_key === S.artist);
+      })
+    : [];
+  const collectors = holders.map(cl => `
+    <button class="row" data-open-client="${esc(cl.id)}">
+      <div class="row-top"><span class="row-name">${esc(cl.name)}</span>${I(ICON.chev, 16)}</div>
+      <div class="row-sub">${esc([cl.tier, cl.city].filter(Boolean).join(" \u00b7 "))}</div>
     </button>`).join("");
 
   return `
@@ -1492,7 +1367,7 @@ function viewDossier(embedded) {
 
       <div class="cols two">
         ${a.talking.length ? `<div class="col sec">${sectionHead("Talking points")}<div class="rows">${talk}</div></div>` : ""}
-        <div class="col sec">${sectionHead("On your book", (a.collectors || []).length + " holding")}<div class="rows">${collectors || '<div class="empty">No client on your book holds this artist.</div>'}</div></div>
+        <div class="col sec">${sectionHead("On your book")}<div class="rows">${collectors || `<div class="empty">${CRM.live ? "No client on your book holds this artist." : "Sign in to see who holds this artist."}</div>`}</div></div>
       </div>
     </div>`;
 }
@@ -1578,40 +1453,105 @@ function viewMarket() {
 /* ============================================================
    SCREEN: CLIENTS + CARD
    ============================================================ */
+/* Entered once per device and kept in this browser's storage — not per login. */
+function viewUnlock() {
+  return `<div class="view-head"><h1>Unlock the book</h1>
+      <p>Once per device</p></div>
+    <div class="view-body">
+      <div class="sec" style="margin-top:0">
+        <div class="label">Desk key</div>
+        <input data-key type="password" autocomplete="off" autocapitalize="off"
+               spellcheck="false" placeholder="paste the key">
+      </div>
+      <div class="btnrow" style="margin-top:22px">
+        <button class="btn btn-primary" data-act="save-key">Unlock</button>
+      </div>
+      ${CRM.keyError ? `<div class="foot-note" style="color:var(--gold-ink)">${esc(CRM.keyError)}</div>` : ""}
+      <div class="foot-note">This stays on this device. The market data needs no
+        key \u2014 only the client book and her diary do.</div>
+    </div>`;
+}
+
 function clientListRows() {
-  if (CRM.live) {
-    return `<div class="rows">` + CRM.clients.map(c => {
-      const sel = isSplit && S.client === c.id;
-      return `<button class="row" data-open-client="${esc(c.id)}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
-        <div class="row-top"><span class="row-name">${esc(c.name)}</span>
-          <span class="cl-tier ${c.tier === "Principal" ? "principal" : ""}">${esc(c.tier || "")}</span></div>
-        <div class="row-sub">${[c.city, c.focus].filter(Boolean).map(esc).join(" \u00b7 ")}${c.open_followups ? ` \u00b7 <span style="color:var(--gold-ink)">${c.open_followups} due</span>` : ""}</div>
-      </button>`;
-    }).join("") + `</div>`;
+  if (CRM.needsKey) {
+    return `<div class="empty">Locked. <button class="more-link" data-nav="unlock"
+      style="display:inline">Enter the desk key</button></div>`;
   }
-  return `<div class="rows">` + clientKeys.map(k => {
-    const c = C(k), sel = isSplit && S.client === k;
-    return `<button class="row" data-open-client="${k}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
+  if (!CRM.live) {
+    return `<div class="empty">The client book is private. Open the desk on the
+      signed-in site and it loads here.</div>`;
+  }
+  if (!CRM.clients.length) {
+    return `<div class="empty">No clients yet. Add the first one below.</div>`;
+  }
+  return `<div class="rows">` + CRM.clients.map(c => {
+    const sel = isSplit && S.client === c.id;
+    return `<button class="row" data-open-client="${esc(c.id)}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
       <div class="row-top"><span class="row-name">${esc(c.name)}</span>
-        <span class="cl-tier ${c.tier === "Principal" ? "principal" : ""}">${esc(c.tier)}</span></div>
-      <div class="row-sub">${esc(c.city)} · ${esc(c.focus)}</div>
+        <span class="cl-tier ${c.tier === "Principal" ? "principal" : ""}">${esc(c.tier || "")}</span></div>
+      <div class="row-sub">${[c.city, c.focus].filter(Boolean).map(esc).join(" \u00b7 ")}${c.open_followups ? ` \u00b7 <span style="color:var(--gold-ink)">${c.open_followups} due</span>` : ""}</div>
     </button>`;
   }).join("") + `</div>`;
 }
 
 function viewClients() {
+  const count = CRM.live ? CRM.clients.length : 0;
+  const addBtn = CRM.live
+    ? `<button class="btn btn-primary btn-block" data-act="new-client" style="margin-bottom:6px">+ Add a client</button>`
+    : "";
+
   const list = `
     <div class="view-head"><h1>Clients</h1>
-      <p>${CRM.live ? `${CRM.clients.length} active \u00b7 signed in as ${esc(CRM.who)}` : `${clientKeys.length} active \u00b7 sample book`}</p></div>
+      <p>${CRM.live ? `${count} active` : (CRM.needsKey ? "locked" : "private")}</p></div>
     <div class="view-body">
-      ${CRM.live ? "" : `<div class="accent-box"><div class="when">Sample book</div><div class="what">The real client book lives behind sign-in. On the private site it loads here automatically; this public copy shows the invented collectors instead.</div></div>`}
-      <div class="sec">${sectionHead("The book", (CRM.live ? CRM.clients.length : clientKeys.length) + " active")}${clientListRows()}</div>
+      ${addBtn}
+      <div class="sec">${sectionHead("The book", CRM.live ? count + " active" : "")}${clientListRows()}</div>
     </div>`;
   if (!isSplit) return list;
   return `<div class="split">
-    <div class="list"><div class="sec" style="margin-top:26px">${sectionHead("Book", clientKeys.length + " active")}${clientListRows()}</div></div>
-    <div class="detail">${viewClient(true)}</div>
+    <div class="list"><div class="sec" style="margin-top:26px">
+      ${addBtn}${sectionHead("Book", CRM.live ? count + " active" : "")}${clientListRows()}
+    </div></div>
+    <div class="detail">${CRM.live && CRM.clients.length ? viewClient(true) : ""}</div>
   </div>`;
+}
+
+/* The form for putting a real collector in the book. Deliberately short: a name
+   is all that is required, because the moment of adding someone is usually
+   mid-conversation and the rest can be filled in afterwards. */
+function viewNewClient() {
+  const f = S.newClient || {};
+  const field = (k, label, ph, long) => `
+    <div class="sec" style="margin-top:22px">
+      <div class="label">${esc(label)}</div>
+      ${long
+        ? `<textarea data-nc="${k}" rows="4" placeholder="${esc(ph)}">${esc(f[k] || "")}</textarea>`
+        : `<input data-nc="${k}" type="text" placeholder="${esc(ph)}" value="${esc(f[k] || "")}">`}
+    </div>`;
+
+  return `<div class="view-head"><h1>Add a client</h1>
+      <p>Only the name is required</p></div>
+    <div class="view-body">
+      ${field("name", "Name", "Full name")}
+      ${field("title", "Title", "Trustee, Nanda Family Collection")}
+      ${field("city", "City", "Mumbai")}
+      <div class="sec" style="margin-top:22px">
+        <div class="label">Tier</div>
+        <div class="chiprow" style="padding-left:0;padding-right:0;margin:10px 0 0">
+          ${["Principal", "Senior", "Growth"].map(x =>
+            `<button class="chip" data-nc-tier="${x}" aria-pressed="${(f.tier || "Growth") === x}">${x}</button>`).join("")}
+        </div>
+      </div>
+      ${field("focus", "Collecting focus", "Moderns, trophy")}
+      ${field("brief", "Collecting brief", "How they buy, and what they will not consider.", true)}
+      ${field("next_what", "Next action", "What you owe them next")}
+
+      <div class="btnrow" style="margin-top:26px">
+        <button class="btn btn-primary" data-act="save-client">Save to the book</button>
+        <button class="btn" data-nav="clients">Cancel</button>
+      </div>
+      ${S.newClientError ? `<div class="foot-note" style="color:var(--gold-ink)">${esc(S.newClientError)}</div>` : ""}
+    </div>`;
 }
 
 function viewClient(embedded) {
@@ -1628,7 +1568,7 @@ function viewClient(embedded) {
     referrals: (d.referrals || []).map(r => ({ name: r.name, tie: r.tie || "" })),
     next: { when: d.next_when || "", what: d.next_what || "" },
     log: (d.log || []).map(l => ({ date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
-  } : C(S.client);
+  } : null;
 
   if (CRM.live && !d) {
     return `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
@@ -1715,26 +1655,35 @@ function viewKnowledge() {
     </div>`;
   }).join("") + `</div>`;
 
-  const p = PITCH[S.pitchClient];
-  const pitch = `
-    <div class="chiprow">${clientKeys.map(k => `<button class="chip" data-pitch="${k}" aria-pressed="${S.pitchClient === k}">${esc(C(k).name)}</button>`).join("")}</div>
-    <div class="pitch">
-      <span class="kicker">Drafted for ${esc(C(S.pitchClient).name)}</span>
-      <h3>${esc(p.subject)}</h3>
-      <div class="bd">${esc(p.body)}</div>
-      <hr class="hr" style="margin:20px 0 4px">
-      <div class="label" style="padding-top:12px">Matched lots</div>
-      <div class="rows" style="margin-top:8px">
-        ${p.lots.map(l => {
-          const ak = artistKeyByName(l.artist);
-          return `<button class="pitch-lot" ${ak ? `data-open-artist="${ak}"` : ""} style="width:100%">
-            <div class="row-top"><span class="a">${esc(l.artist)}</span><span class="es tnum">${esc(l.est)}</span></div>
-            <div class="w">${esc(l.work)} · ${esc(l.sale)}</div>
-            <div class="why">Why: ${esc(l.why)}</div>
-          </button>`;
-        }).join("")}
-      </div>
-    </div>`;
+  const pitch = !CRM.live
+    ? `<div class="empty">The pitch generator drafts against a named collector, so
+        it needs the client book. Sign in on the private site.</div>`
+    : !CRM.clients.length
+      ? `<div class="empty">Add a client first, then a pitch can be drafted for them.</div>`
+      : (() => {
+          const c = CRM.clients.find(x => x.id === S.pitchClient) || CRM.clients[0];
+          const held = (CRM.detail[c.id] || {}).holdings || [];
+          const wants = (c.wants || []).join(", ");
+          const matched = REAL.feed.filter(f =>
+            held.some(h => h.artist_key && h.artist_key === f.artist_key)).slice(0, 3);
+          return `
+            <div class="chiprow">${CRM.clients.map(x =>
+              `<button class="chip" data-pitch="${esc(x.id)}" aria-pressed="${c.id === x.id}">${esc(x.name)}</button>`).join("")}</div>
+            <div class="pitch">
+              <span class="kicker">Drafted for ${esc(c.name)}</span>
+              <h3>${esc(c.focus ? `Where the ${c.focus.split(",")[0].trim()} market has moved` : "What has moved since we last spoke")}</h3>
+              <div class="bd">Dear ${esc(c.name.split(" ")[0])},
+
+${c.brief ? esc(c.brief.split(".")[0]) + "." : "A short note on the market you collect."}
+
+${matched.length
+  ? "Recent results in the names you already hold:\n" + matched.map(m =>
+      `\u00b7 ${m.artist} \u2014 ${m.title || "Untitled"}, ${m.price}${m.above ? " (above high estimate)" : ""}`).join("\n")
+  : "I will send comparables as soon as the next relevant lots are catalogued."}
+${wants ? "\nStill looking for: " + esc(wants) + "." : ""}</div>
+              <div class="foot-note">Drafted from the live record \u2014 read it before you send it.</div>
+            </div>`;
+        })();
 
   const head = `<div class="view-head"><h1>Knowledge</h1>
     <p>Scripts, and a pitch drafted per collector</p></div>`;
@@ -1915,6 +1864,8 @@ function view() {
     case "dossier": return isSplit ? viewArtists() : viewDossier(false);
     case "market": return viewMarket();
     case "clients": return viewClients();
+    case "newclient": return viewNewClient();
+    case "unlock": return viewUnlock();
     case "client": return isSplit ? viewClients() : viewClient(false);
     case "calendar": return viewCalendar();
     case "knowledge": return viewKnowledge();
@@ -1950,7 +1901,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -1987,7 +1938,48 @@ document.addEventListener("click", e => {
   if (attr("data-obj")) { const i = +attr("data-obj"); S.openObjection = S.openObjection === i ? null : i; return render(true); }
   if (attr("data-pitch")) { S.pitchClient = attr("data-pitch"); return render(true); }
 
+  if (attr("data-nc-tier")) {
+    S.newClient = { ...S.newClient, tier: attr("data-nc-tier") };
+    return render(true);
+  }
+
   const act = attr("data-act");
+  if (act === "new-client") {
+    return go("newclient", { newClient: {}, newClientError: null });
+  }
+  if (act === "save-client") {
+    const f = S.newClient || {};
+    if (!f.name || !f.name.trim()) {
+      S.newClientError = "A client needs a name.";
+      return render(true);
+    }
+    const btn = t;
+    btn.textContent = "Saving\u2026";
+    api("/clients", { method: "POST", body: JSON.stringify({ ...f, name: f.name.trim() }) })
+      .then(res => {
+        if (!res) throw new Error("not signed in");
+        return loadCRM();
+      })
+      .then(() => go("clients", { newClient: {}, newClientError: null }))
+      .catch(() => {
+        S.newClientError = "Could not save. Check you are still signed in.";
+        render(true);
+      });
+    return;
+  }
+  if (act === "toggle-theme") { toggleTheme(); return; }
+  if (act === "save-key") {
+    const el = document.querySelector("[data-key]");
+    const k = (el && el.value || "").trim();
+    if (!k) { CRM.keyError = "Paste the key first."; return render(true); }
+    setDeskKey(k);
+    CRM.keyError = null;
+    loadCRM().then(ok => {
+      if (ok) { go("clients"); }
+      else { setDeskKey(""); CRM.keyError = "That key was not accepted."; render(true); }
+    });
+    return;
+  }
   if (act === "open-search") { S.searchOpen = true; S.query = ""; return renderSheet(); }
   if (act === "close-search") { S.searchOpen = false; S.query = ""; return renderSheet(); }
   if (act === "close-search-bg" && e.target.classList.contains("sheet-bg")) { S.searchOpen = false; S.query = ""; return renderSheet(); }
@@ -1999,6 +1991,12 @@ document.addEventListener("click", e => {
     const know = attr("data-know");
     return go(nav, know ? { knowTab: know } : {});
   }
+});
+
+document.addEventListener("input", e => {
+  const el = e.target.closest("[data-nc]");
+  if (!el) return;
+  S.newClient = { ...S.newClient, [el.getAttribute("data-nc")]: el.value };
 });
 
 document.addEventListener("keydown", e => {
