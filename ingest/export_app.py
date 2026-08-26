@@ -18,23 +18,41 @@ from common import ROOT, connect
 
 
 def inr(n):
-    """The trade's own units — crore above 1 cr, lakh below."""
+    """The trade's own units — crore above 1 cr, lakh below.
+
+    Lakh carries a decimal under 10, for the same reason crore does: rounding to
+    whole lakh printed ₹1,08,000 / ₹1,32,000 / ₹1,92,000 as "₹1 lakh", "₹1 lakh"
+    and "₹2 lakh", so three different results read as the same price and one was
+    8% adrift. Below a lakh the exact rupee figure is short enough to just show.
+    """
     if not n:
         return None
     if n >= 10_000_000:
         v = n / 10_000_000
         return f"₹{v:.2f} cr" if v < 10 else f"₹{v:.1f} cr"
     if n >= 100_000:
-        return f"₹{n / 100_000:.0f} lakh"
+        v = n / 100_000
+        return f"₹{v:.1f} lakh" if v < 10 else f"₹{v:.0f} lakh"
     return f"₹{n:,.0f}"
 
 
 def band(lo, hi):
+    """An estimate band, in one unit chosen by the TOP of the band.
+
+    This used to divide by a lakh unconditionally and round to whole, so a
+    ₹30,000–50,000 estimate printed as "₹0–1 lakh" and ₹20,000–40,000 printed as
+    "₹0–0 lakh" — a estimate of nothing to nothing, on real lots in Saffronart's
+    online sales.
+    """
     if not (lo and hi):
         return None
     if hi >= 10_000_000:
         return f"₹{lo / 10_000_000:.1f}–{hi / 10_000_000:.1f} cr"
-    return f"₹{lo / 100_000:.0f}–{hi / 100_000:.0f} lakh"
+    if hi >= 100_000:
+        # Decide on the LOW end: a ₹7.5–10 lakh band must not print "₹8–10 lakh".
+        fmt = (lambda v: f"{v / 100_000:.1f}") if lo < 1_000_000 else (lambda v: f"{v / 100_000:.0f}")
+        return f"₹{fmt(lo)}–{fmt(hi)} lakh"
+    return f"₹{lo:,.0f}–{hi:,.0f}"
 
 
 def main():
@@ -110,8 +128,17 @@ def main():
         events = []                      # diary not built yet
     con.close()
 
+    # Real headlines, written by publishers. See ingest/news.py — this replaced
+    # four invented ones that read as though they had been reported.
+    try:
+        with open(ROOT / "data" / "news.json") as f:
+            news = json.load(f)
+    except (OSError, ValueError):
+        news = {"on_market": [], "wider": []}
+
     app = {
         "generated_at": desk["generated_at"],
+        "news": news,
         "coverage": desk["coverage"],
         "caveats": desk["caveats"],
         "fx": desk["fx"],
@@ -126,7 +153,8 @@ def main():
     with open(args.out, "w") as f:
         f.write(blob)
     print(f"{len(out_artists)} artists, {len(feed)} feed rows, "
-          f"{len(events)} forthcoming events -> {args.out}")
+          f"{len(events)} forthcoming events, "
+          f"{len(news.get('on_market', []))} headlines -> {args.out}")
     print(f"{len(blob) / 1024:.0f} KB")
 
 

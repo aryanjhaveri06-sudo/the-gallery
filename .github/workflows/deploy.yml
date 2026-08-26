@@ -23,9 +23,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          # This used to warn and exit 0, which put a green tick on a push that
+          # never reached the private site — the worst possible signal. If the
+          # job cannot do the one thing it exists for, it fails.
           if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::warning::CLOUDFLARE_API_TOKEN not set — skipping. Add it in Settings → Secrets."
-            exit 0
+            echo "::error::CLOUDFLARE_API_TOKEN is not set, so nothing was deployed to the private site."
+            echo "Create a Cloudflare API token with the Cloudflare Pages:Edit permission on"
+            echo "Aashna's account, then: gh secret set CLOUDFLARE_API_TOKEN -R $GITHUB_REPOSITORY"
+            echo "Until then the private site only updates via a manual deploy."
+            exit 1
           fi
           npx --yes wrangler@3 pages deploy . \
             --project-name the-gallery --commit-dirty=true

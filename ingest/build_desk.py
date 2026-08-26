@@ -104,14 +104,21 @@ FX_URL = "https://api.frankfurter.dev/v1/latest?base=INR&symbols=USD,GBP,SGD,EUR
 # --------------------------------------------------------------------------
 
 def inr(n):
-    """Format in the trade's own units: crore above 1cr, else lakh."""
+    """The trade's own units — crore above 1 cr, lakh below.
+
+    Lakh carries a decimal under 10, for the same reason crore does: rounding to
+    whole lakh printed ₹1,08,000 / ₹1,32,000 / ₹1,92,000 as "₹1 lakh", "₹1 lakh"
+    and "₹2 lakh", so three different results read as the same price and one was
+    8% adrift. Below a lakh the exact rupee figure is short enough to just show.
+    """
     if n is None:
         return None
     if n >= 10_000_000:
         v = n / 10_000_000
         return f"₹{v:.2f} cr" if v < 10 else f"₹{v:.1f} cr"
     if n >= 100_000:
-        return f"₹{n / 100_000:.0f} lakh"
+        v = n / 100_000
+        return f"₹{v:.1f} lakh" if v < 10 else f"₹{v:.0f} lakh"
     return f"₹{n:,.0f}"
 
 
