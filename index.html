@@ -2056,7 +2056,7 @@ function renderSheetResults() {
     : matches.length
       ? matches.map(k => `<button class="sug" data-open-artist="${k}">
           <span class="n">${esc(A(k).name)}</span>
-          <span class="m tnum">${esc(A(k).years)} · ${esc(A(k).stats.lots12)} lots / 12 mo</span></button>`).join("")
+          <span class="m tnum">${[A(k).years, `${A(k).stats.lots12} lots / 12 mo`].filter(Boolean).map(esc).join(" · ")}</span></button>`).join("")
       : `<div class="empty">No artist matches “${esc(S.query)}”. Try Gaitonde, Raza or Baroda.</div>`;
 
   el.innerHTML = `<div class="label" style="padding:18px 0 4px">${q === "" ? artistKeys.length + " artists \u00b7 " + REAL.coverage.lots.toLocaleString() + " lots" : matches.length + " match" + (matches.length === 1 ? "" : "es")}</div>${body}`;
