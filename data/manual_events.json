@@ -1,0 +1,72 @@
+{
+  "_note": [
+    "Sales Aashna knows about that no house feed publishes — invitations, trade",
+    "word, dates announced before they reach a website. upcoming.py loads this",
+    "file on every run, so these survive both the nightly refresh and the loss",
+    "of the cached database. Edit this file, not the database.",
+    "",
+    "starts/ends are ISO dates and are inclusive; a one-day sale repeats the",
+    "date. Leave a field null rather than guessing it — null is honest, a wrong",
+    "city or URL is not. Anything already carried by a house feed belongs there,",
+    "not here: a duplicate title on the same day is not de-duplicated.",
+    "",
+    "Past events age out automatically."
+  ],
+  "events": [
+    {
+      "id": "manual:astaguru-interiors-2026-09",
+      "house": "AstaGuru",
+      "title": "Interiors",
+      "starts": "2026-09-10",
+      "ends": "2026-09-11",
+      "kind": "Online sale",
+      "city": "Mumbai",
+      "url": null,
+      "lot_count": null
+    },
+    {
+      "id": "manual:giftex-art-2026-09",
+      "house": "Giftex",
+      "title": "Art",
+      "starts": "2026-09-16",
+      "ends": "2026-09-17",
+      "kind": null,
+      "city": null,
+      "url": null,
+      "lot_count": null
+    },
+    {
+      "id": "manual:giftex-watches-jewellery-2026-09",
+      "house": "Giftex",
+      "title": "Watches & Jewellery",
+      "starts": "2026-09-21",
+      "ends": "2026-09-22",
+      "kind": null,
+      "city": null,
+      "url": null,
+      "lot_count": null
+    },
+    {
+      "id": "manual:theme-auction-2026-09",
+      "house": "AstaGuru",
+      "title": "Theme auction",
+      "starts": "2026-09-25",
+      "ends": "2026-09-26",
+      "kind": "Online sale",
+      "city": "Mumbai",
+      "url": null,
+      "lot_count": null
+    },
+    {
+      "id": "manual:astaguru-masters-2026-09",
+      "house": "AstaGuru",
+      "title": "Masters",
+      "starts": "2026-09-29",
+      "ends": "2026-09-30",
+      "kind": "Online sale",
+      "city": "Mumbai",
+      "url": null,
+      "lot_count": null
+    }
+  ]
+}

@@ -9,6 +9,9 @@ pass. Each house exposes its calendar differently:
               nothing live. Empty is normal between sales, not a failure.
   Saffronart  no forthcoming feed we can read without a browser, so future-dated
               sales arrive through saffronart.py --discover instead
+  Her own     data/manual_events.json — dates from invitations and trade word
+              that no feed carries. Committed, so a lost database cache does
+              not lose them.
 
 AstaGuru's `endDateTime` on an unopened sale is stale (it can predate the start),
 so it is ignored and the event is written as a single day.
@@ -16,11 +19,12 @@ so it is ignored and the event is written as a single day.
 Usage:  python3 ingest/upcoming.py
 """
 
+import json
 import re
 import sys
 from datetime import datetime, timezone
 
-from common import connect, get
+from common import ROOT, connect, get
 
 UA_PAUSE = 1.0
 
@@ -119,6 +123,34 @@ def from_discovered_sales(con):
     return n
 
 
+def manual(con):
+    """Sales she knows about that no house feed publishes.
+
+    Kept in data/manual_events.json and committed, deliberately: the database is
+    a build cache in CI and can be thrown away, so anything that lives only in a
+    table is one cache miss from gone. Re-read on every run, so correcting the
+    file corrects the diary.
+    """
+    path = ROOT / "data" / "manual_events.json"
+    if not path.exists():
+        return 0
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    n = 0
+    for e in payload.get("events", []):
+        if not (e.get("id") and e.get("starts")):
+            continue
+        con.execute("""
+            INSERT OR REPLACE INTO event
+              (id, house, title, starts, ends, kind, city, url, lot_count, updated_at)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, (e["id"], e.get("house"), e.get("title"), e["starts"],
+              e.get("ends") or e["starts"], e.get("kind"), e.get("city"),
+              e.get("url"), e.get("lot_count"), now))
+        n += 1
+    return n
+
+
 def main():
     con = connect()
     con.executescript(EVENT_SCHEMA)
@@ -126,7 +158,8 @@ def main():
     total = 0
     for label, fn in (("AstaGuru", astaguru),
                       ("Pundole's", pundoles),
-                      ("dated sales", from_discovered_sales)):
+                      ("dated sales", from_discovered_sales),
+                      ("her own diary", manual)):
         try:
             n = fn(con)
             total += n
