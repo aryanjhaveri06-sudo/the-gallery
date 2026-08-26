@@ -21,6 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # A run is pinned to the commit that created it. On 2026-08-26 a dispatched
+      # run sat queued for hours while newer commits shipped; had it then started,
+      # it would have deployed the older tree straight over the live site. If this
+      # run is not on the tip of main any more, it is stale — fail rather than
+      # revert her desk.
+      - name: Refuse to deploy a stale commit
+        run: |
+          git fetch --depth=1 origin main
+          HERE=$(git rev-parse HEAD)
+          TIP=$(git rev-parse FETCH_HEAD)
+          if [ "$HERE" != "$TIP" ]; then
+            echo "::error::Pinned to ${HERE:0:7} but main is ${TIP:0:7} — refusing to deploy a stale tree."
+            exit 1
+          fi
+          echo "On the tip of main (${HERE:0:7})."
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
