@@ -117,7 +117,7 @@ with the same repo behind it. Two sites, one codebase:
 
 | | GitHub Pages | Cloudflare Pages |
 |---|---|---|
-| URL | `aryanjhaveri06-sudo.github.io/the-gallery/` | `the-gallery.pages.dev` |
+| URL | `aryanjhaveri06-sudo.github.io/the-gallery/` | `the-gallery-ct1.pages.dev` |
 | Market data | yes | yes |
 | Client book | sample only | **real, behind sign-in** |
 | Her calendar | no | yes |
@@ -132,27 +132,43 @@ Safari on iPad blocks third-party cookies. An API on `*.workers.dev` with the ap
 on `github.io` would lose the Access session on exactly the device this is for.
 Pages Functions run on the app's own domain, so the cookie is first-party.
 
-## Setup
+## Status — done
 
-```bash
-npm install
-npx wrangler login                       # opens a browser; authorises this machine
+Deployed 26 August 2026 on Aashna's Cloudflare account
+(`aashna.jhaveri96@gmail.com`, account `2a0686c4e5ad7d4827b664425eeb99aa`).
 
-# 1. the database
-npx wrangler d1 create gallery-crm       # copy the database_id into wrangler.toml
-npm run schema:remote                    # create the tables
-npx wrangler d1 execute gallery-crm --remote --file=db/seed.sql   # optional demo rows
+- D1 `gallery-crm` — `fc8e569d-499d-4553-87c9-fec3e3c484ce`, schema applied,
+  demo rows loaded. Clear them before real clients go in: `DELETE FROM client;`
+  (holdings, logs and follow-ups cascade).
+- Pages project `the-gallery` → **https://the-gallery-ct1.pages.dev**
+- `DB` binding attached and confirmed on the production deployment.
+- `/api/*` returns 401 to everyone, because the Access variables are still
+  empty. That is the fail-closed path, not a fault.
 
-# 2. the site
-npx wrangler pages project create the-gallery --production-branch main
-npm run deploy
-```
+## Status — still to do (needs the dashboard)
 
-Then in the dashboard, **Zero Trust → Access → Applications → Add → Self-hosted**:
+The wrangler OAuth token carries `d1` and `pages` scope but **no Access scope**,
+and Access is not yet enabled on the account, so these three steps are yours:
 
-- Application domain: `the-gallery.pages.dev`, path `api`
-- Policy: *Allow*, rule **Emails** → Aashna's address (and yours)
-- Copy the **Application Audience (AUD) tag**
+1. **Enable Access.** dash.cloudflare.com → **Zero Trust** → pick a team name.
+   That name becomes `<team>.cloudflareaccess.com`.
+2. **Add the application.** Zero Trust → **Access → Applications → Add →
+   Self-hosted**. Domain `the-gallery-ct1.pages.dev`, path `api`. Policy
+   *Allow*, rule **Emails** → Aashna's address and yours. Copy the
+   **Application Audience (AUD) tag**.
+3. **Fill the variables.** Pages → the-gallery → Settings → Variables:
+   `ACCESS_TEAM_DOMAIN` = `<team>.cloudflareaccess.com`,
+   `ACCESS_AUD` = the AUD tag, `ALLOWED_EMAILS` = the same addresses.
+   Redeploy. The client book lights up.
+
+## Keeping the two sites in sync
+
+The nightly workflow pushes to GitHub, which updates GitHub Pages on its own.
+Cloudflare will not follow unless you connect it: Pages → the-gallery →
+**Settings → Builds & deployments → Connect to Git** → this repo, branch `main`,
+build command empty, output directory `/`. After that every nightly commit
+deploys both sites. Until then, `npm run deploy` publishes the Cloudflare copy
+by hand.
 
 Put those into `wrangler.toml` under `[vars]` — `ACCESS_TEAM_DOMAIN`,
 `ACCESS_AUD`, `ALLOWED_EMAILS` — and redeploy. Until both the team domain and the
