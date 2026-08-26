@@ -435,15 +435,29 @@ button.row:active{background:var(--gold-tint)}
 .hub .hrow .sb{font-size:12.5px;color:var(--ink-60);margin-top:2px}
 
 /* ---- form fields ---- */
-input[data-nc], input[data-key], textarea[data-nc]{
+input[data-nc], input[data-key], textarea[data-nc],
+input[data-ed], textarea[data-ed]{
   width:100%;margin-top:9px;padding:12px 14px;
   font-family:var(--font-body);font-size:16px;   /* 16px stops iOS zooming on focus */
   color:var(--ink);background:var(--raised);
   border:1px solid var(--divider);border-radius:var(--r-md);
   -webkit-appearance:none;appearance:none;
 }
-input[data-nc]:focus, input[data-key]:focus, textarea[data-nc]:focus{outline:none;border-color:var(--gold)}
-textarea[data-nc]{resize:vertical;line-height:1.6}
+input[data-nc]:focus, input[data-key]:focus, textarea[data-nc]:focus,
+input[data-ed]:focus, textarea[data-ed]:focus{outline:none;border-color:var(--gold)}
+textarea[data-nc], textarea[data-ed]{resize:vertical;line-height:1.6}
+/* Safari renders a date input at its own intrinsic width and ignores width:100%
+   unless the appearance is reset, which the rule above already does. */
+input[data-ed][type=date]{min-height:46px}
+
+/* ---- inline edit panels on the client card ---- */
+.panel{
+  margin-top:18px;padding:18px 18px 20px;
+  background:var(--raised);border:1px solid var(--divider);border-radius:var(--r-md);
+}
+.panel .fld{margin-top:16px}
+.panel .fld:first-of-type{margin-top:10px}
+.panel .chiprow{padding:0;margin:10px 0 0}
 
 /* ---- theme toggle ---- */
 .theme-btn{
@@ -964,6 +978,27 @@ async function loadCRM() {
   }
 }
 
+/* ---- writing back -------------------------------------------------------
+
+   Every write goes the same way: post it, then re-read the record rather than
+   patching the local copy by hand, so the card can never drift from what D1
+   actually holds. loadCRM() comes too because a name, a tier or a follow-up
+   also changes the list and the day's brief.
+   ------------------------------------------------------------------------ */
+const todayIso = () => new Date().toISOString().slice(0, 10);
+const blankToNull = v => { const t = String(v == null ? "" : v).trim(); return t ? t : null; };
+const intOrNull = v => {
+  const digits = String(v == null ? "" : v).replace(/[^0-9]/g, "");
+  return digits ? parseInt(digits, 10) : null;
+};
+
+async function refreshClient(cid) {
+  const d = await api(`/clients/${encodeURIComponent(cid)}`);
+  if (d) CRM.detail[cid] = d;
+  await loadCRM();
+  return d;
+}
+
 async function loadLiveData() {
   try {
     const r = await fetch("data/app_data.json", { cache: "no-cache" });
@@ -1027,6 +1062,9 @@ const S = {
   openObjection: 0,
   newClient: {},
   newClientError: null,
+  panel: null,            // which inline editor is open on the client card
+  draft: {},              // its working copy, discarded on cancel
+  draftError: null,
   openTemplate: null,
   bioOpen: false,
   query: "",
@@ -1568,12 +1606,20 @@ function viewClient(embedded) {
     referrals: (d.referrals || []).map(r => ({ name: r.name, tie: r.tie || "" })),
     next: { when: d.next_when || "", what: d.next_what || "" },
     log: (d.log || []).map(l => ({ date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
+    followups: d.followups || [],
   } : null;
 
   if (CRM.live && !d) {
     return `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
       <h1>${esc((CRM.clients.find(x => x.id === S.client) || {}).name || "Client")}</h1></div>
       <div class="view-body"><div class="empty">Opening the card\u2026</div></div>`;
+  }
+
+  // Reachable only if the book goes offline mid-session; say so rather than throw.
+  if (!c) {
+    return `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
+      <h1>Client</h1></div>
+      <div class="view-body"><div class="empty">The client book is not open on this device.</div></div>`;
   }
 
   const first = c.name.split(" ")[0];
@@ -1610,6 +1656,82 @@ function viewClient(embedded) {
     </div>`;
   }).join("");
 
+  /* ---- inline editors -----------------------------------------------------
+     Each one opens where the thing it edits already lives, so the record stays
+     on screen while it is being changed. One panel at a time; cancelling throws
+     the draft away without touching the record. */
+  const g = S.draft || {};
+  const fld = (k, label, ph, long) => `
+    <div class="fld">
+      <div class="label">${esc(label)}</div>
+      ${long
+        ? `<textarea data-ed="${k}" rows="4" placeholder="${esc(ph)}">${esc(g[k] == null ? "" : g[k])}</textarea>`
+        : `<input data-ed="${k}" type="text" placeholder="${esc(ph)}" value="${esc(g[k] == null ? "" : g[k])}">`}
+    </div>`;
+  const dateFld = (k, label) => `
+    <div class="fld">
+      <div class="label">${esc(label)}</div>
+      <input data-ed="${k}" type="date" value="${esc(g[k] || "")}">
+    </div>`;
+  const chips = (k, label, opts, attr) => `
+    <div class="fld">
+      <div class="label">${esc(label)}</div>
+      <div class="chiprow">${opts.map(o =>
+        `<button class="chip" ${attr}="${esc(o)}" aria-pressed="${(g[k] || "") === o}">${esc(o)}</button>`).join("")}</div>
+    </div>`;
+
+  const panel = (which, saveAct, saveLabel, fields) => S.panel !== which ? "" : `
+    <div class="panel">
+      ${fields}
+      <div class="btnrow" style="margin-top:20px">
+        <button class="btn btn-primary" data-act="${saveAct}">${esc(saveLabel)}</button>
+        <button class="btn" data-panel="close">Cancel</button>
+      </div>
+      ${S.draftError ? `<div class="foot-note" style="color:var(--gold-ink)">${esc(S.draftError)}</div>` : ""}
+    </div>`;
+
+  const editPanel = panel("client", "save-edit", "Save changes",
+      fld("name", "Name", "Full name")
+    + fld("title", "Title", "Trustee, Nanda Family Collection")
+    + fld("city", "City", "Mumbai")
+    + chips("tier", "Tier", ["Principal", "Senior", "Growth"], "data-ed-tier")
+    + fld("since", "Client since", "2019")
+    + fld("lifetime_inr", "Lifetime with the house (\u20b9)", "Whole rupees; leave blank if unknown")
+    + fld("focus", "Collecting focus", "Moderns, trophy")
+    + fld("wants", "Looking for", "Comma separated \u2014 Gaitonde, works on paper")
+    + fld("brief", "Collecting brief", "How they buy, and what they will not consider.", true)
+    + fld("next_when", "Next action \u2014 when", "Before the November sale")
+    + fld("next_what", "Next action \u2014 what", "What you owe them next"));
+
+  const holdingPanel = panel("holding", "save-holding", "Add holding",
+      fld("artist_name", "Artist", "V. S. Gaitonde")
+    + fld("work", "Work", "Untitled, 1974")
+    + dateFld("acquired", "Acquired")
+    + fld("paid_inr", "Paid (\u20b9)", "Whole rupees; leave blank if not known"));
+
+  const logPanel = panel("log", "save-log", "Save note",
+      dateFld("happened", "When")
+    + chips("channel", "Channel", ["Call", "Email", "Viewing", "Meeting", "Sale", "Lunch", "WhatsApp"], "data-ed-channel")
+    + fld("note", "What was said", "Keep it factual \u2014 this is the record.", true));
+
+  const followupPanel = panel("followup", "save-followup", "Set follow-up",
+      dateFld("due", "Due")
+    + fld("reason", "What is owed", "Send the November comparables.", true));
+
+  const today = todayIso();
+  const fuRows = c.followups.length
+    ? `<div class="rows">` + c.followups.map(f => `
+        <div class="log">
+          <div>
+            <div class="d tnum">${esc(fmtDate(f.due))}</div>
+            <div class="ch">${f.done ? "done" : (f.due < today ? "overdue" : "open")}</div>
+          </div>
+          <div class="nt">${esc(f.reason || "")}
+            <div class="btnrow"><button class="chip" data-card-followup="${esc(f.id)}">${f.done ? "Reopen" : "Mark done"}</button></div>
+          </div>
+        </div>`).join("") + `</div>`
+    : `<div class="empty">Nothing owed.</div>`;
+
   return `
     <div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
       <div class="card-head">
@@ -1626,23 +1748,41 @@ function viewClient(embedded) {
       </div>
       <div class="btnrow">
         <button class="btn btn-primary" data-act="pitch-for" data-client="${S.client}">Draft a pitch</button>
+        <button class="btn" data-panel="client">Edit card</button>
         <button class="btn" data-nav="knowledge" data-know="scripts">Objection scripts</button>
       </div>
+      ${editPanel}
 
       <div class="cols two">
         <div class="col sec">${sectionHead("Collecting brief")}
           <div class="brief-p">${esc(c.brief)}</div>
           <div class="tags">${c.wants.map(w => `<span class="tag">${esc(w)}</span>`).join("")}</div>
         </div>
-        <div class="col sec">${sectionHead("Holdings", c.holdings.length + " works")}<div class="rows">${holdings}</div>
-          <div class="sec">${sectionHead("Referral web")}<div class="rows">${refs}</div></div>
+        <div class="col sec">${sectionHead("Holdings", c.holdings.length + " works")}
+          <div class="rows">${holdings}</div>
+          ${c.holdings.length ? "" : `<div class="empty">Nothing recorded yet.</div>`}
+          <div class="btnrow"><button class="chip" data-panel="holding">Add a holding</button></div>
+          ${holdingPanel}
+          <div class="sec">${sectionHead("Referral web")}<div class="rows">${refs}</div>
+            ${c.referrals.length ? "" : `<div class="empty">No referrals recorded.</div>`}</div>
         </div>
       </div>
 
       <div class="cols two">
-        <div class="col sec">${sectionHead("Conversation log", c.log.length + " entries")}<div class="rows">${log}</div></div>
-        <div class="col sec">${sectionHead("Message templates")}<div class="rows">${tpls}</div></div>
+        <div class="col sec">${sectionHead("Conversation log", c.log.length + " entries")}
+          <div class="rows">${log}</div>
+          ${c.log.length ? "" : `<div class="empty">Nothing logged yet.</div>`}
+          <div class="btnrow"><button class="chip" data-panel="log">Log a conversation</button></div>
+          ${logPanel}
+        </div>
+        <div class="col sec">${sectionHead("Follow-ups", c.followups.filter(f => !f.done).length + " open")}
+          ${fuRows}
+          <div class="btnrow"><button class="chip" data-panel="followup">Set a follow-up</button></div>
+          ${followupPanel}
+        </div>
       </div>
+
+      <div class="sec">${sectionHead("Message templates")}<div class="rows">${tpls}</div></div>
     </div>`;
 }
 
@@ -1917,7 +2057,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-rsvp],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -1959,6 +2099,48 @@ document.addEventListener("click", e => {
     return render(true);
   }
 
+  if (attr("data-panel")) {
+    const which = attr("data-panel");
+    if (which === "close" || S.panel === which) {
+      S.panel = null; S.draft = {}; S.draftError = null;
+      return render(true);
+    }
+    const d = CRM.detail[S.client] || {};
+    S.panel = which;
+    S.draftError = null;
+    S.draft =
+      which === "client" ? {
+        name: d.name || "", title: d.title || "", city: d.city || "",
+        tier: d.tier || "Growth", since: d.since || "",
+        lifetime_inr: d.lifetime_inr == null ? "" : String(d.lifetime_inr),
+        focus: d.focus || "", wants: (d.wants || []).join(", "),
+        brief: d.brief || "", next_when: d.next_when || "", next_what: d.next_what || "",
+      }
+      : which === "log"      ? { happened: todayIso(), channel: "Call", note: "" }
+      : which === "followup" ? { due: todayIso(), reason: "" }
+      : { artist_name: "", work: "", acquired: "", paid_inr: "" };
+    return render(true);
+  }
+  if (attr("data-ed-tier"))    { S.draft = { ...S.draft, tier: attr("data-ed-tier") }; return render(true); }
+  if (attr("data-ed-channel")) { S.draft = { ...S.draft, channel: attr("data-ed-channel") }; return render(true); }
+
+  if (attr("data-card-followup")) {
+    const fid = attr("data-card-followup");
+    const d = CRM.detail[S.client];
+    const f = ((d && d.followups) || []).find(x => x.id === fid);
+    if (!f) return;
+    const was = f.done;
+    f.done = was ? 0 : 1;                       // optimistic, so the tap feels instant
+    render(true);
+    api(`/followups/${encodeURIComponent(fid)}/done`, {
+      method: "POST", body: JSON.stringify({ done: !was }),
+    })
+      .then(res => { if (!res) throw new Error("not signed in"); return refreshClient(S.client); })
+      .then(() => render(true))
+      .catch(() => { f.done = was; render(true); });   // put it back if the write failed
+    return;
+  }
+
   const act = attr("data-act");
   if (act === "new-client") {
     return go("newclient", { newClient: {}, newClientError: null });
@@ -1983,6 +2165,82 @@ document.addEventListener("click", e => {
       });
     return;
   }
+  /* One shape for all four writes: disable the button, post, re-read the record,
+     close the panel. On failure the panel stays open with the draft intact, so
+     nothing she typed is lost. */
+  const saveDraft = (btn, run) => {
+    // Disabling the button is the whole double-submit guard. A flag on S would
+    // outlive the panel it belongs to and silently swallow the next save.
+    const cid = S.client, label = btn.textContent;
+    btn.textContent = "Saving\u2026";
+    btn.disabled = true;
+    Promise.resolve(run(cid))
+      .then(res => { if (!res) throw new Error("not signed in"); return refreshClient(cid); })
+      .then(() => {
+        if (S.client !== cid) return;      // she moved on; do not yank the card back
+        S.panel = null; S.draft = {}; S.draftError = null;
+        render(true);
+      })
+      .catch(() => {
+        S.draftError = "Could not save. Check you are still signed in.";
+        btn.textContent = label; btn.disabled = false;
+        render(true);
+      });
+  };
+
+  if (act === "save-edit") {
+    const f = S.draft || {};
+    if (!f.name || !f.name.trim()) { S.draftError = "A client needs a name."; return render(true); }
+    const body = {
+      name: f.name.trim(),
+      title: blankToNull(f.title), city: blankToNull(f.city),
+      tier: f.tier || "Growth", since: blankToNull(f.since),
+      lifetime_inr: intOrNull(f.lifetime_inr),
+      focus: blankToNull(f.focus), brief: blankToNull(f.brief),
+      next_when: blankToNull(f.next_when), next_what: blankToNull(f.next_what),
+      wants: String(f.wants || "").split(",").map(x => x.trim()).filter(Boolean),
+    };
+    return saveDraft(t, cid => api(`/clients/${encodeURIComponent(cid)}`,
+      { method: "PATCH", body: JSON.stringify(body) }));
+  }
+
+  if (act === "save-holding") {
+    const f = S.draft || {};
+    if (!f.artist_name || !f.artist_name.trim()) {
+      S.draftError = "A holding needs an artist."; return render(true);
+    }
+    const name = f.artist_name.trim();
+    return saveDraft(t, cid => api("/holdings", { method: "POST", body: JSON.stringify({
+      client_id: cid,
+      artist_name: name,
+      artist_key: artistKeyByName(name),   // links the holding to the public dossier
+      work: blankToNull(f.work),
+      acquired: blankToNull(f.acquired),
+      paid_inr: intOrNull(f.paid_inr),
+    }) }));
+  }
+
+  if (act === "save-log") {
+    const f = S.draft || {};
+    if (!f.note || !f.note.trim()) { S.draftError = "A note needs something in it."; return render(true); }
+    return saveDraft(t, cid => api("/log", { method: "POST", body: JSON.stringify({
+      client_id: cid,
+      happened: f.happened || todayIso(),
+      channel: blankToNull(f.channel),
+      note: f.note.trim(),
+    }) }));
+  }
+
+  if (act === "save-followup") {
+    const f = S.draft || {};
+    if (!f.due) { S.draftError = "A follow-up needs a date."; return render(true); }
+    return saveDraft(t, cid => api("/followups", { method: "POST", body: JSON.stringify({
+      client_id: cid,
+      due: f.due,
+      reason: blankToNull(f.reason),
+    }) }));
+  }
+
   if (act === "toggle-theme") { toggleTheme(); return; }
   if (act === "save-key") {
     const el = document.querySelector("[data-key]");
@@ -2010,9 +2268,10 @@ document.addEventListener("click", e => {
 });
 
 document.addEventListener("input", e => {
-  const el = e.target.closest("[data-nc]");
-  if (!el) return;
-  S.newClient = { ...S.newClient, [el.getAttribute("data-nc")]: el.value };
+  const nc = e.target.closest("[data-nc]");
+  if (nc) { S.newClient = { ...S.newClient, [nc.getAttribute("data-nc")]: nc.value }; return; }
+  const ed = e.target.closest("[data-ed]");
+  if (ed) { S.draft = { ...S.draft, [ed.getAttribute("data-ed")]: ed.value }; }
 });
 
 document.addEventListener("keydown", e => {
