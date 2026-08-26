@@ -14,7 +14,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "gallery-crm"
-database_id = "00000000-0000-4000-8000-000000000001"  # replaced by the real id after `wrangler d1 create`
+database_id = "fc8e569d-499d-4553-87c9-fec3e3c484ce"
 
 [vars]
 # Filled in after the Access application exists. Until both are set the API
