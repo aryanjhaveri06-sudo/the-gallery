@@ -13,10 +13,10 @@
    TOKENS — Classical design system, adapted for touch
    ============================================================ */
 :root{
-  --paper:#f3f2f2;
-  --raised:#f8f4f4;
-  --surface:#eae9e9;
-  --ink:#201f1d;
+  --paper:#f7f5f0;
+  --raised:#fffdf9;
+  --surface:#efece4;
+  --ink:#1c1b19;
   --gold:#b68235;
   --gold-ink:#7d5411;
   --gold-tint:#fff3e4;
@@ -299,49 +299,90 @@ button.row:active{background:var(--gold-tint)}
   width:76px;aspect-ratio:1/1;object-fit:cover;display:block;
   background:var(--surface);border:1px solid var(--divider-soft);border-radius:var(--r-sm);
 }
-/* ---- Today: ranked intelligence (spec §3) ---- */
-.counters{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.1px;color:var(--ink-60)}
-.counters b{font-family:var(--font-heading);font-weight:600;color:var(--ink);margin-right:4px}
+.filterbar{display:flex;flex-direction:column;gap:8px;padding:16px 0 4px;
+  border-bottom:1px solid var(--divider-soft);margin-bottom:4px}
+.fgroup{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.fgroup::-webkit-scrollbar{display:none}
+.fchip{font-size:11.6px;letter-spacing:.04em;padding:6px 13px;border-radius:999px;
+  border:1px solid var(--divider);color:var(--ink-60);white-space:nowrap;flex:none;background:transparent}
+.fchip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
 
-.story{display:block;color:inherit;text-decoration:none;padding:18px 0}
-.story.big{padding-top:8px}
-.story-hero{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
-  border-radius:var(--r-md);background:var(--surface);margin-bottom:14px}
-.story-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
-.story-head{font-family:var(--font-heading);font-weight:500;font-size:23.1px;line-height:1.2;margin:0;text-wrap:pretty}
-.story.big .story-head{font-size:27.3px}
-.story-sum{margin:8px 0 0;font-size:13.7px;color:var(--ink-72);line-height:1.55}
-/* Why it matters, as traceable reasons rather than prose a model wrote. */
-.story-why{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.why-chip{font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
+/* ---- Today, to the mockup (spec §3) ---- */
+.hero{position:relative;padding-top:6px}
+.hero-link{display:block;color:inherit;text-decoration:none}
+.hero-media{position:relative;border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.hero-media img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.rank{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:var(--r-sm);
+  background:var(--gold);color:#fff;font-family:var(--font-heading);font-weight:600;
+  font-size:13.1px;display:flex;align-items:center;justify-content:center}
+.hero-tag{position:absolute;top:10px;right:10px;background:var(--ink);color:var(--paper);
+  font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  padding:5px 8px;border-radius:var(--r-sm)}
+.hero-body{padding-top:14px}
+.hero-head{font-family:var(--font-heading);font-weight:500;font-size:25.2px;line-height:1.18;
+  margin:6px 0 0;text-wrap:pretty}
+.hero-sum{margin:8px 0 0;font-size:13.7px;color:var(--ink-72);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.story-why{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.why-chip{font-size:10px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;
   border:1px solid var(--divider);color:var(--ink-60)}
 .why-chip.artist{border-color:var(--gold);color:var(--gold-ink)}
 .why-chip.client{border-color:var(--up);color:var(--up)}
-.story-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px solid var(--divider-soft);padding-top:4px}
-.story-pair .story{display:grid;grid-template-columns:1fr;gap:10px}
-.story-pair .story.has-img{grid-template-rows:auto auto}
-.story-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-sm);
-  background:var(--surface);order:-1}
-.story-pair .story-head{font-size:17.9px}
 
-.pulserow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
-.pulse{border:1px solid var(--divider-soft);border-radius:var(--r-md);padding:13px 12px;background:var(--raised)}
-.pulse .pv{font-family:var(--font-heading);font-weight:600;font-size:19.9px;line-height:1.1}
-.pulse .pl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);margin-top:6px}
-.pulse .ps{font-size:11px;color:var(--ink-50);margin-top:3px;line-height:1.35}
+.mark{position:absolute;top:0;right:0;padding:8px;color:var(--ink-40);line-height:0}
+.mark.on{color:var(--gold-ink)}
+.mark.on svg{fill:currentColor}
 
-.dayrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-  padding:14px 0;border-bottom:1px solid var(--divider-soft);color:inherit}
-.dayrow .dn{font-family:var(--font-heading);font-weight:600;font-size:19.9px;min-width:26px}
+.scrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
+.sc{display:block;color:inherit;text-decoration:none}
+.sc-media{position:relative;border-radius:var(--r-sm);overflow:hidden;background:var(--surface);
+  aspect-ratio:4/3}
+.sc-media img{width:100%;height:100%;object-fit:cover;display:block}
+.sc-media .rank{width:20px;height:20px;font-size:11.6px;top:8px;left:8px}
+.sc-media .hero-tag{font-size:8px;padding:3px 6px;top:8px;right:8px}
+.sc-meta{display:flex;align-items:center;gap:8px}
+.rank.flat{position:static;width:19px;height:19px;font-size:11px;flex:none}
+.sc-body h4{font-family:var(--font-heading);font-weight:500;font-size:15.8px;line-height:1.25;
+  margin:6px 0 0;text-wrap:pretty}
+
+.pulserow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:16px}
+.pulse{border:1px solid var(--divider-soft);border-radius:var(--r-md);padding:12px 11px;
+  background:var(--raised)}
+.pulse .pi{color:var(--gold-ink);line-height:0;display:block;margin-bottom:8px}
+.pulse .pv{font-family:var(--font-heading);font-weight:600;font-size:18.9px;line-height:1.05}
+.pulse .pl{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-60);margin-top:6px}
+.pulse .ps{font-size:10.5px;color:var(--ink-50);margin-top:2px;line-height:1.3}
+
+.wrow{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 0;
+  border-bottom:1px solid var(--divider-soft);color:inherit}
+.wrow .wn{flex:1;font-family:var(--font-heading);font-weight:500;font-size:16.8px}
+.wrow .wr{display:block;font-family:var(--font-body);font-weight:400;font-size:11.6px;
+  color:var(--ink-50);margin-top:3px}
+.wrow .wspark{width:78px;height:26px;flex:none;line-height:0}
+.wrow .wspark svg{width:100%;height:26px;display:block}
+
+.dayrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 0;
+  border-bottom:1px solid var(--divider-soft);color:inherit}
+.dayrow .di{color:var(--gold-ink);line-height:0}
 .dayrow .dt{flex:1;font-size:14.2px}
-/* Empty states collapse to one line — never a reserved blank block (spec §13). */
+.dayrow .dt b{font-family:var(--font-heading);font-weight:600;margin-right:3px}
+
+.mf{position:relative;border-bottom:1px solid var(--divider-soft)}
+.mf-link{display:block;color:inherit;text-decoration:none}
+.mf-link, .mf > .mf-body{display:grid;grid-template-columns:1fr 66px;gap:14px;
+  align-items:start;padding:15px 34px 15px 0}
+.mf-img{width:66px;aspect-ratio:1/1;object-fit:cover;border-radius:var(--r-sm);
+  background:var(--surface)}
+.mf-body h4{font-family:var(--font-heading);font-weight:500;font-size:15.8px;line-height:1.25;
+  margin:5px 0 0;text-wrap:pretty}
+.mf .mark{top:12px}
+
+/* Empty states collapse to one line — §13 forbids reserved blank blocks. */
 .oneline{font-size:13.1px;color:var(--ink-50);font-style:italic;padding:14px 0}
 
 @media (max-width:560px){
   .pulserow{grid-template-columns:1fr 1fr}
-  .story-pair{grid-template-columns:1fr;gap:0}
-  .story-pair .story{border-top:1px solid var(--divider-soft)}
-  .story.big .story-head{font-size:23.1px}
+  .hero-head{font-size:23.1px}
 }
 
 .news-tag{
@@ -797,6 +838,11 @@ const I = (d, s = 21) =>
   `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
     stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
 const ICON = {
+  bookmark: `<path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/>`,
+  gavel: `<path d="M14 4l6 6M11 7l6 6M8.5 9.5l5 5M3 21h9M7 12l-4 4a2 2 0 0 0 3 3l4-4"/>`,
+  rupee: `<path d="M7 4h10M7 9h10M16 4c0 4-3 5-6 5l7 10"/>`,
+  globe: `<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>`,
+  bell: `<path d="M18 9a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7"/><path d="M10.5 20a2 2 0 0 0 3 0"/>`,
   today:  '<path d="M12 2v6M4.9 8.9l1.4 1.4M2 17h2M20 17h2M19.1 8.9l-1.4 1.4M22 21H2M16 6l-4-4-4 4M16 17a4 4 0 0 0-8 0"/>',
   artists:'<circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/>',
   market: '<path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/>',
@@ -1471,7 +1517,10 @@ function systemPrefersDark() {
 function currentTheme() {
   const saved = (() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })();
   if (saved === "dark" || saved === "light") return saved;
-  return systemPrefersDark() ? "dark" : "light";
+  // The desk is designed light — warm ivory, near-black, gold. Follow the
+  // system only after she has expressed a preference; do not open dark on a
+  // phone that happens to be in night mode.
+  return "light";
 }
 function applyTheme(theme) {
   if (theme) document.documentElement.setAttribute("data-theme", theme);
@@ -1487,6 +1536,21 @@ const themeIcon = () => currentTheme() === "dark" ? ICON.sun : ICON.moon;
 
 applyTheme((() => { try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; } })());
 
+/* Bookmarks live in localStorage: the spec wants saves to feel instant (§14
+   optimistic UI) and a saved headline is not client data, so it does not need
+   to reach D1. Keyed by URL because the same story arrives under two links. */
+const MARK_KEY = "gallery.marks";
+let MARKS = (() => { try { return new Set(JSON.parse(localStorage.getItem(MARK_KEY) || "[]")); }
+                     catch (e) { return new Set(); } })();
+const markKey = n => (n && n.url) ? String(n.url).split("?")[0].slice(-90) : "";
+const isMarked = n => MARKS.has(markKey(n));
+function toggleMark(n) {
+  const k = markKey(n);
+  if (!k) return;
+  MARKS.has(k) ? MARKS.delete(k) : MARKS.add(k);
+  try { localStorage.setItem(MARK_KEY, JSON.stringify([...MARKS])); } catch (e) {}
+}
+
 const SAVED_KEY = "artdesk.v1";
 const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || {}; } catch (e) { return {}; } })();
 
@@ -1498,6 +1562,10 @@ const S = {
   marketTab: "results",
   knowTab: "scripts",
   calFilter: "All",
+  resHouse: "All",          // results: auction house
+  resPerf: "All",           // results: above / below / all vs estimate
+  feedCat: "All",           // feed: news category
+  feedScope: "India",       // feed: her market vs the wider trade press
   calMonth: 0,            // months from the current one, for the grid
   calDay: null,           // the day whose detail is open
   pitchClient: "sethi",
@@ -1704,97 +1772,149 @@ function viewToday() {
     </button>`;
   }).join("");
 
-  /* ---- ranked intelligence, not a chronological feed (spec §3) ---------- */
+  /* ---- Today, to the mockup (spec §3) ----------------------------------- */
   const ranked = rankedStories();
-  /* A lead story wants a picture. Google-sourced items never have one, so if the
-     top-scoring story is imageless, promote the best one within eight points
-     that does — close enough that the ranking is not being overridden, only
-     broken on a near-tie. */
-  let hero = ranked[0];
-  if (hero && !hero.image) {
-    const alt = ranked.find(r => r.image && hero.score - r.score <= 8);
-    if (alt) hero = alt;
-  }
-  const seconds = ranked.filter(r => r !== hero).slice(0, 2);
-  const rest = ranked.filter(r => r !== hero && !seconds.includes(r));
+
+  /* The top block is picture-led by design, so fill its three slots from the
+     image-bearing stories first and only fall back to text when there are not
+     three. Ranking still decides the order within each group — this breaks ties
+     toward a story that can be seen, it does not promote a weak one. Stories
+     reaching us through Google News never carry an image, so without this the
+     lead frames render empty. */
+  const withPic = ranked.filter(r => safeUrl(r.image));
+  const noPic = ranked.filter(r => !safeUrl(r.image));
+  const lead = [...withPic, ...noPic].slice(0, 3);
+  const hero = lead[0];
+  const seconds = lead.slice(1, 3);
+  const rest = ranked.filter(r => !lead.includes(r));
 
   const due = CRM.live ? CRM.followups.length : 0;
   const closing = (REAL.events || []).filter(e => e.starts === todayIso()).length;
-  const watching = new Set(ranked.flatMap(r => r.artists)).size;
-
-  const storyCard = (n, big) => {
-    const u = safeUrl(n.url);
-    const img = safeUrl(n.image);
-    const tag = newsTag(n);
-    const inner = `
-      ${big && img ? `<img class="story-hero" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
-      <div class="story-body">
-        <div class="story-meta">${tag ? `<span class="news-tag">${esc(tag)}</span>` : ""}<span class="kick">${esc(fmtDate(n.date))} \u00b7 ${esc(n.source)}</span></div>
-        <h3 class="story-head">${esc(n.headline)}</h3>
-        ${big && n.why ? `<p class="story-sum">${esc(n.why)}</p>` : ""}
-        ${n.reasons.length ? `<div class="story-why">${n.reasons.map(r =>
-            `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</div>` : ""}
-      </div>`;
-    const cls = "story" + (big ? " big" : "") + (!big && img ? " has-img" : "");
-    const media = !big && img
-      ? `<img class="story-thumb" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : "";
-    return u
-      ? `<a class="${cls}" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}${media}</a>`
-      : `<div class="${cls}">${inner}${media}</div>`;
-  };
-
-  /* ---- Market Pulse (spec §3.5) ------------------------------------------
-     Only tiles the data actually supports. The spec's "7-day Indian Modern
-     momentum" is deliberately absent: art-desk-data-sources rule 1 says never
-     index on median price without a minimum comparable count in BOTH windows,
-     and seven days never has it. A number there would be noise wearing a
-     decimal point. Same for "international fairs this week" — there is no
-     fairs source since the invented set was deleted. */
-  const above = (REAL.feed || []).filter(f => f.vs_est && f.vs_est.dir === "above").length;
-  const withEst = (REAL.feed || []).filter(f => f.vs_est).length;
-  const topLot = (REAL.feed || []).reduce((best, f) =>
-    (!best || (f.vs_est && f.vs_est.dir === "above" && f.vs_est.pct > (best.vs_est ? best.vs_est.pct : 0))) ? f : best, null);
   const weekEnd = new Date(Date.parse(todayIso()) + 7 * 86400000).toISOString().slice(0, 10);
   const thisWeek = (REAL.events || []).filter(e => e.starts >= todayIso() && e.starts <= weekEnd).length;
 
-  const pulse = [
-    { v: (REAL.feed || [])[0] ? (REAL.feed || [])[0].price : "\u2014", l: "Latest result", s: (REAL.feed || [])[0] ? (REAL.feed || [])[0].artist : "" },
-    { v: withEst ? Math.round(above / withEst * 100) + "%" : "\u2014", l: "Above high est.", s: `of ${withEst} priced lots` },
-    { v: String(thisWeek), l: "Sales this week", s: thisWeek ? "in the diary" : "none scheduled" },
-    { v: String((REAL.events || []).length), l: "Sales ahead", s: "next three months" },
-  ].map(t => `<div class="pulse"><div class="pv tnum">${esc(t.v)}</div><div class="pl">${esc(t.l)}</div><div class="ps">${esc(t.s)}</div></div>`).join("");
+  const stamp = (REAL.news || {}).generated_at || REAL.generated_at;
+  const updated = stamp && String(stamp).length > 10
+    ? "Updated " + String(stamp).slice(11, 16) + " UTC" : "";
 
-  /* ---- Your Day: compact rows only, never a big blank (spec §3.7/§13) ---- */
+  const markBtn = n => `<button class="mark ${isMarked(n) ? "on" : ""}" data-mark="${esc(markKey(n))}"
+      aria-label="${isMarked(n) ? "Saved" : "Save"}" aria-pressed="${isMarked(n)}">${I(ICON.bookmark, 15)}</button>`;
+
+  /* Hero: image with rank badge and category over it, then kicker, headline,
+     summary and the reasons it ranked — the mockup's "Why it matters" line,
+     except ours names the actual reason instead of promising an essay. */
+  const heroCard = n => {
+    if (!n) return `<div class="oneline">No headlines pulled yet.</div>`;
+    const u = safeUrl(n.url), img = safeUrl(n.image), tag = newsTag(n);
+    const inner = `
+      ${img ? `<div class="hero-media">
+          <img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.parentElement.remove()">
+          <span class="rank">1</span>
+          ${tag ? `<span class="hero-tag">${esc(tag)}</span>` : ""}
+        </div>` : ""}
+      <div class="hero-body">
+        <div class="kicker">${esc(n.source)} \u00b7 ${esc(fmtDate(n.date))}</div>
+        <h3 class="hero-head">${esc(n.headline)}</h3>
+        ${n.why ? `<p class="hero-sum">${esc(n.why)}</p>` : ""}
+        ${n.reasons.length ? `<div class="story-why">${n.reasons.map(r =>
+          `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</div>` : ""}
+      </div>`;
+    return `<div class="hero">${u
+      ? `<a class="hero-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+      : inner}${markBtn(n)}</div>`;
+  };
+
+  const smallCard = (n, i) => {
+    const u = safeUrl(n.url), img = safeUrl(n.image), tag = newsTag(n);
+    const inner = `
+      ${img ? `<div class="sc-media">
+        <img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.parentElement.remove()">
+        <span class="rank">${i + 2}</span>
+        ${tag ? `<span class="hero-tag">${esc(tag)}</span>` : ""}
+      </div>` : ""}
+      <div class="sc-body">
+        <div class="sc-meta">${img ? "" : `<span class="rank flat">${i + 2}</span>`}
+          <span class="kicker">${esc(n.source)}</span></div>
+        <h4>${esc(n.headline)}</h4>
+      </div>`;
+    return u ? `<a class="sc" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+             : `<div class="sc">${inner}</div>`;
+  };
+
+  /* Market Pulse. Four tiles, all from real rows. The mockup's "7-day Indian
+     Modern momentum" is not among them on purpose: rule 1 forbids indexing on
+     median price without minimum comparables in both windows, and a week never
+     has them. "International fairs this week" has no source. */
+  const above = (REAL.feed || []).filter(f => f.vs_est && f.vs_est.dir === "above").length;
+  const withEst = (REAL.feed || []).filter(f => f.vs_est).length;
+  const top = (REAL.feed || []).slice().sort((a, b) =>
+    (b.vs_est ? b.vs_est.pct : -1) - (a.vs_est ? a.vs_est.pct : -1))[0];
+  const pulse = [
+    { i: ICON.rupee,  v: top ? top.price : "\u2014", l: "Top result", s: top ? top.artist : "no results yet" },
+    { i: ICON.market, v: withEst ? Math.round(above / withEst * 100) + "%" : "\u2014", l: "Above high est.", s: `of ${withEst} priced lots` },
+    { i: ICON.gavel,  v: String(thisWeek), l: "Sales this week", s: thisWeek ? "in the diary" : "none scheduled" },
+    { i: ICON.globe,  v: String((REAL.events || []).length), l: "Sales ahead", s: "next three months" },
+  ].map(t => `<div class="pulse"><span class="pi">${I(t.i, 15)}</span>
+      <div class="pv tnum">${esc(t.v)}</div>
+      <div class="pl">${esc(t.l)}</div>
+      <div class="ps">${esc(t.s)}</div></div>`).join("");
+
+  /* Watchlist. Real artists, real twelve-month move, real sparkline — and where
+     the comparable count is too thin to quote a move, it says so instead of
+     printing a number. */
+  const watch = (REAL.trending || []).map(k => ARTISTS[k]).filter(Boolean).slice(0, 3);
+  const watchRows = watch.length
+    ? `<div class="rows">` + watch.map(a => {
+        const d = a.stats.delta;
+        return `<button class="wrow" data-open-artist="${esc(a.key)}">
+          <span class="wn">${esc(a.name)}<span class="wr">${d
+            ? esc(d) + " over 12 months"
+            : "not enough comparable lots to quote a move"}</span></span>
+          <span class="wspark" data-spark="${esc(a.key)}"></span>
+        </button>`;
+      }).join("") + `</div>`
+    : `<div class="oneline">No artist has enough comparable lots in both windows to rank a move.</div>`;
+
   const dayRows = [
-    due ? { n: due, t: `follow-up${due === 1 ? "" : "s"} due`, nav: "clients" } : null,
-    closing ? { n: closing, t: `auction${closing === 1 ? "" : "s"} closing today`, nav: "calendar" } : null,
-    thisWeek ? { n: thisWeek, t: `sale${thisWeek === 1 ? "" : "s"} this week`, nav: "calendar" } : null,
+    due ? { i: ICON.clients, n: due, t: `follow-up${due === 1 ? "" : "s"} due`, nav: "clients" } : null,
+    closing ? { i: ICON.gavel, n: closing, t: `auction${closing === 1 ? "" : "s"} closing today`, nav: "calendar" } : null,
+    thisWeek ? { i: ICON.calendar, n: thisWeek, t: `sale${thisWeek === 1 ? "" : "s"} this week`, nav: "calendar" } : null,
   ].filter(Boolean);
   const yourDay = dayRows.length
     ? `<div class="rows">` + dayRows.map(r => `<button class="dayrow" data-nav="${r.nav}">
-         <span class="dn tnum">${r.n}</span><span class="dt">${esc(r.t)}</span>${I(ICON.chev, 15)}</button>`).join("") + `</div>`
+        <span class="di">${I(r.i, 15)}</span><span class="dt"><b class="tnum">${r.n}</b> ${esc(r.t)}</span>${I(ICON.chev, 15)}</button>`).join("") + `</div>`
     : `<div class="oneline">Nothing owed today.${CRM.live ? "" : " Sign in for the client book."}</div>`;
 
-  const stamp = (REAL.news || {}).generated_at || REAL.generated_at;
+  const moreRows = rest.length
+    ? `<div class="rows">` + rest.map(n => {
+        const u = safeUrl(n.url), img = safeUrl(n.image);
+        const body = `
+          <div class="mf-body">
+            <div class="kicker">${esc(n.source)} \u00b7 ${esc(fmtDate(n.date))}</div>
+            <h4>${esc(n.headline)}</h4>
+          </div>
+          ${img ? `<img class="mf-img" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}`;
+        return `<div class="mf">${u
+          ? `<a class="mf-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${body}</a>` : body}
+          ${markBtn(n)}</div>`;
+      }).join("") + `</div>`
+    : `<div class="oneline">Nothing further today.</div>`;
 
   return `
     <div class="view-head">
       <span class="date tnum">${esc(todayLong())}</span>
       <h1>Good morning, Aashna</h1>
       <p>Your art-market briefing is ready.</p>
-      <div class="counters">
-        <span><b class="tnum">${ranked.filter(r => r.score >= 45).length}</b> stories that matter</span>
-        <span><b class="tnum">${(REAL.events || []).length}</b> sales ahead</span>
-        <span><b class="tnum">${watching}</b> artists in the news</span>
-      </div>
     </div>
     <div class="view-body">
-      <div class="sec">${sectionHead("Top stories", (REAL.news || {}).live ? "live" : "nightly")}
-        ${hero ? storyCard(hero, true) : `<div class="oneline">No headlines pulled yet.</div>`}
-        ${seconds.length ? `<div class="story-pair">${seconds.map(n => storyCard(n, false)).join("")}</div>` : ""}
+      <div class="sec">${sectionHead("Top stories", updated)}
+        ${heroCard(hero)}
+        ${seconds.length ? `<div class="scrow">${seconds.map(smallCard).join("")}</div>` : ""}
       </div>
 
       <div class="sec">${sectionHead("Market pulse")}<div class="pulserow">${pulse}</div></div>
+
+      <div class="sec">${sectionHead("Watchlist", "12-month move")}${watchRows}</div>
 
       <div class="sec">${sectionHead("Your day")}${yourDay}</div>
 
@@ -1803,12 +1923,7 @@ function viewToday() {
         <div class="col sec">${sectionHead("Follow-ups due")}${fups}</div>
       </div>
 
-      <div class="sec">${sectionHead("Next up", "calendar")}<div class="rows">${next || '<div class="oneline">No sale scheduled.</div>'}</div></div>
-
-      <div class="sec">${sectionHead("More from the art world")}
-        ${rest.length ? `<div class="rows">${rest.map(newsRow).join("")}</div>` : `<div class="oneline">Nothing further today.</div>`}
-        ${stamp ? `<div class="foot-note">Updated ${esc(fmtDate(String(stamp).slice(0, 10)))}${String(stamp).length > 10 ? " \u00b7 " + esc(String(stamp).slice(11, 16)) + " UTC" : ""}</div>` : ""}
-      </div>
+      <div class="sec">${sectionHead("More from the art world", updated)}${moreRows}</div>
     </div>`;
 }
 
@@ -1995,8 +2110,28 @@ function lotThumb(f) {
 }
 
 function marketResults() {
-  if (!REAL.feed.length) return `<div class="empty">No results yet.</div>`;
-  return `<div class="rows">` + REAL.feed.map(f => {
+  if (!REAL.feed.length) return `<div class="oneline">No results yet.</div>`;
+
+  /* The mockup's two dropdowns, as chips. Both filter on values that exist in
+     the row — house, and where the hammer landed against the estimate. There is
+     no category filter because the feed carries no category; a control that
+     cannot filter anything is worse than no control. */
+  const houses = ["All", ...new Set(REAL.feed.map(f => f.house).filter(Boolean))];
+  const perfs = [["All", "All lots"], ["above", "Above estimate"], ["below", "Below estimate"]];
+  const rows = REAL.feed.filter(f =>
+    (S.resHouse === "All" || f.house === S.resHouse) &&
+    (S.resPerf === "All" || (f.vs_est && f.vs_est.dir === S.resPerf)));
+
+  const filters = `<div class="filterbar">
+    <div class="fgroup">${houses.map(h =>
+      `<button class="fchip" data-res="house:${esc(h)}" aria-pressed="${S.resHouse === h}">${esc(h === "All" ? "All houses" : h)}</button>`).join("")}</div>
+    <div class="fgroup">${perfs.map(([k, l]) =>
+      `<button class="fchip" data-res="perf:${esc(k)}" aria-pressed="${S.resPerf === k}">${esc(l)}</button>`).join("")}</div>
+  </div>`;
+
+  if (!rows.length) return filters + `<div class="oneline">No lots match that filter.</div>`;
+
+  return filters + `<div class="rows">` + rows.map(f => {
     const k = f.artist_key && ARTISTS[f.artist_key] ? f.artist_key : null;
     const v = f.vs_est;
     const lot = safeUrl(f.url);
@@ -2062,7 +2197,23 @@ function marketTrending() {
 }
 
 function marketNews() {
-  return newsBlock(14, 8);
+  const d = REAL.news || {};
+  const pool = S.feedScope === "Wider" ? (d.wider || []) : (d.on_market || []);
+  const cats = ["All", ...new Set(pool.map(newsTag).filter(Boolean))];
+  const rows = pool.filter(n => S.feedCat === "All" || newsTag(n) === S.feedCat);
+
+  /* Scope is real: "Her market" is what the India-targeted feeds and queries
+     return, "Wider" is the international trade press, and the two are kept in
+     separate buckets by the pipeline rather than mixed and guessed at. */
+  const filters = `<div class="filterbar">
+    <div class="fgroup">${cats.map(c =>
+      `<button class="fchip" data-feed="cat:${esc(c)}" aria-pressed="${S.feedCat === c}">${esc(c === "All" ? "All categories" : c)}</button>`).join("")}</div>
+    <div class="fgroup">${[["India", "Her market"], ["Wider", "Wider art world"]].map(([k, l]) =>
+      `<button class="fchip" data-feed="scope:${esc(k)}" aria-pressed="${S.feedScope === k}">${esc(l)}</button>`).join("")}</div>
+  </div>`;
+
+  if (!rows.length) return filters + `<div class="oneline">Nothing in that category today.</div>`;
+  return filters + `<div class="rows">` + rows.map(newsRow).join("") + `</div>`;
 }
 
 function marketFx() {
@@ -2830,7 +2981,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -2853,6 +3004,23 @@ document.addEventListener("click", e => {
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
   if (attr("data-market")) { S.marketTab = attr("data-market"); return render(true); }
   if (attr("data-cal")) { S.calFilter = attr("data-cal"); S.calDay = null; return render(true); }
+  if (attr("data-res")) {
+    const [k, v] = attr("data-res").split(":");
+    S[k === "house" ? "resHouse" : "resPerf"] = v;
+    return render(true);
+  }
+  if (attr("data-feed")) {
+    const [k, v] = attr("data-feed").split(":");
+    S[k === "cat" ? "feedCat" : "feedScope"] = v;
+    return render(true);
+  }
+  if (attr("data-mark")) {
+    const url = attr("data-mark");
+    const all = [...(((REAL.news || {}).on_market) || []), ...(((REAL.news || {}).wider) || [])];
+    const n = all.find(x => markKey(x) === url) || { url };
+    toggleMark(n);
+    return render(true);
+  }
   if (attr("data-cal-nav")) {
     const dir = attr("data-cal-nav");
     S.calMonth = dir === "today" ? 0 : (S.calMonth || 0) + (dir === "next" ? 1 : -1);
