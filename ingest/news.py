@@ -79,6 +79,16 @@ NOT_A_PUBLISHER = [
     "vajiram", "testbook", "byjus", "unacademy", "adda247",   # exam-prep listicles
 ]
 
+# Read directly, exactly as functions/_lib/news.js does. These are where the
+# pictures come from: Google News carries none and hides the publisher URL, so
+# an India tier built only on Google is a wall of text.
+INDIA_FEEDS = [
+    ("The Hindu",          "https://www.thehindu.com/entertainment/art/feeder/default.rss"),
+    ("The Indian Express", "https://indianexpress.com/section/lifestyle/art-and-culture/feed/"),
+    ("Economic Times",     "https://economictimes.indiatimes.com/magazines/panache/rssfeeds/1466318837.cms"),
+    ("Hindustan Times",    "https://www.hindustantimes.com/feeds/rss/lifestyle/art-culture/rssfeed.xml"),
+]
+
 WIDER_FEEDS = [
     ("The Art Newspaper", "https://www.theartnewspaper.com/rss.xml"),
     ("artnet News",       "https://news.artnet.com/feed"),
@@ -152,6 +162,29 @@ def first(el, *names):
     return ""
 
 
+IMG_IN_HTML = re.compile(r'<img[^>]*\ssrc="([^"]+)"')
+
+
+def feed_image(el, raw=""):
+    """Publishers ship an image, but never in the same tag.
+
+    media:content and media:thumbnail carry a url attribute; ET uses enclosure;
+    some only inline an <img> in the description HTML. Try them in that order.
+    """
+    for child in el:
+        t = tag(child)
+        if t in ("content", "thumbnail", "enclosure"):
+            u = child.get("url") or child.get("href")
+            if u and u.startswith("http"):
+                return u
+    for child in el:
+        if tag(child) in ("description", "summary", "encoded"):
+            m = IMG_IN_HTML.search(child.text or "")
+            if m:
+                return m.group(1)
+    return None
+
+
 def read_feed(source, url):
     body = get(url, expect_json=False, pause=1.0)
     try:
@@ -175,6 +208,7 @@ def read_feed(source, url):
             "url": link,
             "when": when,
             "why": summary,
+            "image": feed_image(el, body),
         })
     return out
 
@@ -206,6 +240,7 @@ def google_news(query):
             "url": link,
             "when": parse_when(first(el, "pubDate")),
             "why": "",          # Google's description is just the headline again
+            "image": None,      # Google News carries none; publisher feeds do
             "query": query,
         })
     return out
@@ -235,6 +270,43 @@ MARKET_SIGNAL = re.compile(
 
 def is_market(item):
     return bool(MARKET_SIGNAL.search(item["headline"] + " " + item.get("why", "")))
+
+
+OG_IMAGE = re.compile(
+    r'<meta[^>]+(?:property|name)=["\'](?:og:image|twitter:image)(?::src)?["\']'
+    r'[^>]+content=["\']([^"\']+)["\']', re.I)
+OG_IMAGE_REV = re.compile(
+    r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+'
+    r'(?:property|name)=["\'](?:og:image|twitter:image)(?::src)?["\']', re.I)
+
+
+def resolve_image(url):
+    """Fetch a story's own og:image.
+
+    NOT for news.google.com links. That interstitial carries no canonical, no
+    data-n-au and no JS redirect we can read — the publisher URL is inside
+    obfuscated script — and its og:image is Google's logo. Resolving twelve of
+    them returned the SAME googleusercontent URL twelve times, which looks like
+    success and is not. Google-sourced items get no picture; that is why the
+    India feeds below are read directly.
+    """
+    if "news.google.com" in url or "google.com/rss" in url:
+        return None
+    try:
+        html = get(url, expect_json=False, retries=1, pause=0.4)
+    except Exception:
+        return None
+    m = OG_IMAGE.search(html) or OG_IMAGE_REV.search(html)
+    if not m:
+        return None
+    src = m.group(1).strip()
+    if src.startswith("//"):
+        src = "https:" + src
+    if not src.startswith("http"):
+        return None
+    if "googleusercontent.com" in src or "news.google.com" in src:
+        return None
+    return src
 
 
 def diversify(items, limit, per_subject=2):
@@ -353,15 +425,35 @@ def main():
         for it in items:
             if not it.get("when") or it["when"] < cutoff:
                 continue
-            key = re.sub(r"[?#].*$", "", it["url"])[-90:]
-            if key in seen:
+            # Dedupe on the HEADLINE as well as the URL. The same Hindu story
+            # arrives twice — once through Google News under a news.google.com
+            # link, once from the Hindu feed direct — and the URLs do not match,
+            # so a URL-only key printed it twice.
+            url_key = re.sub(r"[?#].*$", "", it["url"])[-90:]
+            head_key = "h:" + re.sub(r"[^a-z0-9]+", " ",
+                                     it["headline"].lower()).strip()[:70]
+            if url_key in seen or head_key in seen:
                 continue
-            seen.add(key)
+            seen.add(url_key)
+            seen.add(head_key)
             bucket.append(it)
             kept += 1
         return kept
 
+    # PUBLISHER FEEDS FIRST. The same story often arrives twice — from the
+    # publisher with an image, and through Google News without one. Whichever is
+    # collected first wins the dedupe, so read the ones that carry pictures
+    # before the ones that do not.
     mine = []
+    for source, url in INDIA_FEEDS:
+        try:
+            got = [i for i in read_feed(source, url) if is_hers(i)]
+        except Exception as e:
+            print(f"  {source:30} FAILED {e}", flush=True)
+            continue
+        print(f"  {source:30} {collect(got, mine):>3} kept", flush=True)
+
+    # Google second, for the house-specific stories the general feeds miss.
     for q in QUERIES:
         try:
             got = [i for i in google_news(q) if is_hers(i)]
@@ -390,6 +482,17 @@ def main():
                   key=lambda i: -i["when"].timestamp())[: args.limit]
     wider = diversify(wider, args.limit)
 
+    # Google-sourced items arrive imageless; go and get one for each of the few
+    # that actually made the cut, rather than for all two hundred candidates.
+    need = [i for i in mine + wider if not i.get("image")]
+    print(f"\n  resolving og:image for {len(need)} items", flush=True)
+    got = 0
+    for i in need:
+        i["image"] = resolve_image(i["url"])
+        if i["image"]:
+            got += 1
+    print(f"  {got}/{len(need)} resolved", flush=True)
+
     def shape(i):
         return {
             "date": i["when"].strftime("%Y-%m-%d"),
@@ -397,6 +500,7 @@ def main():
             "headline": i["headline"],
             "why": i["why"],
             "url": i["url"],
+            "image": i.get("image"),
         }
 
     payload = {

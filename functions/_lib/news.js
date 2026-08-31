@@ -128,8 +128,17 @@ function parseFeed(xml, publisher) {
     if (!headline || !url) continue;
     const ts = Date.parse(pick("pubDate") || pick("dc:date"));
     if (!Number.isFinite(ts)) continue;
+    // Every one of these publishers ships an image, but not in the same tag:
+    // The Hindu, Indian Express, HT and TAN use media:content; ET uses
+    // enclosure. Some also inline an <img> in the description.
+    const img =
+      (b.match(/<media:content[^>]*\surl="([^"]+)"/) ||
+       b.match(/<media:thumbnail[^>]*\surl="([^"]+)"/) ||
+       b.match(/<enclosure[^>]*\surl="([^"]+)"/) ||
+       b.match(/<img[^>]*\ssrc="([^"]+)"/) || [])[1] || null;
     out.push({ headline, url, source: publisher, when: ts,
-               why: pick("description").slice(0, 150) });
+               why: pick("description").slice(0, 150),
+               image: img ? unescapeXml(img) : null });
   }
   return out;
 }
@@ -162,7 +171,10 @@ function diversify(items, limit, perSubject = 2) {
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
            "(KHTML, like Gecko) Chrome/126.0 Safari/537.36";
 
-const CACHE_KEY = "https://gallery.internal/news-v1";
+// BUMP THIS whenever the payload shape changes. Adding images went unnoticed
+// for a deploy because the edge kept serving the previous shape for 15 minutes
+// and the endpoint reported cached=true while looking simply broken.
+const CACHE_KEY = "https://gallery.internal/news-v2-images";
 const TTL_SECONDS = 900;   // 15 minutes at the edge
 
 export async function liveNews(ctx) {
@@ -213,6 +225,7 @@ export async function liveNews(ctx) {
     on_market: diversify(pool, 12).map(i => ({
       date: new Date(i.when).toISOString().slice(0, 10),
       source: i.source, headline: i.headline, why: "", url: i.url,
+      image: i.image,
     })),
   };
 
