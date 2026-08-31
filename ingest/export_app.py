@@ -137,11 +137,29 @@ def main():
             } for r in recs],
         }
 
+    def vs_estimate(price, lo, hi):
+        """How far the hammer landed from the published estimate.
+
+        Measured against the nearer end of the band: above the high, or below
+        the low. Inside the band is not a result worth a number, so it returns
+        None and the card says nothing rather than inventing precision.
+        """
+        if not price or not (lo and hi) or lo > hi:
+            return None
+        if price > hi:
+            return {"dir": "above", "pct": round((price - hi) / hi * 100)}
+        if price < lo:
+            return {"dir": "below", "pct": round((lo - price) / lo * 100)}
+        return None
+
     feed = [{
         "date": f["date"], "house": f["house"], "artist": f["artist"],
         "artist_key": f["artist_key"] if f["artist_key"] in out_artists else None,
         "title": f["title"], "price": inr(f["price"]),
         "est": band(f["est_low"], f["est_high"]), "above": f["above_high"],
+        "vs_est": vs_estimate(f["price"], f["est_low"], f["est_high"]),
+        "image": f.get("image"), "medium": f.get("medium"), "size": f.get("size"),
+        "url": f.get("url"),
     } for f in desk["feed"][:40]]
 
     trending = [k for k in desk.get("trending", []) if k in out_artists][:20]

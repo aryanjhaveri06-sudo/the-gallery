@@ -355,6 +355,10 @@ def main():
         "price": r["price_inr"], "est_low": r["est_low_inr"], "est_high": r["est_high_inr"],
         "above_high": bool(r["est_high_inr"] and r["price_inr"] and r["price_inr"] > r["est_high_inr"]),
         "url": r["url"],
+        # The desk is for looking at pictures. Every lot in the database has an
+        # image and all three houses serve them to our origin, so the feed
+        # carries the thumbnail rather than describing the work in words.
+        "image": r["image_url"], "medium": r["medium"], "size": r["size"],
     } for r in feed_src][:60]
 
     sales = [dict(r) for r in con.execute(
