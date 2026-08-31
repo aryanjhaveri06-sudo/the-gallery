@@ -1124,12 +1124,26 @@ async function refreshClient(cid) {
 
    The endpoint serves her market only; the wider trade-press tier stays baked,
    because those five feeds are not worth five more fetches per cache miss. */
+/* Same origin first — that is the private site, where the Function lives. On
+   GitHub Pages there is no Function and api/news 404s, so it reaches across to
+   the private site for the same public headlines. A published Artifact cannot
+   do either: its CSP blocks cross-origin fetches, so it keeps the embedded copy
+   and is a snapshot by design. */
+const NEWS_ENDPOINTS = ["api/news", "https://the-gallery-ct1.pages.dev/api/news"];
+
 async function loadNews() {
   try {
-    const r = await fetch("api/news", { cache: "no-store" });
-    if (!r.ok) return false;
-    const d = await r.json();
-    if (!d || !Array.isArray(d.on_market) || !d.on_market.length) return false;
+    let d = null;
+    for (const url of NEWS_ENDPOINTS) {
+      try {
+        const r = await fetch(url, { cache: "no-store" });
+        if (!r.ok) continue;
+        d = await r.json();
+        if (d && Array.isArray(d.on_market) && d.on_market.length) break;
+        d = null;
+      } catch (e) { /* try the next one */ }
+    }
+    if (!d) return false;
 
     /* Merge, do not replace. The two layers see different things: the edge
        reads Indian art desks (galleries, shows, the scene) and is minutes old;

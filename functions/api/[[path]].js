@@ -184,6 +184,11 @@ export async function onRequest(context) {
           // so a tab switch does not re-request on every render.
           "Cache-Control": "public, max-age=120",
           "X-Content-Type-Options": "nosniff",
+          // GitHub Pages is static and has no Functions, so the public site
+          // cannot serve this itself — it calls across to here instead. Safe to
+          // open up: these are public headlines, the endpoint takes no input and
+          // sits before the auth gate, and no credentials are sent with it.
+          "Access-Control-Allow-Origin": "*",
         },
       });
     } catch (err) {
