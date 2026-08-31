@@ -41,12 +41,23 @@ from common import ROOT, get
 # nothing for quoted, OR-heavy queries — the two elaborate ones tried first came
 # back with zero items while these return a hundred.
 QUERIES = [
-    "Indian art auction",
-    "Indian art market",
-    "modern Indian art sale",
-    "Saffronart auction",
-    "AstaGuru auction",
-    "Pundole's auction",
+    # `when:` is not optional. Google News RSS ranks by RELEVANCE and truncates
+    # at 100, so without a recency bound the fresh stories fall off the end:
+    # "Saffronart" alone returned 100 items with ONE from the past week and
+    # nothing newer than six days old, while "Saffronart when:7d" returned seven,
+    # all fresh. That is exactly why this desk sat on 25 August headlines for six
+    # days while the nightly refresh ran green every single night.
+    #
+    # Houses get a longer window than themes: low volume, always relevant.
+    # 21 days, not 14: a record price is still live information to a dealer a
+    # fortnight later, and a 14-day window dropped the ₹16.2 crore Gandhi sale
+    # off the desk while it was still the biggest Indian result of the season.
+    "Indian art auction when:21d",
+    "Indian art market when:21d",
+    "modern Indian art when:21d",
+    "Saffronart when:30d",
+    "AstaGuru auction when:30d",
+    "Pundole's auction when:30d",
 ]
 GOOGLE_NEWS = ("https://news.google.com/rss/search?q={q}&hl=en-IN&gl=IN&ceid=IN:en")
 
@@ -56,6 +67,7 @@ NOT_HERS = [
     "native american", "santa fe", "indigenous", "first nations", "navajo",
     "cherokee", "pueblo", "tribal nation", "indian country", "red cloud",
     "southwestern association",          # ...for Indian Arts — Santa Fe, not Mumbai
+    "kiowa", "comanche", "apache",
 ]
 
 # Google News indexes social posts and PR wires alongside journalism. A desk
@@ -64,6 +76,7 @@ NOT_HERS = [
 NOT_A_PUBLISHER = [
     "linkedin", "facebook", "instagram", "youtube", "reddit", "medium.com",
     "pr newswire", "prnewswire", "globenewswire", "businesswire", "yahoo finance",
+    "vajiram", "testbook", "byjus", "unacademy", "adda247",   # exam-prep listicles
 ]
 
 WIDER_FEEDS = [
@@ -212,6 +225,18 @@ def signature(headline):
     return {w for w in words if len(w) > 3 and w not in STOPWORDS}
 
 
+# A market story names a house or an auction event. "collector" alone is not
+# enough — it matched a furniture showroom.
+MARKET_SIGNAL = re.compile(
+    r"saffronart|astaguru|pundole|sotheby|christie|bonhams|"
+    r"\b(auction|auctions|auctioned|sold|sells|fetches|record|hammer|"
+    r"consignment|crore|lakh)\b", re.I)
+
+
+def is_market(item):
+    return bool(MARKET_SIGNAL.search(item["headline"] + " " + item.get("why", "")))
+
+
 def diversify(items, limit, per_subject=2):
     """Keep the panel varied, newest first.
 
@@ -248,15 +273,69 @@ def diversify(items, limit, per_subject=2):
     return out
 
 
+# THIS IS AN ART DESK, NOT A MARKETS DESK. "Indian art auction" also matches the
+# closing auction in an MSCI index rebalance and "market" matches the equity
+# market, so bounding the queries for freshness dragged in "MSCI Rebalancing
+# Threatens to Turn Messy" and "Top 10 Indian firms lose Rs 1.13 lakh crore in
+# market". None of that goes in front of a collector.
+FINANCE_NOISE = [
+    "sensex", "nifty", "msci", "share price", "shares", "stock", "stocks",
+    "bourses", "equity", "equities", "ipo", "market cap", "rebalancing",
+    "closing auction", "trading session", "mutual fund", "sebi", "bond yield",
+    "futures", "nasdaq", "dow jones", "quarterly results", "gdp", "inflation",
+    "brokerage", "listing gains", "derivatives", "crore in market",
+]
+
+# ...and it has to be about art at all. Word-boundary matched, so "art" does not
+# fire on "part" or "start".
+ART_TERMS = [
+    "art", "arts", "artist", "artists", "artwork", "artworks", "painting",
+    "paintings", "painter", "sculpture", "sculptor", "canvas", "gallery",
+    "galleries", "collector", "collectors", "museum", "biennale", "biennial",
+    "exhibition", "drawing", "drawings", "watercolour", "watercolor",
+    "lithograph", "masterpiece", "provenance", "antiquities", "memorabilia",
+    "manuscript", "saffronart", "astaguru", "pundole", "sotheby", "sothebys",
+    "christie", "christies", "bonhams", "phillips", "kiran nadar",
+]
+
+INDIA_TERMS = [
+    "india", "indian", "mumbai", "bombay", "delhi", "kolkata", "calcutta",
+    "chennai", "bengaluru", "bangalore", "hyderabad", "jaipur", "goa", "kochi",
+    "bengal", "south asian", "subcontinent", "saffronart", "astaguru",
+    "pundole", "kiran nadar", "india art fair", "art mumbai", "kochi-muziris",
+]
+
+_word_cache = {}
+
+
+def has_word(hay, term):
+    """Whole-word match. Substring matching let "art" fire on "part"."""
+    rx = _word_cache.get(term)
+    if rx is None:
+        rx = _word_cache[term] = re.compile(r"(?<!\w)" + re.escape(term) + r"(?!\w)")
+    return bool(rx.search(hay))
+
+
 def is_hers(item):
-    """Guard the two ways this query goes wrong: in the American press "Indian"
-    often means Native American, and Google indexes posts as though they were
-    reporting."""
-    hay = (item["headline"] + " " + item["why"]).lower()
+    """Three gates, and a story has to clear all of them:
+
+      - not Native American — "Indian" is ambiguous in the American press
+      - from a publisher, not a LinkedIn post or an exam-prep listicle
+      - about ART, and not about the equity market
+    """
+    hay = (item["headline"] + " " + item.get("why", "")).lower()
     if any(t in hay for t in NOT_HERS):
         return False
-    src = item["source"].lower()
-    return not any(t in src for t in NOT_A_PUBLISHER)
+    if any(t in item["source"].lower() for t in NOT_A_PUBLISHER):
+        return False
+    if any(has_word(hay, t) for t in FINANCE_NOISE):
+        return False
+    if not any(has_word(hay, t) for t in ART_TERMS):
+        return False
+    # An India-targeted query still returns American stories that merely say
+    # "Indian" — a community art-auction fundraiser in the US made the desk.
+    # Mirrors INDIA_TERMS in functions/_lib/news.js; keep the two in step.
+    return any(has_word(hay, t) for t in INDIA_TERMS)
 
 
 def main():
@@ -300,7 +379,15 @@ def main():
             continue
         print(f"  {source:30} {collect(got, wider):>3} kept", flush=True)
 
-    mine = diversify(mine, args.limit)
+    # Reserve slots for market stories. Newest-first selection alone filled every
+    # slot with fresh gallery-scene pieces and evicted the ₹16.2 crore Gandhi
+    # record — the biggest Indian result of the season — because it was six days
+    # older. She trades on the market half; it does not get crowded out by a
+    # furniture showroom opening.
+    market = [i for i in mine if is_market(i)]
+    scene = [i for i in mine if not is_market(i)]
+    mine = sorted(diversify(market, 6) + diversify(scene, 8),
+                  key=lambda i: -i["when"].timestamp())[: args.limit]
     wider = diversify(wider, args.limit)
 
     def shape(i):

@@ -12,6 +12,7 @@
 
 import { authenticate, unauthorised } from "../_lib/auth.js";
 import { parseIcs } from "../_lib/ics.js";
+import { liveNews } from "../_lib/news.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -168,6 +169,27 @@ export async function onRequest(context) {
   // Lets the app tell "wrong key" from "no desk here" without exposing anything.
   if (method === "GET" && path === "/health") {
     return json({ ok: true, guard: env.ACCESS_AUD ? "access" : (env.CRM_TOKEN ? "key" : "unconfigured") });
+  }
+
+  // News is public market information, not her book, so it sits BEFORE the auth
+  // gate — the same reasoning as /health. It also must not need the D1 binding.
+  if (method === "GET" && path === "/news") {
+    try {
+      const payload = await liveNews(context);
+      return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          // The edge holds it for 15 minutes; let the browser hold it briefly
+          // so a tab switch does not re-request on every render.
+          "Cache-Control": "public, max-age=120",
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+    } catch (err) {
+      console.error("news", err && err.message);
+      return json({ error: "Could not reach the news feeds.", on_market: [] }, 502);
+    }
   }
 
   if (!env.DB) {
