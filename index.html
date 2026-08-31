@@ -299,6 +299,51 @@ button.row:active{background:var(--gold-tint)}
   width:76px;aspect-ratio:1/1;object-fit:cover;display:block;
   background:var(--surface);border:1px solid var(--divider-soft);border-radius:var(--r-sm);
 }
+/* ---- Today: ranked intelligence (spec §3) ---- */
+.counters{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:12.1px;color:var(--ink-60)}
+.counters b{font-family:var(--font-heading);font-weight:600;color:var(--ink);margin-right:4px}
+
+.story{display:block;color:inherit;text-decoration:none;padding:18px 0}
+.story.big{padding-top:8px}
+.story-hero{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;
+  border-radius:var(--r-md);background:var(--surface);margin-bottom:14px}
+.story-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
+.story-head{font-family:var(--font-heading);font-weight:500;font-size:23.1px;line-height:1.2;margin:0;text-wrap:pretty}
+.story.big .story-head{font-size:27.3px}
+.story-sum{margin:8px 0 0;font-size:13.7px;color:var(--ink-72);line-height:1.55}
+/* Why it matters, as traceable reasons rather than prose a model wrote. */
+.story-why{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.why-chip{font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;
+  border:1px solid var(--divider);color:var(--ink-60)}
+.why-chip.artist{border-color:var(--gold);color:var(--gold-ink)}
+.why-chip.client{border-color:var(--up);color:var(--up)}
+.story-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;border-top:1px solid var(--divider-soft);padding-top:4px}
+.story-pair .story{display:grid;grid-template-columns:1fr;gap:10px}
+.story-pair .story.has-img{grid-template-rows:auto auto}
+.story-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-sm);
+  background:var(--surface);order:-1}
+.story-pair .story-head{font-size:17.9px}
+
+.pulserow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+.pulse{border:1px solid var(--divider-soft);border-radius:var(--r-md);padding:13px 12px;background:var(--raised)}
+.pulse .pv{font-family:var(--font-heading);font-weight:600;font-size:19.9px;line-height:1.1}
+.pulse .pl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);margin-top:6px}
+.pulse .ps{font-size:11px;color:var(--ink-50);margin-top:3px;line-height:1.35}
+
+.dayrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:14px 0;border-bottom:1px solid var(--divider-soft);color:inherit}
+.dayrow .dn{font-family:var(--font-heading);font-weight:600;font-size:19.9px;min-width:26px}
+.dayrow .dt{flex:1;font-size:14.2px}
+/* Empty states collapse to one line — never a reserved blank block (spec §13). */
+.oneline{font-size:13.1px;color:var(--ink-50);font-style:italic;padding:14px 0}
+
+@media (max-width:560px){
+  .pulserow{grid-template-columns:1fr 1fr}
+  .story-pair{grid-template-columns:1fr;gap:0}
+  .story-pair .story{border-top:1px solid var(--divider-soft)}
+  .story.big .story-head{font-size:23.1px}
+}
+
 .news-tag{
   display:inline-block;font-size:9px;font-weight:700;letter-spacing:.13em;
   text-transform:uppercase;color:var(--gold-ink);background:var(--gold-tint);
@@ -998,6 +1043,110 @@ const NEWS_TAGS = [
   ["Exhibition",  /\b(exhibition|exhibit|showcase|retrospective)\b/i],
   ["Artist",      /\b(artist|artists|painter|sculptor)\b/i],
 ];
+/* ---- story ranking (spec §3.4) --------------------------------------------
+
+   Scored IN THE BROWSER, deliberately. Two of the six signals depend on her
+   client book, and that lives behind the desk key in D1 — scoring server-side
+   would mean shipping client interests to a shared endpoint to rank public news.
+   The spec's own §14 says send the minimum client context anywhere; here the
+   answer is none at all.
+
+   Weights follow the spec. Every point scored records WHY, because "why does
+   this matter" has to be traceable to a stored record — not prose a model wrote.
+   No LLM is involved and none is implied. */
+const AUTHORITATIVE = [
+  "the hindu", "the indian express", "indian express", "economic times",
+  "hindustan times", "the art newspaper", "artnews", "artforum", "artnet",
+  "bloomberg", "reuters", "mint", "livemint", "business standard", "the print",
+  "financial express", "times of india", "the tribune", "scroll",
+];
+const MARKET_SIGNIFICANCE = [
+  "auction", "auctions", "sold", "sells", "fetches", "record", "hammer",
+  "estimate", "crore", "lakh", "consignment", "sale", "collection",
+  "saffronart", "astaguru", "pundole", "sotheby", "christie", "bonhams",
+];
+
+/* Surnames that are ordinary words or too common to identify anyone. */
+const SURNAME_STOP = new Set(["roy", "das", "sen", "bose", "khan", "singh",
+  "kumar", "shaw", "gupta", "iyer", "menon", "rao", "dey", "jain", "shah"]);
+
+function artistsInText(hay) {
+  /* The curated set only — matching all 1,300 raw names fired on the word
+     "Artist" itself. Headlines write the same painter as "S H Raza",
+     "S.H. Raza" and "Sayed Haider Raza", so compare with punctuation stripped
+     and fall back to the surname. FOUR characters, not five: Raza is four, and
+     excluding him excluded the single most quoted name in this market. The
+     stoplist carries the ones that would match anything. */
+  const flat = hay.replace(/[.\u2019']/g, "").replace(/\s+/g, " ");
+  const out = [];
+  for (const k of artistKeys) {
+    const a = ARTISTS[k];
+    if (!a || !a.name) continue;
+    const name = a.name.toLowerCase().replace(/[.\u2019']/g, "");
+    const surname = name.split(" ").pop();
+    if (flat.includes(name)) { out.push(k); continue; }
+    if (surname.length >= 4 && !SURNAME_STOP.has(surname) &&
+        new RegExp("(?<!\\w)" + surname + "(?!\\w)").test(flat)) out.push(k);
+  }
+  return out;
+}
+
+function scoreStory(n) {
+  const hay = ((n.headline || "") + " " + (n.why || "")).toLowerCase();
+  const src = (n.source || "").toLowerCase();
+  let score = 0;
+  const reasons = [];
+
+  // recency 20 — linear decay over a fortnight
+  const days = Math.max(0, (Date.now() - Date.parse(n.date + "T00:00:00")) / 86400000);
+  score += 20 * Math.max(0, 1 - days / 14);
+
+  // Indian / South Asian relevance 20
+  if (INDIA_WORDS.some(t => hay.includes(t))) { score += 20; }
+
+  // auction / market significance 20
+  const mk = MARKET_SIGNIFICANCE.filter(t => hay.includes(t));
+  if (mk.length) { score += 20; reasons.push({ kind: "market", label: "Market activity" }); }
+
+  // watchlist artist match 15
+  const hits = artistsInText(hay);
+  if (hits.length) {
+    score += 15;
+    reasons.push({ kind: "artist", label: ARTISTS[hits[0]].name + " on the desk", key: hits[0] });
+  }
+
+  // client relevance 15 — only when the book is actually open
+  if (CRM.live && CRM.clients) {
+    const matched = CRM.clients.filter(c => {
+      const wants = [(c.focus || ""), ...(c.wants || [])].join(" ").toLowerCase();
+      if (!wants.trim()) return false;
+      return hits.some(k => wants.includes(ARTISTS[k].name.toLowerCase().split(" ").pop()))
+        || wants.split(/[^a-z]+/).some(w => w.length > 4 && hay.includes(w));
+    });
+    if (matched.length) {
+      score += 15;
+      reasons.push({ kind: "client",
+        label: matched.length + (matched.length === 1 ? " client" : " clients") + " in the book" });
+    }
+  }
+
+  // source authority 10
+  if (AUTHORITATIVE.some(t => src.includes(t))) score += 10;
+
+  return { score: Math.round(score), reasons, artists: hits };
+}
+
+const INDIA_WORDS = ["india", "indian", "mumbai", "delhi", "kolkata", "chennai",
+  "bengaluru", "hyderabad", "bengal", "south asian", "saffronart", "astaguru",
+  "pundole", "kochi", "jaipur"];
+
+/* Ranked once per render, cached on the object so the Today hero and the feed
+   agree about what matters. */
+function rankedStories() {
+  const all = ((REAL.news || {}).on_market || []).map(n => ({ ...n, ...scoreStory(n) }));
+  return all.sort((a, b) => b.score - a.score || String(b.date).localeCompare(String(a.date)));
+}
+
 const newsTag = n => {
   const hay = (n.headline || "") + " " + (n.why || "");
   const hit = NEWS_TAGS.find(([, rx]) => rx.test(hay));
@@ -1515,9 +1664,9 @@ function renderTabbar() {
 function viewToday() {
   const liveDiary = CRM.live && CRM.diary && CRM.diary.configured && CRM.diary.today;
   const diary = !CRM.live
-    ? `<div class="empty">Sign in on the private site to see today\u2019s diary.</div>`
+    ? `<div class="oneline">Sign in on the private site to see today\u2019s diary.</div>`
     : !liveDiary
-      ? `<div class="empty">Her calendar is not connected yet.</div>`
+      ? `<div class="oneline">Her calendar is not connected yet.</div>`
       : (CRM.diary.today.length
           ? `<div class="rows">` + CRM.diary.today.map(e => `
               <div class="diary">
@@ -1525,10 +1674,10 @@ function viewToday() {
                 <div><div class="ti">${esc(e.title)}</div>
                 ${e.location ? `<div class="wh">${esc(e.location)}</div>` : ""}</div>
               </div>`).join("") + `</div>`
-          : '<div class="empty">Nothing in the diary today.</div>');
+          : '<div class="oneline">Nothing in the diary today.</div>');
 
   const fups = !CRM.live
-    ? `<div class="empty">Follow-ups live with the client book.</div>`
+    ? `<div class="oneline">Follow-ups live with the client book.</div>`
     : (CRM.followups.length
         ? `<div class="rows">` + CRM.followups.map(f => `
             <div class="fu">
@@ -1542,7 +1691,7 @@ function viewToday() {
                 <button class="btn" data-open-client="${esc(f.client_id)}">Open card</button>
               </div>
             </div>`).join("") + `</div>`
-        : '<div class="empty">Nothing owed. Rare.</div>');
+        : '<div class="oneline">Nothing owed. Rare.</div>');
 
   const news = newsBlock(6, 4);
 
@@ -1555,20 +1704,111 @@ function viewToday() {
     </button>`;
   }).join("");
 
+  /* ---- ranked intelligence, not a chronological feed (spec §3) ---------- */
+  const ranked = rankedStories();
+  /* A lead story wants a picture. Google-sourced items never have one, so if the
+     top-scoring story is imageless, promote the best one within eight points
+     that does — close enough that the ranking is not being overridden, only
+     broken on a near-tie. */
+  let hero = ranked[0];
+  if (hero && !hero.image) {
+    const alt = ranked.find(r => r.image && hero.score - r.score <= 8);
+    if (alt) hero = alt;
+  }
+  const seconds = ranked.filter(r => r !== hero).slice(0, 2);
+  const rest = ranked.filter(r => r !== hero && !seconds.includes(r));
+
   const due = CRM.live ? CRM.followups.length : 0;
+  const closing = (REAL.events || []).filter(e => e.starts === todayIso()).length;
+  const watching = new Set(ranked.flatMap(r => r.artists)).size;
+
+  const storyCard = (n, big) => {
+    const u = safeUrl(n.url);
+    const img = safeUrl(n.image);
+    const tag = newsTag(n);
+    const inner = `
+      ${big && img ? `<img class="story-hero" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
+      <div class="story-body">
+        <div class="story-meta">${tag ? `<span class="news-tag">${esc(tag)}</span>` : ""}<span class="kick">${esc(fmtDate(n.date))} \u00b7 ${esc(n.source)}</span></div>
+        <h3 class="story-head">${esc(n.headline)}</h3>
+        ${big && n.why ? `<p class="story-sum">${esc(n.why)}</p>` : ""}
+        ${n.reasons.length ? `<div class="story-why">${n.reasons.map(r =>
+            `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</div>` : ""}
+      </div>`;
+    const cls = "story" + (big ? " big" : "") + (!big && img ? " has-img" : "");
+    const media = !big && img
+      ? `<img class="story-thumb" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : "";
+    return u
+      ? `<a class="${cls}" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}${media}</a>`
+      : `<div class="${cls}">${inner}${media}</div>`;
+  };
+
+  /* ---- Market Pulse (spec §3.5) ------------------------------------------
+     Only tiles the data actually supports. The spec's "7-day Indian Modern
+     momentum" is deliberately absent: art-desk-data-sources rule 1 says never
+     index on median price without a minimum comparable count in BOTH windows,
+     and seven days never has it. A number there would be noise wearing a
+     decimal point. Same for "international fairs this week" — there is no
+     fairs source since the invented set was deleted. */
+  const above = (REAL.feed || []).filter(f => f.vs_est && f.vs_est.dir === "above").length;
+  const withEst = (REAL.feed || []).filter(f => f.vs_est).length;
+  const topLot = (REAL.feed || []).reduce((best, f) =>
+    (!best || (f.vs_est && f.vs_est.dir === "above" && f.vs_est.pct > (best.vs_est ? best.vs_est.pct : 0))) ? f : best, null);
+  const weekEnd = new Date(Date.parse(todayIso()) + 7 * 86400000).toISOString().slice(0, 10);
+  const thisWeek = (REAL.events || []).filter(e => e.starts >= todayIso() && e.starts <= weekEnd).length;
+
+  const pulse = [
+    { v: (REAL.feed || [])[0] ? (REAL.feed || [])[0].price : "\u2014", l: "Latest result", s: (REAL.feed || [])[0] ? (REAL.feed || [])[0].artist : "" },
+    { v: withEst ? Math.round(above / withEst * 100) + "%" : "\u2014", l: "Above high est.", s: `of ${withEst} priced lots` },
+    { v: String(thisWeek), l: "Sales this week", s: thisWeek ? "in the diary" : "none scheduled" },
+    { v: String((REAL.events || []).length), l: "Sales ahead", s: "next three months" },
+  ].map(t => `<div class="pulse"><div class="pv tnum">${esc(t.v)}</div><div class="pl">${esc(t.l)}</div><div class="ps">${esc(t.s)}</div></div>`).join("");
+
+  /* ---- Your Day: compact rows only, never a big blank (spec §3.7/§13) ---- */
+  const dayRows = [
+    due ? { n: due, t: `follow-up${due === 1 ? "" : "s"} due`, nav: "clients" } : null,
+    closing ? { n: closing, t: `auction${closing === 1 ? "" : "s"} closing today`, nav: "calendar" } : null,
+    thisWeek ? { n: thisWeek, t: `sale${thisWeek === 1 ? "" : "s"} this week`, nav: "calendar" } : null,
+  ].filter(Boolean);
+  const yourDay = dayRows.length
+    ? `<div class="rows">` + dayRows.map(r => `<button class="dayrow" data-nav="${r.nav}">
+         <span class="dn tnum">${r.n}</span><span class="dt">${esc(r.t)}</span>${I(ICON.chev, 15)}</button>`).join("") + `</div>`
+    : `<div class="oneline">Nothing owed today.${CRM.live ? "" : " Sign in for the client book."}</div>`;
+
+  const stamp = (REAL.news || {}).generated_at || REAL.generated_at;
+
   return `
     <div class="view-head">
       <span class="date tnum">${esc(todayLong())}</span>
-      <h1>Start my day</h1>
-      <p>${CRM.live ? `${due} follow-up${due === 1 ? "" : "s"} owed` : "Market data live \u00b7 client book private"} \u00b7 ${(REAL.events || []).length} sales ahead</p>
+      <h1>Good morning, Aashna</h1>
+      <p>Your art-market briefing is ready.</p>
+      <div class="counters">
+        <span><b class="tnum">${ranked.filter(r => r.score >= 45).length}</b> stories that matter</span>
+        <span><b class="tnum">${(REAL.events || []).length}</b> sales ahead</span>
+        <span><b class="tnum">${watching}</b> artists in the news</span>
+      </div>
     </div>
     <div class="view-body">
-      <div class="cols three">
+      <div class="sec">${sectionHead("Top stories", (REAL.news || {}).live ? "live" : "nightly")}
+        ${hero ? storyCard(hero, true) : `<div class="oneline">No headlines pulled yet.</div>`}
+        ${seconds.length ? `<div class="story-pair">${seconds.map(n => storyCard(n, false)).join("")}</div>` : ""}
+      </div>
+
+      <div class="sec">${sectionHead("Market pulse")}<div class="pulserow">${pulse}</div></div>
+
+      <div class="sec">${sectionHead("Your day")}${yourDay}</div>
+
+      <div class="cols two">
         <div class="col sec">${sectionHead("Today\u2019s diary")}${diary}</div>
         <div class="col sec">${sectionHead("Follow-ups due")}${fups}</div>
-        <div class="col sec">${sectionHead("Market news", (REAL.news || {}).live ? "live" : (onMarketCount() ? "nightly" : ""))}${news}</div>
       </div>
-      <div class="sec">${sectionHead("Next up", "calendar")}<div class="rows">${next || '<div class="empty">No sale scheduled.</div>'}</div></div>
+
+      <div class="sec">${sectionHead("Next up", "calendar")}<div class="rows">${next || '<div class="oneline">No sale scheduled.</div>'}</div></div>
+
+      <div class="sec">${sectionHead("More from the art world")}
+        ${rest.length ? `<div class="rows">${rest.map(newsRow).join("")}</div>` : `<div class="oneline">Nothing further today.</div>`}
+        ${stamp ? `<div class="foot-note">Updated ${esc(fmtDate(String(stamp).slice(0, 10)))}${String(stamp).length > 10 ? " \u00b7 " + esc(String(stamp).slice(11, 16)) + " UTC" : ""}</div>` : ""}
+      </div>
     </div>`;
 }
 
