@@ -368,9 +368,16 @@ button.row:active{background:var(--gold-tint)}
 .lotcard{
   display:grid;grid-template-columns:80px 1fr;gap:16px;
   padding:18px 0;align-items:start;width:100%;text-align:left;
-  font:inherit;color:inherit;
+  /* The card is an <a> now, so the link defaults have to be undone or every
+     line of it renders underlined. */
+  font:inherit;color:inherit;text-decoration:none;
 }
-.lotcard + .lotcard{border-top:1px solid var(--divider-soft)}
+.lotcard:hover .lot-artist{color:var(--gold-ink)}
+.lotcard .lot-artist{transition:color .12s ease}
+.lotcard + .lotcard,
+.lotwrap + .lotwrap, .lotwrap + .lotcard, .lotcard + .lotwrap{border-top:1px solid var(--divider-soft)}
+.lotwrap .lotcard{border-top:0}
+.lot-dossier{margin:0 0 16px 96px;font-size:10.5px}
 .lotcard .thumb{
   /* contain, never cover: cropping a painting to fit a box defeats the point of
      showing it. Saffronart serves squares, AstaGuru tall scans; both fit. */
@@ -1752,14 +1759,28 @@ function marketResults() {
   return `<div class="rows">` + REAL.feed.map(f => {
     const k = f.artist_key && ARTISTS[f.artist_key] ? f.artist_key : null;
     const v = f.vs_est;
+    const lot = safeUrl(f.url);
+
+    /* Half this market's works genuinely have no title — Saffronart publishes
+       none at all for the StoryLTD online sales, and AstaGuru's own lot page
+       for one of these is headed "Untitled". Printing the word twenty times in
+       a column is noise, not information. Where there is a medium and a size,
+       show those instead; where there is nothing, let the picture do the work
+       and say nothing. A real title is always shown. */
+    const titled = (f.title || "").trim() && (f.title || "").trim().toLowerCase() !== "untitled";
     const meta = [f.medium, f.size].filter(Boolean).join(" \u00b7 ");
-    return `<${k ? "button" : "div"} class="lotcard" ${k ? `data-open-artist="${esc(k)}"` : ""}>
+    const desc = titled
+      ? `<div class="lot-title">${esc(f.title)}</div>${meta ? `<div class="lot-meta">${esc(meta)}</div>` : ""}`
+      : meta
+        ? `<div class="lot-meta">${esc(meta)}</div>`
+        : "";
+
+    const inner = `
       ${lotThumb(f)}
       <div>
         <div class="lot-top">${houseTag(f.house)}<span class="row-meta tnum">${esc(fmtDate(f.date))}</span></div>
         <div class="lot-artist">${esc(f.artist || "\u2014")}</div>
-        <div class="lot-title">${esc(f.title || "Untitled")}</div>
-        ${meta ? `<div class="lot-meta">${esc(meta)}</div>` : ""}
+        ${desc}
         <div class="lot-foot">
           <div class="lot-est">${f.est ? `Est. <span class="tnum">${esc(f.est)}</span>` : ""}</div>
           <div>
@@ -1767,8 +1788,21 @@ function marketResults() {
             ${v ? `<div class="lot-vs ${v.dir} tnum">${v.dir === "above" ? "\u2191" : "\u2193"} ${v.pct}% ${v.dir === "above" ? "above high est." : "below low est."}</div>` : ""}
           </div>
         </div>
-      </div>
-    </${k ? "button" : "div"}>`;
+      </div>`;
+
+    /* The card opens the lot at the house — AstaGuru lands on the work itself,
+       Saffronart on the catalogue that holds it. The dossier link has to sit
+       OUTSIDE that anchor: a button inside an <a> is invalid and swallows the
+       tap. It only appears for the artists the desk actually tracks. */
+    const card = lot
+      ? `<a class="lotcard" href="${esc(lot)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+      : `<div class="lotcard">${inner}</div>`;
+
+    return k
+      ? `<div class="lotwrap">${card}
+           <button class="chip lot-dossier" data-open-artist="${esc(k)}">${esc(f.artist)} on the desk \u2192</button>
+         </div>`
+      : card;
   }).join("") + `</div>`;
 }
 
