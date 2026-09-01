@@ -1584,7 +1584,8 @@ const OBJECTIONS = [
    rather than breaking — the market data is the part that must never fail.
    ------------------------------------------------------------ */
 const CRM = { live: false, who: null, clients: null, followups: null, diary: null,
-              detail: {}, guard: null, needsKey: false, keyError: null,
+              detail: {}, detailBusy: {}, detailError: {},
+              guard: null, needsKey: false, keyError: null,
               ai: false };   // a Mistral key is set on this origin
 
 const KEY_STORE = "gallery.key";
@@ -1655,13 +1656,76 @@ const intOrNull = v => {
    limit, a draft rejected for quoting a figure the record does not hold — and
    each of those is worth showing her verbatim. So this does not go through
    api(), which turns a non-200 into an opaque throw. */
-/* CRM.detail is filled lazily by opening a client card. Anything else that
-   needs a collector's holdings has to ask for them first. */
-function ensureDetail(cid) {
-  if (!CRM.live || !cid || CRM.detail[cid]) return Promise.resolve(CRM.detail[cid] || null);
-  return api(`/clients/${encodeURIComponent(cid)}`)
-    .then(d => { if (d) CRM.detail[cid] = d; return d; })
-    .catch(() => null);
+/* The ONE way a client card is loaded. It used to be a fire-and-forget fetch
+   inside the click handler with an empty catch, so a 401, a 404 or a dropped
+   connection left the card reading "Opening the card\u2026" for the rest of the
+   session with nothing on screen to say why and nothing to press. Three rules
+   now: one request in flight per collector, a failure is recorded rather than
+   swallowed, and whatever is on screen re-renders when it settles. */
+const LOCKED_OUT = "The desk key is not being accepted any more.";
+
+function ensureDetail(cid, force) {
+  if (!CRM.live || !cid) return Promise.resolve(null);
+  if (CRM.detail[cid] && !force) return Promise.resolve(CRM.detail[cid]);
+  if (CRM.detailBusy[cid]) return CRM.detailBusy[cid];
+
+  delete CRM.detailError[cid];
+  const req = api(`/clients/${encodeURIComponent(cid)}`)
+    .then(d => {
+      // api() answers null for 401 and 503 rather than throwing. Silence there
+      // is what made this invisible: say so, do not keep waiting.
+      if (!d) throw new Error(LOCKED_OUT);
+      CRM.detail[cid] = normaliseClient(d);
+      return CRM.detail[cid];
+    })
+    .catch(err => {
+      // Only a sentence written here is shown. A browser's own wording for a
+      // dropped connection ("Load failed", "Failed to fetch") tells her nothing.
+      const m = String((err && err.message) || "");
+      CRM.detailError[cid] =
+          m === LOCKED_OUT       ? LOCKED_OUT
+        : /-> 404\b/.test(m)     ? "That collector is no longer in the book."
+        :                          "Could not reach the book from this device.";
+      return null;
+    })
+    .then(d => {
+      delete CRM.detailBusy[cid];
+      // Repaint unconditionally. Five places read a client record and only two
+      // of them are the card; guessing which screen is waiting is how the
+      // pitch generator ended up drafting against a collector it had not loaded.
+      render(true);
+      return d;
+    });
+
+  CRM.detailBusy[cid] = req;
+  return req;
+}
+
+/* The shape gate for one client record, in the spirit of rebuildFromReal():
+   shape it once here rather than defend it at forty read sites. `wants` and the
+   four child lists reach the card through JSON columns and JSON.parse, so any
+   of them can arrive as something that is not an array \u2014 and .map on a
+   string is a throw, which render() turns into a console.error and a card that
+   never repaints. */
+function normaliseClient(d) {
+  const arr = v => Array.isArray(v) ? v : [];
+  return {
+    ...d,
+    name: d.name == null ? "" : String(d.name),
+    wants: arr(d.wants).map(w => String(w)),
+    holdings: arr(d.holdings),
+    referrals: arr(d.referrals),
+    log: arr(d.log),
+    followups: arr(d.followups),
+  };
+}
+
+/* Which collector the card is showing. An id that is not in the book \u2014 a
+   stale default, a record deleted on another device \u2014 is not a selection. */
+function selectedClient() {
+  const book = CRM.clients || [];
+  if (S.client && book.some(c => c.id === S.client)) return S.client;
+  return null;
 }
 
 /* One question, one call. Like aiPitch this bypasses api(), because every
@@ -1703,9 +1767,11 @@ async function aiPitch(cid, comparables) {
 
 async function refreshClient(cid) {
   const d = await api(`/clients/${encodeURIComponent(cid)}`);
-  if (d) CRM.detail[cid] = d;
+  // Through the same shape gate as ensureDetail: a write path that skipped it
+  // would put an unnormalised record straight back on the card.
+  if (d) { CRM.detail[cid] = normaliseClient(d); delete CRM.detailError[cid]; }
   await loadCRM();
-  return d;
+  return CRM.detail[cid] || null;
 }
 
 /* Live headlines. The nightly pipeline bakes a copy into app_data.json, which
@@ -1863,7 +1929,12 @@ const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) 
 const S = {
   screen: "today",
   artist: "v s gaitonde",
-  client: "nanda",
+  /* These used to hold ids from the old sample book ("nanda", "sethi"). Nothing
+     in the real book carries them, so the split view opened Clients on a
+     collector that does not exist and sat on "Opening the card\u2026" for ever
+     \u2014 the record was only ever fetched by tapping a row. A selection is
+     made from the book that is actually loaded now, or not made at all. */
+  client: null,
   houseFilter: "All",
   marketTab: "results",
   knowTab: "scripts",
@@ -1875,7 +1946,7 @@ const S = {
   calMonth: 0,            // months from the current one, for the grid
   calDay: null,           // the day whose detail is open
   calEvent: null,         // the sale whose summary is expanded
-  pitchClient: "sethi",
+  pitchClient: null,
   aiDrafts: {},           // client id -> the drafted note, for this session only
   aiBusy: null,           // client id currently being drafted for
   aiError: null,
@@ -2684,7 +2755,7 @@ function clientListRows() {
     return `<div class="empty">No clients yet. Add the first one below.</div>`;
   }
   return `<div class="rows">` + CRM.clients.map(c => {
-    const sel = isSplit && S.client === c.id;
+    const sel = isSplit && selectedClient() === c.id;
     return `<button class="row" data-open-client="${esc(c.id)}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
       <div class="row-top"><span class="row-name">${esc(c.name)}</span>
         <span class="cl-tier ${c.tier === "Principal" ? "principal" : ""}">${esc(c.tier || "")}</span></div>
@@ -2713,6 +2784,19 @@ function viewClients() {
     </div></div>
     <div class="detail">${CRM.live && CRM.clients.length ? viewClient(true) : ""}</div>
   </div>`;
+}
+
+/* Called before every paint of a screen that shows a card. Two jobs, both of
+   them the reason the card used to hang: make sure the chosen collector is one
+   the book actually holds, and make sure something is fetching their record.
+   The card no longer depends on a tap having happened to load itself. */
+function settleClientSelection() {
+  if (!CRM.live) return;
+  if (S.screen !== "clients" && S.screen !== "client") return;
+  const book = CRM.clients || [];
+  if (!selectedClient() && isSplit && book.length) S.client = book[0].id;
+  const cid = selectedClient();
+  if (cid && !CRM.detail[cid] && !CRM.detailBusy[cid] && !CRM.detailError[cid]) ensureDetail(cid);
 }
 
 /* The form for putting a real collector in the book. Deliberately short: a name
@@ -2754,7 +2838,8 @@ function viewNewClient() {
 }
 
 function viewClient(embedded) {
-  const d = CRM.live ? CRM.detail[S.client] : null;
+  const cid = selectedClient();
+  const d = CRM.live ? CRM.detail[cid] : null;
 
   // Map the live record onto the shape the card already renders, so there is one
   // template rather than two that can drift apart.
@@ -2770,10 +2855,28 @@ function viewClient(embedded) {
     followups: d.followups || [],
   } : null;
 
+  /* Three different things used to print the same sentence and wait for ever:
+     no collector chosen, one chosen whose record is still coming, and one whose
+     record failed to arrive. Only the middle one is worth waiting on, and the
+     last one is worth pressing. */
   if (CRM.live && !d) {
-    return `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
-      <h1>${esc((CRM.clients.find(x => x.id === S.client) || {}).name || "Client")}</h1></div>
-      <div class="view-body"><div class="empty">Opening the card\u2026</div></div>`;
+    const head = name => `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
+      <h1>${esc(name)}</h1></div>`;
+    if (!cid) {
+      return head("Clients") + `<div class="view-body"><div class="empty">Pick a
+        collector from the book${(CRM.clients || []).length ? "" : " \u2014 there is nobody in it yet"}.</div></div>`;
+    }
+    const name = (CRM.clients.find(x => x.id === cid) || {}).name || "Client";
+    if (CRM.detailError[cid]) {
+      const locked = CRM.detailError[cid] === LOCKED_OUT;
+      return head(name) + `<div class="view-body"><div class="empty">
+        ${esc(CRM.detailError[cid])}
+        <div class="btnrow" style="justify-content:center;margin-top:14px">
+          <button class="btn" data-act="retry-client" data-client="${esc(cid)}">Try again</button>
+          ${locked ? `<button class="btn btn-primary" data-nav="unlock">Enter the desk key</button>` : ""}
+        </div></div></div>`;
+    }
+    return head(name) + `<div class="view-body"><div class="empty">Opening the card\u2026</div></div>`;
   }
 
   // Reachable only if the book goes offline mid-session; say so rather than throw.
@@ -2953,7 +3056,7 @@ function viewClient(embedded) {
         ${c.next.what ? `<div class="what">${esc(c.next.what)}</div>` : ""}
       </div>` : ""}
       <div class="btnrow">
-        <button class="btn btn-primary" data-act="pitch-for" data-client="${S.client}">Draft a pitch</button>
+        <button class="btn btn-primary" data-act="pitch-for" data-client="${esc(cid)}">Draft a pitch</button>
         <button class="btn" data-panel="client">Edit card</button>
         <button class="btn" data-nav="knowledge" data-know="scripts">Objection scripts</button>
       </div>
@@ -3012,6 +3115,10 @@ function viewKnowledge() {
       ? `<div class="empty">Add a client first, then a pitch can be drafted for them.</div>`
       : (() => {
           const c = CRM.clients.find(x => x.id === S.pitchClient) || CRM.clients[0];
+          // The chip handler loads the collector it was tapped for; nothing was
+          // loading the one this falls back to, so the first pitch she saw was
+          // drafted as if that collector owned nothing.
+          if (!CRM.detail[c.id] && !CRM.detailBusy[c.id] && !CRM.detailError[c.id]) ensureDetail(c.id);
           const held = (CRM.detail[c.id] || {}).holdings || [];
           const wants = (c.wants || []).join(", ");
           const matched = REAL.feed.filter(f =>
@@ -3614,6 +3721,9 @@ const splitRecordKey = () =>
   : null;
 
 function render(keepScroll) {
+  // Before anything reads S.client: a card screen must be pointed at a
+  // collector the book holds, and that collector's record must be on its way.
+  guard("selection", settleClientSelection);
   const main = document.getElementById("main");
   const y = keepScroll ? main.scrollTop : 0;
   const split = (S.screen === "artists" || S.screen === "dossier" || S.screen === "clients" || S.screen === "client") && isSplit;
@@ -3758,11 +3868,7 @@ document.addEventListener("click", e => {
     const ck = attr("data-open-client");
     S.searchOpen = false;
     go(isSplit ? "clients" : "client", { client: ck, openTemplate: null });
-    if (CRM.live && !CRM.detail[ck]) {
-      api(`/clients/${encodeURIComponent(ck)}`)
-        .then(d => { if (d) { CRM.detail[ck] = d; render(true); } })
-        .catch(() => {});
-    }
+    ensureDetail(ck);
     return;
   }
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
@@ -3911,6 +4017,12 @@ document.addEventListener("click", e => {
   }
 
   const act = attr("data-act");
+  if (act === "retry-client") {
+    const cid = attr("data-client");
+    delete CRM.detailError[cid];
+    ensureDetail(cid, true);
+    return render(true);
+  }
   if (act === "new-client") {
     return go("newclient", { newClient: {}, newClientError: null });
   }

@@ -23,7 +23,16 @@
   const savedPad = isPad, savedSplit = isSplit, savedS = Object.assign({}, S);
   const savedREAL = JSON.parse(JSON.stringify(REAL));
   const savedCRM = { live: CRM.live, needsKey: CRM.needsKey, clients: CRM.clients,
-                     detail: CRM.detail, followups: CRM.followups, diary: CRM.diary };
+                     detail: CRM.detail, detailBusy: CRM.detailBusy,
+                     detailError: CRM.detailError,
+                     followups: CRM.followups, diary: CRM.diary };
+  // render() now asks for a missing client record while it paints. That is the
+  // whole point of the fix, but a harness that let it run would put ~1700
+  // requests on the wire and repaint asynchronously in the middle of its own
+  // measurements. Stubbed here; the three states it can leave the card in
+  // (loading / failed / nothing chosen) are driven directly below instead.
+  const realEnsure = ensureDetail;
+  ensureDetail = () => Promise.resolve(null);
   const realErr = console.error;
   let caught = [];
   console.error = (...a) => { caught.push(a.map(String).join(' ')); };
@@ -54,8 +63,19 @@
     'live-empty':   () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, followups: [], diary: { configured: false, today: [] } }),
     'live-bare':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Bare', tier: null, focus: null, wants: [], holdings: 0, open_followups: 0 }], detail: { [CID]: bare }, followups: [], diary: { configured: true, today: [] } }),
     'live-full':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: { [CID]: full }, followups: [{ id: 'f1', client_id: CID, client_name: 'Probe', due: '2026-09-01', reason: 'R', done: 0, overdue: true, age: 'overdue 5d' }], diary: { configured: true, today: [{ time: '11:00', title: 'V', location: 'M' }] } }),
-    'detail-missing': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, followups: [], diary: { configured: true, today: [] } }),
+    'detail-missing': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: { [CID]: true }, detailError: {}, followups: [], diary: { configured: true, today: [] } }),
+    // The record asked for and refused. Before the fix this and the state above
+    // printed the same sentence and waited for ever.
+    'detail-failed': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: {}, detailError: { [CID]: 'Could not reach the book from this device.' }, followups: [], diary: { configured: true, today: [] } }),
+    // THE BUG this file exists to keep out: S.client holding an id the book does
+    // not carry. It shipped as the default ("nanda", from the old sample book),
+    // so opening Clients on a wide screen sat on "Opening the card" for ever.
+    'stale-selection': () => { Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: { [CID]: full }, detailBusy: {}, detailError: {}, followups: [], diary: { configured: true, today: [] } }); STALE = true; },
+    // Live, signed in, and nobody in the book to select.
+    'live-none':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, detailBusy: {}, detailError: {}, followups: [], diary: { configured: true, today: [] } }),
   };
+  // set by the stale-selection state; makes the loop point S.client at a ghost
+  let STALE = false;
 
   const SCREENS = ['today', 'artists', 'market', 'clients', 'calendar', 'knowledge',
                    'more', 'newclient', 'unlock', 'dossier', 'client', 'ask'];
@@ -80,9 +100,10 @@
   for (const [vp, pad, split] of [['phone', false, false], ['tablet', true, false], ['desktop', true, true]]) {
     isPad = pad; isSplit = split;
     for (const [auth, setup] of Object.entries(AUTH)) {
-      setup();
+      STALE = false; setup();
       for (const sc of SCREENS) {
-        S.screen = sc; S.marketTab = 'results'; S.client = CID;
+        S.screen = sc; S.marketTab = 'results';
+        S.client = STALE ? 'no-such-collector' : CID;
         S.artist = Object.keys(ARTISTS)[0]; S.panel = null; S.draft = {}; S.confirmDelete = null;
         if (sc === 'ask') {
           for (const [name, set] of Object.entries(ASK_STATES)) {
@@ -121,6 +142,20 @@
       S.searchOpen = false; renderSheet();
     }
   }
+  // A pass here is not "it did not throw" \u2014 the bug never threw. On a wide
+  // screen a live book must end up pointed at a collector it holds, and the
+  // detail column must show that card rather than an eternal "Opening the card".
+  isPad = true; isSplit = true;
+  AUTH['stale-selection'](); STALE = false;
+  S.screen = 'clients'; S.client = 'no-such-collector';
+  S.panel = null; S.draft = {}; S.confirmDelete = null; S.searchOpen = false;
+  render(false);
+  if (S.client !== CID) failures.push(`STALE selection not repaired :: S.client=${S.client}`);
+  const detailText = (document.querySelector('.split .detail') || { textContent: '' }).textContent;
+  if (/Opening the card/.test(detailText)) failures.push('STALE selection still shows "Opening the card"');
+  if (!/Probe/.test(detailText)) failures.push('STALE selection did not paint the card');
+  runs++;
+
   isPad = savedPad; isSplit = savedSplit; Object.assign(CRM, savedCRM);
 
   // --- axis 3: adverse data shapes ----------------------------------------
@@ -185,5 +220,6 @@
   S.calMonth = 0; S.calDay = null;
   render(false); renderSheet();
   console.error = realErr;
+  ensureDetail = realEnsure;
   return { combinationsRun: runs, failureCount: failures.length, failures: failures.slice(0, 40) };
 })()
