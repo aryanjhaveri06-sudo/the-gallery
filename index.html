@@ -565,6 +565,9 @@ button.row:active{background:var(--gold-tint)}
 .pitch{border:1px solid var(--divider);border-radius:var(--r-md);background:var(--raised);padding:20px 18px;margin-top:16px}
 .pitch h3{font-family:var(--font-heading);font-weight:500;font-size:25.2px;line-height:1.18;margin:8px 0 0;text-wrap:balance}
 .pitch .bd{font-size:14.7px;line-height:1.78;white-space:pre-line;margin-top:14px;text-align:justify;hyphens:auto;color:var(--ink-72)}
+.ai-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.ai-note{font-size:13.1px;line-height:1.55;margin-top:10px;color:var(--ink-60)}
+.ai-bad{color:var(--warn,#8a3324)}
 .pitch-lot{padding:14px 0}
 .pitch-lot .a{font-family:var(--font-heading);font-weight:500;font-size:18.9px}
 .pitch-lot .w{font-size:13.1px;font-style:italic;color:var(--ink-60);margin-top:3px}
@@ -1336,7 +1339,8 @@ const OBJECTIONS = [
    rather than breaking — the market data is the part that must never fail.
    ------------------------------------------------------------ */
 const CRM = { live: false, who: null, clients: null, followups: null, diary: null,
-              detail: {}, guard: null, needsKey: false, keyError: null };
+              detail: {}, guard: null, needsKey: false, keyError: null,
+              ai: false };   // a Mistral key is set on this origin
 
 const KEY_STORE = "gallery.key";
 const deskKey = () => { try { return localStorage.getItem(KEY_STORE) || ""; } catch (e) { return ""; } };
@@ -1368,7 +1372,14 @@ async function loadCRM() {
     const me = await api("/me");
     if (!me) { CRM.needsKey = true; return false; }
     CRM.needsKey = false;
-    const [clients, brief] = await Promise.all([api("/clients"), api("/brief")]);
+    // The drafter is optional: an origin with no MISTRAL_API_KEY is a working
+    // desk, just without the button. Never let its absence fail the load.
+    const [clients, brief, ai] = await Promise.all([
+      api("/clients"),
+      api("/brief"),
+      api("/ai/status").catch(() => null),
+    ]);
+    CRM.ai = !!(ai && ai.configured);
     if (!clients) return false;
     CRM.live = true;
     CRM.who = me.email;
@@ -1394,6 +1405,32 @@ const intOrNull = v => {
   const digits = String(v == null ? "" : v).replace(/[^0-9]/g, "");
   return digits ? parseInt(digits, 10) : null;
 };
+
+/* The drafter answers with a message on every failure — a missing key, a rate
+   limit, a draft rejected for quoting a figure the record does not hold — and
+   each of those is worth showing her verbatim. So this does not go through
+   api(), which turns a non-200 into an opaque throw. */
+/* CRM.detail is filled lazily by opening a client card. Anything else that
+   needs a collector's holdings has to ask for them first. */
+function ensureDetail(cid) {
+  if (!CRM.live || !cid || CRM.detail[cid]) return Promise.resolve(CRM.detail[cid] || null);
+  return api(`/clients/${encodeURIComponent(cid)}`)
+    .then(d => { if (d) CRM.detail[cid] = d; return d; })
+    .catch(() => null);
+}
+
+async function aiPitch(cid, comparables) {
+  const key = deskKey();
+  const r = await fetch("api/ai/pitch", {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", ...(key ? { Authorization: "Bearer " + key } : {}) },
+    body: JSON.stringify({ client_id: cid, comparables }),
+  });
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok || !body.draft) throw new Error(body.error || `The drafter answered ${r.status}.`);
+  return body;
+}
 
 async function refreshClient(cid) {
   const d = await api(`/clients/${encodeURIComponent(cid)}`);
@@ -1569,6 +1606,9 @@ const S = {
   calMonth: 0,            // months from the current one, for the grid
   calDay: null,           // the day whose detail is open
   pitchClient: "sethi",
+  aiDrafts: {},           // client id -> the drafted note, for this session only
+  aiBusy: null,           // client id currently being drafted for
+  aiError: null,
   openObjection: 0,
   newClient: {},
   newClientError: null,
@@ -2622,22 +2662,46 @@ function viewKnowledge() {
           const wants = (c.wants || []).join(", ");
           const matched = REAL.feed.filter(f =>
             held.some(h => h.artist_key && h.artist_key === f.artist_key)).slice(0, 3);
-          return `
-            <div class="chiprow">${CRM.clients.map(x =>
-              `<button class="chip" data-pitch="${esc(x.id)}" aria-pressed="${c.id === x.id}">${esc(x.name)}</button>`).join("")}</div>
-            <div class="pitch">
-              <span class="kicker">Drafted for ${esc(c.name)}</span>
-              <h3>${esc(c.focus ? `Where the ${c.focus.split(",")[0].trim()} market has moved` : "What has moved since we last spoke")}</h3>
-              <div class="bd">Dear ${esc(c.name.split(" ")[0])},
+
+          /* The template is the default and stays the default: it is built from
+             records and cannot say anything the desk does not hold. Mistral is
+             an optional second pass over the same facts, kept for this session
+             only — nothing generated is written to D1. */
+          const written = S.aiDrafts[c.id];
+          const busy = S.aiBusy === c.id;
+
+          const body = written
+            ? esc(written.draft)
+            : `Dear ${esc(c.name.split(" ")[0])},
 
 ${c.brief ? esc(c.brief.split(".")[0]) + "." : "A short note on the market you collect."}
 
 ${matched.length
   ? "Recent results in the names you already hold:\n" + matched.map(m =>
-      `\u00b7 ${m.artist} \u2014 ${m.title || "Untitled"}, ${m.price}${m.above ? " (above high estimate)" : ""}`).join("\n")
+      `\u00b7 ${esc(m.artist)} \u2014 ${esc(m.title || "Untitled")}, ${esc(m.price)}${m.above ? " (above high estimate)" : ""}`).join("\n")
   : "I will send comparables as soon as the next relevant lots are catalogued."}
-${wants ? "\nStill looking for: " + esc(wants) + "." : ""}</div>
-              <div class="foot-note">Drafted from the live record \u2014 read it before you send it.</div>
+${wants ? "\nStill looking for: " + esc(wants) + "." : ""}`;
+
+          const drafter = !CRM.ai ? "" : `
+            <div class="ai-bar">
+              <button class="btn btn-primary" data-act="ai-pitch" data-client="${esc(c.id)}"
+                      ${busy ? "disabled" : ""}>
+                ${busy ? "Drafting\u2026" : written ? "Draft again" : "Write it out"}</button>
+              ${written ? `<button class="btn" data-act="ai-clear" data-client="${esc(c.id)}">Back to the template</button>` : ""}
+            </div>
+            ${S.aiError && S.aiBusy !== c.id ? `<div class="ai-note ai-bad">${esc(S.aiError)}</div>` : ""}`;
+
+          return `
+            <div class="chiprow">${CRM.clients.map(x =>
+              `<button class="chip" data-pitch="${esc(x.id)}" aria-pressed="${c.id === x.id}">${esc(x.name)}</button>`).join("")}</div>
+            ${drafter}
+            <div class="pitch">
+              <span class="kicker">${written ? `Written for ${esc(c.name)}` : `Drafted for ${esc(c.name)}`}</span>
+              <h3>${esc(c.focus ? `Where the ${c.focus.split(",")[0].trim()} market has moved` : "What has moved since we last spoke")}</h3>
+              <div class="bd">${body}</div>
+              <div class="foot-note">${written
+                ? `Written by ${esc(written.model)} from the record, and every figure in it checked back against the record \u2014 read it before you send it.`
+                : "Drafted from the live record \u2014 read it before you send it."}</div>
             </div>`;
         })();
 
@@ -3043,7 +3107,12 @@ document.addEventListener("click", e => {
   if (attr("data-toggle-done")) { const k = attr("data-toggle-done"); S.done[k] = !S.done[k]; persist(); return render(true); }
   if (attr("data-tpl")) { const i = +attr("data-tpl"); S.openTemplate = S.openTemplate === i ? null : i; return render(true); }
   if (attr("data-obj")) { const i = +attr("data-obj"); S.openObjection = S.openObjection === i ? null : i; return render(true); }
-  if (attr("data-pitch")) { S.pitchClient = attr("data-pitch"); return render(true); }
+  if (attr("data-pitch")) {
+    S.pitchClient = attr("data-pitch");
+    S.aiError = null;
+    ensureDetail(S.pitchClient);
+    return render(true);
+  }
 
   if (attr("data-nc-tier")) {
     S.newClient = { ...S.newClient, tier: attr("data-nc-tier") };
@@ -3281,7 +3350,42 @@ document.addEventListener("click", e => {
   if (act === "close-search") { S.searchOpen = false; S.query = ""; return renderSheet(); }
   if (act === "close-search-bg" && e.target.classList.contains("sheet-bg")) { S.searchOpen = false; S.query = ""; return renderSheet(); }
   if (act === "toggle-bio") { S.bioOpen = !S.bioOpen; return render(true); }
-  if (act === "pitch-for") { return go("knowledge", { pitchClient: attr("data-client"), knowTab: "pitch" }); }
+  if (act === "pitch-for") {
+    const cid = attr("data-client");
+    ensureDetail(cid).then(d => { if (d) render(true); });
+    return go("knowledge", { pitchClient: cid, knowTab: "pitch" });
+  }
+
+  if (act === "ai-clear") {
+    delete S.aiDrafts[attr("data-client")];
+    S.aiError = null;
+    return render(true);
+  }
+  if (act === "ai-pitch") {
+    const cid = attr("data-client");
+    if (S.aiBusy) return;                      // the free tier is one call at a time
+    S.aiBusy = cid; S.aiError = null;
+    render(true);
+
+    // The comparables come from here rather than being re-derived in the Worker:
+    // the artist matching lives in this file, and duplicating it server-side is
+    // exactly how the news constants drifted apart. The holdings have to be on
+    // hand before that match can mean anything, so wait for them.
+    ensureDetail(cid)
+      .then(() => {
+        const held = (CRM.detail[cid] || {}).holdings || [];
+        const comparables = REAL.feed
+          .filter(f => held.some(h => h.artist_key && h.artist_key === f.artist_key))
+          .slice(0, 4)
+          .map(m => ({ artist: m.artist, title: m.title, price: m.price,
+                       house: m.house, above: !!m.above }));
+        return aiPitch(cid, comparables);
+      })
+      .then(d => { S.aiDrafts[cid] = d; })
+      .catch(err => { S.aiError = err.message || "The drafter could not be reached."; })
+      .then(() => { S.aiBusy = null; render(true); });
+    return;
+  }
 
   const nav = attr("data-nav");
   if (nav) {

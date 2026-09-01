@@ -13,6 +13,7 @@
 import { authenticate, unauthorised } from "../_lib/auth.js";
 import { parseIcs } from "../_lib/ics.js";
 import { liveNews } from "../_lib/news.js";
+import { chat, aiConfigured, unsupportedFigures, AiError } from "../_lib/ai.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -157,6 +158,79 @@ async function todaysDiary(env) {
   };
 }
 
+/* --------------------------------------------------------------- the drafter */
+
+/**
+ * What Mistral is allowed to know about a collector.
+ *
+ * §14 says send the minimum, and this is the one route that leaves the origin,
+ * so the minimum is enforced here rather than trusted to the caller. Deliberately
+ * absent: the surname, the Background field (it names firms), what she paid, and
+ * the text of any logged conversation. A first name, a stated interest and a list
+ * of artists is enough to write the letter; the rest is her book, not Mistral's.
+ *
+ * It matters because Mistral's free Experiment tier trains on API input unless
+ * the Privacy toggle in the Admin Console is turned off. See DEPLOY.md.
+ */
+function pitchFacts(client, comparables) {
+  const firstName = String(client.name || "").trim().split(/\s+/)[0] || "the collector";
+  const wants = Array.isArray(client.wants) ? client.wants : [];
+  const held = [...new Set((client.holdings || [])
+    .map(h => String(h.artist_name || "").trim()).filter(Boolean))];
+  const lastSeen = (client.log || [])[0];
+
+  const lines = [
+    `Collector first name: ${firstName}`,
+    client.tier ? `Relationship: ${client.tier} client` : null,
+    client.focus ? `What they collect: ${client.focus}` : null,
+    wants.length ? `Still looking for: ${wants.join(", ")}` : null,
+    held.length ? `Artists they already own: ${held.join(", ")}` : null,
+    lastSeen && lastSeen.happened
+      ? `Last spoke: ${lastSeen.happened}${lastSeen.channel ? ` (${lastSeen.channel})` : ""}`
+      : "Last spoke: not recorded",
+  ].filter(Boolean);
+
+  if (comparables.length) {
+    lines.push("", "Recent auction results, quote these exactly or not at all:");
+    for (const c of comparables) {
+      lines.push(`- ${c.artist}${c.title ? `, "${c.title}"` : ""}: sold ${c.price}`
+        + `${c.house ? ` at ${c.house}` : ""}${c.above ? ", above its high estimate" : ""}`);
+    }
+  } else {
+    lines.push("", "Recent auction results: none in the names they own.");
+  }
+  return lines.join("\n");
+}
+
+/** Trust nothing from the browser: cap the list, clip the strings. */
+function cleanComparables(raw) {
+  const s = (v, n) => v == null ? "" : String(v).replace(/\s+/g, " ").trim().slice(0, n);
+  return (Array.isArray(raw) ? raw : []).slice(0, 6).map(c => ({
+    artist: s(c.artist, 80),
+    title: s(c.title, 120),
+    price: s(c.price, 40),
+    house: s(c.house, 40),
+    above: !!c.above,
+  })).filter(c => c.artist && c.price);
+}
+
+const PITCH_SYSTEM = [
+  "You draft short notes for an Indian art advisor writing to a collector she knows.",
+  "",
+  "Absolute rules:",
+  "- Use ONLY the facts in the FACTS block. Invent nothing.",
+  "- Never write a price, percentage, valuation, estimate or date that is not in FACTS.",
+  "  When you quote a figure from FACTS, copy it character for character.",
+  "- Write any count as a word (three works, not 3 works). Do not number your lines.",
+  "- If FACTS is thin, write a shorter note. Never pad it with market commentary.",
+  "",
+  "Style: plain British English, warm, unhurried, no sales language, no superlatives,",
+  "no exclamation marks. One hundred and twenty to one hundred and eighty words.",
+  "Plain prose only: no markdown, no headings, no subject line, no bullet characters.",
+  "Open with 'Dear <first name>,' and close with 'Warm regards,' on its own line.",
+  "Write nothing after that line — she signs it herself.",
+].join("\n");
+
 /* -------------------------------------------------------------------- router */
 
 export async function onRequest(context) {
@@ -208,6 +282,60 @@ export async function onRequest(context) {
     /* --- read ------------------------------------------------------------ */
     if (method === "GET" && path === "/me") {
       return json({ email: who.email, dev: !!who.dev });
+    }
+
+    /* --- drafting -------------------------------------------------------- */
+    if (method === "GET" && path === "/ai/status") {
+      return json({ configured: aiConfigured(env), model: env.MISTRAL_MODEL || null });
+    }
+
+    if (method === "POST" && path === "/ai/pitch") {
+      const b = await request.json().catch(() => ({}));
+      if (!b.client_id) return json({ error: "A pitch needs a collector." }, 400);
+
+      const client = await getClient(env, b.client_id);
+      if (!client) return json({ error: "No such client." }, 404);
+
+      const comparables = cleanComparables(b.comparables);
+      const facts = pitchFacts(client, comparables);
+
+      let out;
+      try {
+        out = await chat(env, {
+          system: PITCH_SYSTEM,
+          user: `FACTS\n-----\n${facts}\n-----\nWrite the note.`,
+          maxTokens: 500,
+          temperature: 0.35,
+        });
+      } catch (err) {
+        if (err instanceof AiError) {
+          return json({ error: err.message, code: err.code }, err.status);
+        }
+        // A timeout arrives as a DOMException, not an AiError.
+        console.error("ai/pitch", err && err.name, err && err.message);
+        return json({ error: "The drafter did not answer in time.", code: "timeout" }, 504);
+      }
+
+      // Prompting is not a control. If a figure in the draft is not in the facts
+      // it came from the model, and this desk does not send a collector a number
+      // it cannot trace — so the draft is thrown away and she keeps the template.
+      const invented = unsupportedFigures(out.text, facts);
+      if (invented.length) {
+        console.warn("ai/pitch rejected, unsupported figures:", invented.join(","));
+        return json({
+          error: "The draft quoted figures that are not in the record, so it was discarded.",
+          code: "ungrounded",
+          figures: invented.slice(0, 6),
+        }, 422);
+      }
+
+      await audit(env, who.email, "draft", "client", b.client_id);
+      return json({
+        draft: out.text,
+        model: out.model,
+        grounded: true,
+        comparables: comparables.length,
+      });
     }
     if (method === "GET" && path === "/clients") {
       return json({ clients: await listClients(env) });

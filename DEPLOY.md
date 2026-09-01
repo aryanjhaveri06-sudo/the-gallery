@@ -187,6 +187,65 @@ calendar → **Public Calendar** and copy the `webcal://` link, changed to
 `https://`. It is a secret because it grants read access to her whole diary,
 which is why it is a Worker secret and never a var.
 
+## The drafter — Mistral
+
+Optional. Without it the desk works exactly as before; the Pitch generator shows
+its template and no button appears. With it, the Knowledge screen grows a
+**Write it out** button that turns the same records into a note she can send.
+
+Get a key at <https://console.mistral.ai> → **API Keys**. The free *Experiment*
+plan needs a phone number and no card.
+
+```bash
+npx wrangler pages secret put MISTRAL_API_KEY --project-name the-gallery
+```
+
+Paste the key when it prompts; it never goes in the repo, in `wrangler.toml`, or
+in the page. The browser asks *this* origin for a draft — it never talks to
+Mistral, so the key cannot be read out of a public `index.html`.
+
+**Do this second, in the same console: Admin → Privacy → turn OFF "use my data
+for model improvement."** The free tier trains on API input by default, and
+these requests carry a collector's first name and what she collects. The paid
+tiers are opted out already; the free one is not.
+
+### What actually leaves the origin
+
+Enforced in `pitchFacts()` in `functions/api/[[path]].js`, not left to the
+caller. Sent: the collector's **first name**, tier, the "what they collect" and
+"still looking for" fields, the **artist names** they own, the date and channel
+of the last contact, and up to four public auction results. Deliberately not
+sent: the surname, the Background field (it names firms), what she paid for
+anything, and the text of any logged conversation.
+
+### The figure check
+
+§11 says never invent a market fact, and a model that writes "up 34% since 2019"
+into a letter to a buyer is worse than no model. So the prompt carries the facts
+and forbids any others — and then `unsupportedFigures()` reads the answer back
+and rejects it if any run of digits in it is not in the facts it was given. A
+rejected draft is discarded, she keeps the template, and the API answers 422.
+Prompting is not a control; this is. It is deliberately strict: a wrong
+rejection costs a fallback, a wrong pass costs a wrong number sent to a
+collector.
+
+Cover it with `node tests/ai_grounding.mjs` — it stubs Mistral, so it needs no
+key and spends no quota.
+
+### Rate limits and models
+
+The free tier is rate limited and Mistral no longer publishes the number, so
+nothing calls it on render — every draft is one deliberate button press, and a
+429 comes back as "give it a minute" rather than a retry storm.
+
+Mistral renames its models often (`mistral-small-2503` became
+`mistral-small-4-0-26-03`). If the configured id is rejected the Worker asks the
+account what it actually has and picks the smallest sensible model, once per
+isolate. Pin one with a `MISTRAL_MODEL` var if you want a specific model.
+
+To retire the drafter, delete the secret — the button disappears on the next
+load and nothing else changes.
+
 ## Local development
 
 ```bash
@@ -196,6 +255,10 @@ npx wrangler pages dev . --port 8788 --binding CRM_DEV_IDENTITY=you@example.com
 
 `CRM_DEV_IDENTITY` bypasses Access for local work only. It must never be set on
 the deployed project — if it is, anyone reaching the API is treated as signed in.
+
+`MISTRAL_BASE_URL` points the drafter at something other than api.mistral.ai, so
+the route can be driven end to end against a local stub without a key or quota.
+Like `CRM_DEV_IDENTITY`, it is for local work only and is never set in production.
 
 ## What is protected, and how
 
