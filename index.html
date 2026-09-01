@@ -899,13 +899,37 @@ input[data-ed][type=date]{min-height:46px}
 
 /* iPad landscape — wide enough for a genuine list-and-detail split */
 @media (min-width:1024px){
-  .wrap{max-width:1180px}
+  .wrap{max-width:1180px;margin-inline:auto}
   .split{display:grid;grid-template-columns:308px 1fr;align-items:start}
   .split .list{border-right:1px solid var(--divider);padding-right:24px;position:sticky;top:0}
   .split .detail{padding-left:30px;min-width:0}
   .market-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:0 38px;align-items:start}
   .market-grid .rail-col{border-left:1px solid var(--divider);padding-left:34px;min-width:0}
   .market-grid .main-col{min-width:0}
+}
+
+/* Desktop monitors. The column used to stop at 1180px hard against the sidebar
+   and leave the rest of a 1920 screen blank, so it steps up instead — and once
+   there is real width, the lead block becomes a newsroom grid rather than one
+   enormous picture. A 16/10 hero at 1480px wide is 925px tall: a wall, not a
+   lead. Beside its secondaries it is a lead again. */
+@media (min-width:1440px){
+  .wrap{max-width:1360px}
+}
+@media (min-width:1700px){
+  .wrap{max-width:1560px}
+}
+@media (min-width:1360px){
+  .topblock{display:grid;grid-template-columns:1.62fr 1fr;gap:0 30px;align-items:start}
+  .topblock > .hero{min-width:0;padding-top:0}
+  .topblock > .scrow{grid-template-columns:1fr;gap:22px;margin-top:0;min-width:0}
+  .topblock .hero-media img{aspect-ratio:16/9}
+  /* A fixed height rather than a ratio: the side column has to come out level
+     with the hero, and two ratio-driven cards in a 550px column always ran
+     taller. object-fit still keeps the picture uncropped in the frame. */
+  .topblock .sc-media{aspect-ratio:auto;height:196px}
+  .topblock .sc-media img{height:100%}
+  .topblock .hero-head{font-size:29.4px}
 }
 </style>
 
@@ -2088,8 +2112,10 @@ function viewToday() {
     </div>
     <div class="view-body">
       <div class="sec">${sectionHead("Top stories", updated)}
-        ${heroCard(hero)}
-        ${seconds.length ? `<div class="scrow">${seconds.map(smallCard).join("")}</div>` : ""}
+        <div class="topblock">
+          ${heroCard(hero)}
+          ${seconds.length ? `<div class="scrow">${seconds.map(smallCard).join("")}</div>` : ""}
+        </div>
       </div>
 
       <div class="sec">${sectionHead("Market pulse")}<div class="pulserow">${pulse}</div></div>
