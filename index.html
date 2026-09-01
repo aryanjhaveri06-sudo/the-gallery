@@ -160,20 +160,20 @@ svg{display:block}
 .hr{height:1px;background:var(--divider);border:0;margin:0}
 
 /* section heading used across every screen */
-.sec{margin-top:50px}
-.cols{margin-top:48px}
+.sec{margin-top:36px}
+.cols{margin-top:34px}
 .view-body > .sec:first-child,
 .view-body > .cols:first-child{margin-top:0}
 .cols > .col.sec:first-child{margin-top:0}
 .sec-head{
   display:flex;align-items:baseline;justify-content:space-between;gap:14px;
-  padding-bottom:10px;border-bottom:1px solid var(--rule);margin-bottom:6px;
+  padding-bottom:10px;margin-bottom:10px;
 }
 .sec-head h2{
-  font-family:var(--font-heading);font-weight:600;font-size:13.7px;
-  letter-spacing:.19em;text-transform:uppercase;margin:0;line-height:1.4;
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;margin:0;line-height:1.4;color:var(--ink);
 }
-.sec-head .side{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-50);white-space:nowrap}
+.sec-head .side{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-60);white-space:nowrap}
 
 /* ============================================================
    SHELL
@@ -213,14 +213,25 @@ svg{display:block}
 .topbar .double{height:3px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:0 var(--pad) -1px}
 
 /* ---- view title ---- */
-.view-head{padding:30px var(--pad) 0}
+.view-head{padding:22px var(--pad) 0}
 .view-head h1{
-  font-family:var(--font-heading);font-weight:700;font-size:35.7px;line-height:1.08;
+  font-family:var(--font-heading);font-weight:700;font-size:26px;line-height:1.15;
   margin:0;letter-spacing:-.005em;text-wrap:balance;
 }
-.view-head p{margin:12px 0 0;font-size:13.7px;line-height:1.6;color:var(--ink-50);max-width:44ch}
-.view-head .date{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-50);margin-bottom:9px}
-.view-body{padding-top:34px;container-type:inline-size;container-name:pane}
+.view-head p{margin:4px 0 0;font-size:14px;line-height:1.5;color:var(--ink-60);max-width:52ch}
+.view-head .date{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-60);margin-bottom:6px}
+.view-body{padding-top:22px;container-type:inline-size;container-name:pane}
+
+/* The handoff's three tiles under the greeting, and the brief beneath them.
+   Both read entirely off the record — the counts are counted, and the brief
+   names what is actually in front of her rather than narrating a mood. */
+.tiles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:18px 0 20px}
+.tile{border:1px solid var(--divider);border-radius:var(--r-md);padding:12px 8px;text-align:center}
+.tile .tv{font-family:var(--font-heading);font-weight:700;font-size:22px;line-height:1.1;color:var(--ink)}
+.tile .tl{font-size:10px;color:var(--ink-60);margin-top:2px;line-height:1.3}
+.brief{background:var(--gold-tint);border-left:2px solid var(--gold);padding:12px 14px;margin-bottom:22px}
+.brief .bl{font-size:10px;letter-spacing:.1em;color:var(--gold-ink);font-weight:700;margin-bottom:6px}
+.brief .bb{font-size:13px;color:var(--ink);line-height:1.5}
 
 /* ---- bottom tab bar (phone) ---- */
 .tabbar{
@@ -386,9 +397,9 @@ button.row:active{background:var(--gold-tint)}
   font-size:9px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
   padding:5px 8px;border-radius:var(--r-sm)}
 .hero-body{padding-top:14px}
-.hero-head{font-family:var(--font-heading);font-weight:600;font-size:25.2px;line-height:1.18;
+.hero-head{font-family:var(--font-heading);font-weight:700;font-size:17px;line-height:1.25;
   margin:6px 0 0;text-wrap:pretty}
-.hero-sum{margin:8px 0 0;font-size:13.7px;color:var(--ink-72);line-height:1.55;
+.hero-sum{margin:6px 0 0;font-size:12.5px;color:var(--ink-60);line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .story-why{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
 .why-chip{font-size:10px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;
@@ -409,7 +420,7 @@ button.row:active{background:var(--gold-tint)}
 .sc-media .hero-tag{font-size:8px;padding:3px 6px;top:8px;right:8px}
 .sc-meta{display:flex;align-items:center;gap:8px}
 .rank.flat{position:static;width:19px;height:19px;font-size:11px;flex:none}
-.sc-body h4{font-family:var(--font-heading);font-weight:600;font-size:15.8px;line-height:1.25;
+.sc-body h4{font-family:var(--font-heading);font-weight:700;font-size:14px;line-height:1.25;
   margin:6px 0 0;text-wrap:pretty}
 
 .pulserow{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:16px}
@@ -440,7 +451,7 @@ button.row:active{background:var(--gold-tint)}
   align-items:start;padding:15px 34px 15px 0}
 .mf-img{width:66px;aspect-ratio:1/1;object-fit:cover;border-radius:var(--r-sm);
   background:var(--surface)}
-.mf-body h4{font-family:var(--font-heading);font-weight:600;font-size:15.8px;line-height:1.25;
+.mf-body h4{font-family:var(--font-heading);font-weight:700;font-size:14px;line-height:1.25;
   margin:5px 0 0;text-wrap:pretty}
 .mf .mark{top:12px}
 
@@ -449,7 +460,7 @@ button.row:active{background:var(--gold-tint)}
 
 @media (max-width:560px){
   .pulserow{grid-template-columns:1fr 1fr}
-  .hero-head{font-size:23.1px}
+  .hero-head{font-size:16px}
 }
 
 .news-tag{
@@ -483,12 +494,16 @@ button.row:active{background:var(--gold-tint)}
 .dossier-head h1{font-family:var(--font-heading);font-weight:700;font-size:42px;line-height:1.02;margin:8px 0 0;letter-spacing:-.012em;text-wrap:balance}
 .dossier-head .yrs{font-size:14.7px;font-style:italic;color:var(--ink-60);margin-top:8px}
 
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;margin-top:10px}
-.stat{padding:16px 0;border-top:1px solid var(--divider)}
-.stat .k{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-50)}
-.stat .v{font-family:var(--font-heading);font-weight:600;font-size:23.1px;margin-top:2px;letter-spacing:.01em}
-.stat.gold .v{color:var(--gold-ink)}
-.stat:last-child{grid-column:1 / -1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.stats .stat{border:1px solid var(--divider);border-radius:var(--r-md);
+  padding:12px 10px;text-align:center;min-width:0}
+.stats .stat .v{font-family:var(--font-heading);font-weight:700;font-size:17px;
+  line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
+.stats .stat .k{font-size:9.5px;color:var(--ink-60);margin-top:3px;line-height:1.3}
+.stats .stat.gold .v{color:var(--gold-ink)}
+.stats .stat.quiet .v{font-size:12px;color:var(--ink-40);font-family:var(--font-body);font-weight:600}
+@media (max-width:420px){ .stats{grid-template-columns:1fr 1fr} }
+
 
 .chart{margin-top:22px}
 .chart-cap{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-50);margin-top:7px}
@@ -696,6 +711,33 @@ button.row:active{background:var(--gold-tint)}
 .ask-foot .chip{font-size:10.5px;letter-spacing:.04em;text-transform:none;
   padding:5px 11px;border-radius:var(--r-pill)}
 .ask-note{font-size:10.5px;line-height:1.45;color:var(--ink-60);flex:1;min-width:180px}
+/* Artists list — avatar, name over years, momentum on the right. */
+.arows > *{border-top:1px solid var(--divider-soft)}
+.arow{display:grid;grid-template-columns:38px 1fr auto;gap:0 12px;align-items:center;
+  width:100%;text-align:left;padding:12px 0;color:inherit;
+  transition:background var(--t-fast) var(--ease)}
+.arow:hover{background:var(--gold-tint)}
+.arow.on{background:var(--gold-tint)}
+.arow .av{width:38px;height:38px;border-radius:50%;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-heading);font-weight:700;font-size:13px;color:var(--ink-60)}
+.arow .an{display:block;font-family:var(--font-heading);font-weight:700;font-size:15px;line-height:1.2}
+.arow .ay{display:block;font-size:11px;color:var(--ink-60);margin-top:2px}
+.arow .am{font-size:12.5px;font-weight:600;white-space:nowrap;text-align:right}
+.arow .am.up{color:var(--up)}
+.arow .am.down{color:var(--down)}
+.arow .am.flat{color:var(--ink-60)}
+.arow .am .none{font-size:10px;font-weight:400;color:var(--ink-40)}
+/* Artist profile header, to the handoff. */
+.prof{display:grid;grid-template-columns:auto 1fr auto;gap:0 14px;align-items:center}
+.prof .pav{width:56px;height:56px;border-radius:50%;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-heading);font-weight:700;font-size:18px;color:var(--ink-60)}
+.prof h1{margin:0}
+.prof .py{display:block;font-size:12px;color:var(--ink-60);margin-top:3px}
+.prof .pm{font-size:13px;font-weight:600;white-space:nowrap}
+.prof .pm.up{color:var(--up)}
+.prof .pm.down{color:var(--down)}
 .ask-cta p{font-size:12.5px;line-height:1.55;color:var(--ink-60);margin:12px 0 14px;max-width:58ch}
 .ask-form{display:flex;gap:10px;align-items:flex-end;border-top:1px solid var(--divider);padding-top:18px}
 .ask-input{flex:1;min-height:44px;max-height:180px;resize:none;font:inherit;font-size:15.1px;
@@ -925,8 +967,8 @@ input[data-ed][type=date]{min-height:46px}
   .topbar .double{display:none}
   .topbar .spacer{display:block}
 
-  .view-head{padding-top:30px}
-  .view-head h1{font-size:44.1px}
+  .view-head{padding-top:26px}
+  .view-head h1{font-size:32px}
 
   /* split view: list rail + detail */
 }
@@ -934,10 +976,9 @@ input[data-ed][type=date]{min-height:46px}
 /* ---- pane-level: these follow the width of the column they sit in,
    not the width of the device, so a split pane never over-columnises ---- */
 @container pane (min-width:460px){
-  .stats{grid-template-columns:repeat(3,1fr);gap:0 26px}
   .stat:last-child{grid-column:auto}
 }
-@container pane (min-width:760px){ .stats{grid-template-columns:repeat(5,1fr)} }
+@container pane (min-width:640px){ .stats{grid-template-columns:repeat(6,1fr)} }
 
 @container pane (min-width:520px){
   .bio.clamped{-webkit-line-clamp:unset;display:block;overflow:visible}
@@ -1008,7 +1049,7 @@ input[data-ed][type=date]{min-height:46px}
      taller. object-fit still keeps the picture uncropped in the frame. */
   .topblock .sc-media{aspect-ratio:auto;height:196px}
   .topblock .sc-media img{height:100%}
-  .topblock .hero-head{font-size:29.4px}
+  .topblock .hero-head{font-size:23px}
 }
 </style>
 
@@ -1455,6 +1496,8 @@ function buildArtists() {
         high: s.high || "—",
         avg: s.median_12mo || s.median_all || "—",
         lots12: String(s.lots_12mo == null ? 0 : s.lots_12mo),
+        lotsTotal: s.lots_total == null ? null : String(s.lots_total),
+        highLot: s.high_lot || null,
         above: s.above_high_rate == null ? "—" : s.above_high_rate + "%",
         sellThrough: s.sell_through,
         sellBasis: s.sell_through_basis || null,
@@ -2081,6 +2124,37 @@ function viewToday() {
   const weekEnd = new Date(Date.parse(todayIso()) + 7 * 86400000).toISOString().slice(0, 10);
   const thisWeek = (REAL.events || []).filter(e => e.starts >= todayIso() && e.starts <= weekEnd).length;
 
+  /* The handoff's three tiles and its Morning Brief.
+     Every number is counted, not asserted, and the brief names what is actually
+     in front of her — §11 forbids narrating a mood, so it does not. When there
+     is genuinely nothing, it says so rather than reaching for something. */
+  const marketStories = ranked.filter(r => r.reasons.some(x => x.kind === "market")).length;
+  const deskArtists = [...new Set(ranked.flatMap(r => r.artists))];
+  const clientStories = ranked.filter(r => r.reasons.some(x => x.kind === "client"));
+
+  const tiles = `<div class="tiles">
+    <div class="tile"><div class="tv">${ranked.length}</div><div class="tl">Stories on the desk</div></div>
+    <div class="tile"><div class="tv">${marketStories}</div><div class="tl">Market signals</div></div>
+    <div class="tile"><div class="tv">${deskArtists.length}</div><div class="tl">Artists named</div></div>
+  </div>`;
+
+  const briefBits = [];
+  if (deskArtists.length) {
+    briefBits.push(listOf(deskArtists.slice(0, 3).map(k => ARTISTS[k].name))
+      + (deskArtists.length > 3 ? " and others you track are" : (deskArtists.length === 1 ? " is" : " are"))
+      + " named in this morning's stories.");
+  }
+  if (clientStories.length) {
+    briefBits.push(`${clientStories.length === 1 ? "One story touches" : clientStories.length + " stories touch"} `
+      + "someone in the book.");
+  }
+  if (thisWeek) briefBits.push(`${thisWeek} ${thisWeek === 1 ? "sale opens" : "sales open"} in the next seven days.`);
+  if (due) briefBits.push(`${due} ${due === 1 ? "follow-up is" : "follow-ups are"} owed.`);
+  const brief = briefBits.length ? `<div class="brief">
+    <div class="bl">MORNING BRIEF</div>
+    <div class="bb">${esc(briefBits.join(" "))}</div>
+  </div>` : "";
+
   const stamp = (REAL.news || {}).generated_at || REAL.generated_at;
   const updated = stamp && String(stamp).length > 10
     ? "Updated " + String(stamp).slice(11, 16) + " UTC" : "";
@@ -2195,6 +2269,7 @@ function viewToday() {
       <p>Your art-market briefing is ready.</p>
     </div>
     <div class="view-body">
+      ${tiles}${brief}
       <div class="sec">${sectionHead("Top stories", updated)}
         <div class="topblock">
           ${heroCard(hero)}
@@ -2206,7 +2281,7 @@ function viewToday() {
 
       <div class="sec">${sectionHead("Watchlist", "12-month move")}${watchRows}</div>
 
-      ${CRM.ai ? `<div class="sec">${sectionHead("Ask AG")}
+      ${CRM.ai ? `<div class="sec">${sectionHead("Ask AG Newsroom")}
         <div class="ask-cta">
           <p>Her diary, the client book, the headlines and the auction record, read together.</p>
           <div class="chiprow">
@@ -2230,15 +2305,28 @@ function viewToday() {
 /* ============================================================
    SCREEN: ARTISTS + DOSSIER
    ============================================================ */
+const initials = name => String(name || "").trim().split(/\s+/)
+  .filter(w => /[A-Za-z]/.test(w)).slice(-2).map(w => w[0]).join("").toUpperCase() || "\u2014";
+
+/* The handoff ranks this list by momentum and shows an arrow beside each name.
+   Ours shows the twelve-month move where the record supports one and says so
+   where it does not — rule 1: a move computed off too few comparables is noise,
+   and delta_12mo is already null in exactly those cases. */
 function artistListRows() {
-  return `<div class="rows">` + artistKeys.map(k => {
+  return `<div class="rows arows">` + artistKeys.map(k => {
     const a = A(k), sel = isSplit && S.artist === k;
-    return `<button class="row" data-open-artist="${k}" ${sel ? 'style="background:var(--gold-tint)"' : ""}>
-      <div class="row-top">
-        <span class="row-name">${esc(a.name)}</span>
-        <span class="row-meta tnum" style="${a.stats.delta && parseFloat(a.stats.delta) >= 15 ? "color:var(--gold-ink)" : ""}">${esc(a.stats.delta || a.stats.high)}</span>
-      </div>
-      <div class="row-sub">${a.years ? `<span class="tnum">${esc(a.years)}</span> \u00b7 ` : ""}${esc(a.movement)}</div>
+    const d = a.stats.delta ? parseFloat(a.stats.delta) : null;
+    const dir = d == null ? "" : d > 0 ? "\u2191" : d < 0 ? "\u2193" : "\u2192";
+    return `<button class="arow${sel ? " on" : ""}" data-open-artist="${k}">
+      <span class="av">${esc(initials(a.name))}</span>
+      <span class="ab">
+        <span class="an">${esc(a.name)}</span>
+        <span class="ay">${[a.years, a.movement].filter(Boolean).map(esc).join(" \u00b7 ")}</span>
+      </span>
+      <span class="am ${d == null ? "flat" : d > 0 ? "up" : d < 0 ? "down" : "flat"}">
+        ${d == null ? `<span class="none">Not enough comparables</span>`
+                    : `${dir} ${esc(a.stats.delta)}`}
+      </span>
     </button>`;
   }).join("") + `</div>`;
 }
@@ -2282,10 +2370,11 @@ function viewDossier(embedded) {
     { k: "Highest result", v: st.high },
     { k: "Median, 12 mo", v: st.avg },
     { k: "Lots, 12 mo", v: st.lots12 },
+    { k: "Lots on record", v: st.lotsTotal || "\u2014" },
     { k: "Above high est.", v: st.above },
-    { k: "Sell-through", v: st.sellThrough == null ? "\u2014" : st.sellThrough + "%" },
-    { k: "\u0394 12 mo, per sq in", v: st.delta || "\u2014", gold: !!st.delta }
-  ].map(x => `<div class="stat ${x.gold ? "gold" : ""}"><div class="k">${esc(x.k)}</div><div class="v tnum">${esc(x.v)}</div></div>`).join("");
+    { k: "\u0394 12 mo, per sq in", v: st.delta || "Not enough", gold: !!st.delta, quiet: !st.delta }
+  ].map(x => `<div class="stat ${x.gold ? "gold" : ""}${x.quiet ? " quiet" : ""}">`
+    + `<div class="v tnum">${esc(x.v)}</div><div class="k">${esc(x.k)}</div></div>`).join("");
 
   const basis = st.deltaBasis || {};
   // Always show both medians and both samples: the percentage is consignment-
@@ -2294,10 +2383,9 @@ function viewDossier(embedded) {
     ? `Median \u20b9${(basis.ppsi_now || 0).toLocaleString()} per sq in on ${esc(basis.medium || "comparable")} works this year against \u20b9${(basis.ppsi_prior || 0).toLocaleString()} last, from ${basis.n_now} lots and ${basis.n_prior}. Consignment-weighted, not adjusted for quality.`
     : `Not enough comparable lots to quote a 12-month move${basis.n_now != null ? ` \u2014 ${basis.n_now} this year, ${basis.n_prior} last` : ""}. The figures above still stand.`;
 
-  const sb = st.sellBasis || {};
-  const sellNote = st.sellThrough != null
-    ? ` Sell-through is ${sb.sold} of ${sb.offered} lots at ${esc((sb.houses || []).join(", "))}, the only house here that publishes what went unsold.`
-    : "";
+  // Sell-through deliberately has no tile and no note: unsold lots are absent
+  // from public results, so any figure would read near 100% and be false.
+  const sellNote = "";
 
   const recs = rows.map(r => `
     <div class="rec">
@@ -2334,9 +2422,15 @@ function viewDossier(embedded) {
 
   return `
     <div class="view-head dossier-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
-      <span class="kicker">${esc(a.movement)}</span>
-      <h1>${esc(a.name)}</h1>
-      ${a.years ? `<div class="yrs tnum">${esc(a.years)}</div>` : ""}
+      <div class="prof">
+        <span class="pav">${esc(initials(a.name))}</span>
+        <span class="pb">
+          <h1>${esc(a.name)}</h1>
+          <span class="py">${[a.years, a.movement].filter(Boolean).map(esc).join(" \u00b7 ")}</span>
+        </span>
+        ${st.delta ? `<span class="pm ${parseFloat(st.delta) >= 0 ? "up" : "down"}">
+          ${parseFloat(st.delta) >= 0 ? "\u2191" : "\u2193"} ${esc(st.delta)}</span>` : ""}
+      </div>
     </div>
     <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
       <div class="sec">${sectionHead("Market card")}
@@ -2359,7 +2453,7 @@ function viewDossier(embedded) {
       <div class="sec">${sectionHead("Auction record", rows.length + " of " + a.records.length)}
         <div class="chiprow">${houses.map(h => `<button class="chip" data-house="${esc(h)}" aria-pressed="${S.houseFilter === h}">${esc(h)}</button>`).join("")}</div>
         <div class="rows">${recs}</div>
-        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them. Source: ${esc(listOf(REAL.coverage.houses))} public results. ${esc(REAL.caveats.sell_through || "")}</div>
+        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them. Source: ${esc(listOf(REAL.coverage.houses))} public results. Unsold lots are not published, so no sell-through figure is quoted anywhere on this desk.</div>
       </div>
 
       <div class="sec">${sectionHead("Look up elsewhere")}
