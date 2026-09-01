@@ -2221,6 +2221,19 @@ const safeUrl = u => {
   return /^https?:\/\//i.test(raw) ? raw : "";
 };
 
+/* Order-only. The feed carries a price as the house PRINTED it ("\u20b99.98 cr"),
+   with no number behind it, so ranking by value means reading the string back.
+   Used to COMPARE and never to display \u2014 the printed string is always what
+   reaches the page \u2014 and anything it cannot read returns null and drops out
+   of the ranking rather than sorting as zero and passing for cheap. */
+const LOT_UNIT = { lakh: 1e5, cr: 1e7, crore: 1e7 };
+const lotValue = p => {
+  const m = String(p == null ? "" : p).replace(/[\u20b9,\s]/g, "")
+    .match(/^([0-9]+(?:\.[0-9]+)?)(lakh|cr|crore)?$/i);
+  if (!m) return null;
+  return parseFloat(m[1]) * (m[2] ? LOT_UNIT[m[2].toLowerCase()] : 1);
+};
+
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const A = k => ARTISTS[k];
 const C = k => (CRM.clients || []).find(c => c.id === k) || null;
@@ -2521,14 +2534,22 @@ function viewToday() {
      median price without minimum comparables in both windows, and a week never
      has them. "International fairs this week" has no source. */
   const above = (REAL.feed || []).filter(f => f.vs_est && f.vs_est.dir === "above").length;
-  const withEst = (REAL.feed || []).filter(f => f.vs_est).length;
-  const top = (REAL.feed || []).slice().sort((a, b) =>
-    (b.vs_est ? b.vs_est.pct : -1) - (a.vs_est ? a.vs_est.pct : -1))[0];
+  // Every lot that carried an estimate, not every lot that missed the band —
+  // a lot that sold inside its estimate did not clear the high either, and
+  // leaving those out printed 52% where the record says 43%.
+  const withEst = (REAL.feed || []).filter(f => f.est).length;
+  /* "Top result" means the biggest price, which is what those two words say.
+     It used to sort by the percentage over estimate, so the tile named a
+     \u20b93.00 cr lot that beat its estimate by 651% while a \u20b99.98 cr Souza
+     sat in the same feed \u2014 the top result understated by a factor of three.
+     The percentage has its own place, on Market's Overview. */
+  const top = (REAL.feed || []).filter(f => lotValue(f.price) != null)
+    .sort((a, b) => lotValue(b.price) - lotValue(a.price))[0];
   const pulse = [
     { i: ICON.rupee,  v: top ? top.price : "\u2014", l: "Top result", s: top ? top.artist : "no results yet" },
-    { i: ICON.market, v: withEst ? Math.round(above / withEst * 100) + "%" : "\u2014", l: "Above high est.", s: `of ${withEst} priced lots` },
+    { i: ICON.market, v: withEst ? Math.round(above / withEst * 100) + "%" : "\u2014", l: "Above high est.", s: `of ${withEst} lots with an estimate` },
     { i: ICON.gavel,  v: String(thisWeek), l: "Sales this week", s: thisWeek ? "in the diary" : "none scheduled" },
-    { i: ICON.globe,  v: String((REAL.events || []).length), l: "Sales ahead", s: "next three months" },
+    { i: ICON.globe,  v: String((REAL.events || []).length), l: "Sales ahead", s: "in the diary" },
   ].map(t => `<div class="pulse"><span class="pi">${I(t.i, 15)}</span>
       <div class="pv tnum">${esc(t.v)}</div>
       <div class="pl">${esc(t.l)}</div>
@@ -3091,6 +3112,15 @@ function marketFx() {
    is countable from rows the desk stores. */
 function marketOverview() {
   const feed = REAL.feed || [];
+  /* The denominator is every lot that CARRIED an estimate, not every lot that
+     missed the band. `vs_est` is null for a lot that landed inside its estimate
+     — the pipeline says so in as many words — and those lots were estimated and
+     did not clear the high, so dropping them from the bottom of the fraction
+     only makes the market look hotter than it was. Seven of forty landed inside
+     the band here: 17 of 33 reads 52%, 17 of 40 reads 43%.
+     `_above_rate()` in build_desk.py has always divided by the estimated set;
+     this now agrees with it. */
+  const estimated = feed.filter(f => f.est);
   const priced = feed.filter(f => f.vs_est);
   const above = priced.filter(f => f.vs_est.dir === "above");
   const below = priced.filter(f => f.vs_est.dir === "below");
@@ -3103,7 +3133,7 @@ function marketOverview() {
 
   const tiles = `<div class="tiles three">
     <div class="tile"><div class="tv">${feed.length}</div><div class="tl">Lots in the latest results</div></div>
-    <div class="tile"><div class="tv">${above.length}<span class="of"> of ${priced.length}</span></div>
+    <div class="tile"><div class="tv">${above.length}<span class="of"> of ${estimated.length}</span></div>
       <div class="tl">Cleared the high estimate</div></div>
     <div class="tile"><div class="tv">${houses.length}</div><div class="tl">Houses reporting</div></div>
   </div>${span ? `<div class="foot-note" style="margin-top:10px">${esc(span)} · ${esc(listOf(houses))}</div>` : ""}`;
@@ -3184,14 +3214,21 @@ function auctionCard(e, closed) {
 
 function marketAuctions() {
   const up = REAL.events || [];
-  const done = REAL.recent_sales || [];
+  /* `recent_sales` is not a list of closed sales. It is the last 40 rows of the
+     `sale` table by date, and that table carries Saffronart's forthcoming sales
+     too — so eleven of sixteen here had not happened yet, seven of them were
+     already listed above under Forthcoming, and four carried a 31-December
+     placeholder date. All eleven were being labelled "Closed" with a link
+     offering "Results". A sale is closed when its date has passed. */
+  const today = todayIso();
+  const done = (REAL.recent_sales || []).filter(e => e.start_date && e.start_date < today);
   return `
     <div class="sec" style="margin-top:0">${sectionHead("Forthcoming", up.length + " in the diary")}
       ${up.length ? `<div class="rows">${up.map(e => auctionCard(e, false)).join("")}</div>`
                   : `<div class="oneline">Nothing forthcoming in the diary.</div>`}</div>
-    <div class="sec">${sectionHead("Recently closed", done.length + " sales")}
+    <div class="sec">${sectionHead("Recently closed", done.length + (done.length === 1 ? " sale" : " sales"))}
       ${done.length ? `<div class="rows">${done.map(e => auctionCard(e, true)).join("")}</div>`
-                    : `<div class="oneline">No closed sales on the record yet.</div>`}</div>
+                    : `<div class="oneline">No sale on the record has closed yet.</div>`}</div>
     <div class="foot-note">No sale total is quoted. Neither house publishes a
       turnover figure, and one summed from the lots on the results page would leave
       out everything that did not sell.</div>`;

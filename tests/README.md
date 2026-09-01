@@ -88,6 +88,47 @@ looks: it strips TAB, LF and CR out of a URL *before* parsing the scheme, so a
 scheme split across a newline still executes. The guard strips the control range
 first, then requires http(s).
 
+## `lot_value.mjs`
+
+    node tests/lot_value.mjs
+
+`lotValue()` is the comparator behind Today's "Top result". The feed carries a
+price as the house printed it (`"₹9.98 cr"`) with no number behind it, so ranking
+lots by value means reading the string back — the one thing this desk otherwise
+refuses to do with money, because the two formatters have disagreed twice. Two
+rules make it safe, and both are tested: it only ever **orders** (the printed
+string is what reaches the page), and it fails **closed** (an unreadable price
+returns null and drops out of the ranking rather than parsing to 0 and passing
+for the cheapest lot in the sale).
+
+It lifts the definitions out of `index.html` at run time rather than copying
+them, so the test cannot drift from the code.
+
+Written after "Top result" was found showing ₹3.00 cr while a ₹9.98 cr Souza sat
+in the same forty lots: the tile had been sorting by percentage over estimate.
+
+## Verifying the Market figures against the houses
+
+Not a file — a method, written down because it found three wrong figures.
+
+1. **Recompute every displayed number from `data/app_data.json`** and compare
+   against the DOM. That is what caught `17 of 33`.
+2. **Reclassify every lot** against its own estimate band. `vs_est` is null for a
+   lot that sold *inside* its estimate, which is why it is the wrong denominator
+   for "cleared the high estimate" — 7 of 40 landed inside the band here.
+3. **Join the feed back to the house.** AstaGuru answers
+   `/api/auctions/filter-lots?auctionId={id}&limit=1000&page=1`; join on the
+   trailing slug of the desk's `url` (the API's `slug` is the whole path, the
+   desk's URL carries only its tail), and read prices from `lot.auctionState`
+   (`hammerWithMarginINR`, `currentHammerINR`, `isBoughtIn` — never
+   `lotAmountWithMargin` or `outbidHammer`, which come back zeroed). All 15
+   AstaGuru lots agreed on artist, title, estimate band, sold price and
+   percentage.
+4. **Allow for display rounding.** Prices print to the whole lakh, so a
+   recomputation from the printed string can be ~2.6% off at ₹19 lakh and 3
+   points off on a percentage. The stored percentages come from exact rupees and
+   are the accurate ones; verify against `data/artdesk.db`, not the strings.
+
 ## Injection sweep (manual)
 
 Paste into the console with the app open: poison every text field a person can
