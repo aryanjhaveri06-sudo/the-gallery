@@ -3036,9 +3036,15 @@ function workThumb(image, alt, cls, placeholder) {
   const orig = safeUrl(image);
   if (!orig) return placeholder ? `<div class="thumb ${cls} ph">no image</div>` : "";
   const shown = orig.replace("_aucres.", "_thumb.");
+  /* Only Saffronart publishes a thumbnail (_thumb, 159px, ~15 KB). AstaGuru and
+     Pundole's serve the print scan and nothing else — measured: ~195 KB and
+     ~1.1 MB a picture, no size variant, no resize parameter, no WebP
+     negotiation. So these must never compete with the page: lazy keeps them off
+     the wire until she scrolls to them, async keeps the decode off the main
+     thread, and low priority keeps them behind everything that matters. */
   return `<img class="thumb ${cls}" src="${esc(shown)}" alt="${esc(alt || "")}"
     ${shown !== orig ? `data-fallback="${esc(orig)}"` : ""}
-    loading="lazy" decoding="async" onerror="lotThumbFail(this)">`;
+    loading="lazy" decoding="async" fetchpriority="low" onerror="lotThumbFail(this)">`;
 }
 
 function lotThumb(f) {
