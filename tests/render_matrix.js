@@ -24,7 +24,7 @@
   const savedREAL = JSON.parse(JSON.stringify(REAL));
   const savedCRM = { live: CRM.live, needsKey: CRM.needsKey, clients: CRM.clients,
                      detail: CRM.detail, detailBusy: CRM.detailBusy,
-                     detailError: CRM.detailError,
+                     detailError: CRM.detailError, activity: CRM.activity,
                      followups: CRM.followups, diary: CRM.diary };
   // render() now asks for a missing client record while it paints. That is the
   // whole point of the fix, but a harness that let it run would put ~1700
@@ -58,27 +58,33 @@
     holdings: [], referrals: [], log: [], followups: [] };
 
   const AUTH = {
-    offline:        () => Object.assign(CRM, { live: false, needsKey: false, clients: null, detail: {}, followups: null, diary: null }),
-    locked:         () => Object.assign(CRM, { live: false, needsKey: true, clients: null, detail: {}, followups: null, diary: null }),
-    'live-empty':   () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, followups: [], diary: { configured: false, today: [] } }),
-    'live-bare':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Bare', tier: null, focus: null, wants: [], holdings: 0, open_followups: 0 }], detail: { [CID]: bare }, followups: [], diary: { configured: true, today: [] } }),
-    'live-full':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: { [CID]: full }, followups: [{ id: 'f1', client_id: CID, client_name: 'Probe', due: '2026-09-01', reason: 'R', done: 0, overdue: true, age: 'overdue 5d' }], diary: { configured: true, today: [{ time: '11:00', title: 'V', location: 'M' }] } }),
-    'detail-missing': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: { [CID]: true }, detailError: {}, followups: [], diary: { configured: true, today: [] } }),
+    offline:        () => Object.assign(CRM, { live: false, needsKey: false, clients: null, detail: {}, detailBusy: {}, detailError: {}, activity: null, followups: null, diary: null }),
+    locked:         () => Object.assign(CRM, { live: false, needsKey: true, clients: null, detail: {}, detailBusy: {}, detailError: {}, activity: null, followups: null, diary: null }),
+    'live-empty':   () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, detailBusy: {}, detailError: {}, activity: [], followups: [], diary: { configured: false, today: [] } }),
+    'live-bare':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Bare', tier: null, focus: null, wants: [], holdings: 0, open_followups: 0 }], detail: { [CID]: bare }, detailBusy: {}, detailError: {}, activity: [], followups: [], diary: { configured: true, today: [] } }),
+    'live-full':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: { [CID]: full }, detailBusy: {}, detailError: {}, activity: [{ id: 'l1', client_id: CID, client_name: 'Probe', happened: '2026-08-01', channel: 'Call', note: 'N' }], followups: [{ id: 'f1', client_id: CID, client_name: 'Probe', due: '2026-09-01', reason: 'R', done: 0, overdue: true, age: 'overdue 5d' }], diary: { configured: true, today: [{ time: '11:00', title: 'V', location: 'M' }] } }),
+    'detail-missing': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: { [CID]: true }, detailError: {}, activity: [], followups: [], diary: { configured: true, today: [] } }),
     // The record asked for and refused. Before the fix this and the state above
     // printed the same sentence and waited for ever.
-    'detail-failed': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: {}, detailError: { [CID]: 'Could not reach the book from this device.' }, followups: [], diary: { configured: true, today: [] } }),
+    'detail-failed': () => Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: {}, detailBusy: {}, detailError: { [CID]: 'Could not reach the book from this device.' }, activity: [], followups: [], diary: { configured: true, today: [] } }),
     // THE BUG this file exists to keep out: S.client holding an id the book does
     // not carry. It shipped as the default ("nanda", from the old sample book),
     // so opening Clients on a wide screen sat on "Opening the card" for ever.
     'stale-selection': () => { Object.assign(CRM, { live: true, needsKey: false, clients: [{ id: CID, name: 'Probe', tier: 'Principal', focus: 'M', wants: [], holdings: 1, open_followups: 1 }], detail: { [CID]: full }, detailBusy: {}, detailError: {}, followups: [], diary: { configured: true, today: [] } }); STALE = true; },
     // Live, signed in, and nobody in the book to select.
-    'live-none':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, detailBusy: {}, detailError: {}, followups: [], diary: { configured: true, today: [] } }),
+    'live-none':    () => Object.assign(CRM, { live: true, needsKey: false, clients: [], detail: {}, detailBusy: {}, detailError: {}, activity: [], followups: [], diary: { configured: true, today: [] } }),
   };
   // set by the stale-selection state; makes the loop point S.client at a ghost
   let STALE = false;
 
-  const SCREENS = ['today', 'artists', 'market', 'clients', 'calendar', 'knowledge',
-                   'more', 'newclient', 'unlock', 'dossier', 'client', 'ask'];
+  const SCREENS = ['today', 'news', 'article', 'search', 'artists', 'market', 'clients',
+                   'calendar', 'knowledge', 'more', 'newclient', 'unlock', 'dossier',
+                   'client', 'ask'];
+  const MARKET_TABS_T = ['overview', 'results', 'artists', 'auctions', 'no-such-tab'];
+  const NEWS_TABS_T = ['foryou', 'all', 'saved'];
+  const CLIENT_TABS_T = ['overview', 'interests', 'activity', 'templates', 'no-such-tab'];
+  // A story key that exists, one that never did, and nothing at all.
+  const someStory = () => (allStories()[0] || {}).key || null;
   const PANELS = [null, 'client', 'holding', 'log', 'followup', 'holding:h1', 'log:l1', 'followup:f1'];
   const ASK_STATES = {
     'ask-off':      () => { CRM.ai = false; S.askLog = []; S.askBusy = false; S.askError = null; },
@@ -102,8 +108,10 @@
     for (const [auth, setup] of Object.entries(AUTH)) {
       STALE = false; setup();
       for (const sc of SCREENS) {
-        S.screen = sc; S.marketTab = 'results';
+        S.screen = sc; S.marketTab = 'overview';
         S.client = STALE ? 'no-such-collector' : CID;
+        S.clientTab = 'overview'; S.newsTab = 'foryou';
+        S.article = someStory(); S.back = null; S.query = '';
         S.artist = Object.keys(ARTISTS)[0]; S.panel = null; S.draft = {}; S.confirmDelete = null;
         if (sc === 'ask') {
           for (const [name, set] of Object.entries(ASK_STATES)) {
@@ -119,6 +127,44 @@
           S.confirmDelete = p && p.includes(':') ? p : null;
           runs++; attempt(`${vp}/${auth}/${sc}${p ? '/' + p : ''}`, () => render(false));
         }
+        if (sc === 'market') {
+          for (const mt of MARKET_TABS_T) {
+            S.marketTab = mt; runs++;
+            attempt(`${vp}/${auth}/market:${mt}`, () => render(false));
+          }
+          S.marketTab = 'overview';
+        }
+        if (sc === 'news') {
+          for (const nt of NEWS_TABS_T) {
+            S.newsTab = nt; runs++;
+            attempt(`${vp}/${auth}/news:${nt}`, () => render(false));
+          }
+          S.newsTab = 'foryou';
+        }
+        // An article the desk holds, one it never had, and none named at all.
+        if (sc === 'article') {
+          for (const key of [someStory(), 'no-such-story', null, '']) {
+            for (const back of [null, 'today', 'article', 'search']) {
+              S.article = key; S.back = back; runs++;
+              attempt(`${vp}/${auth}/article:${key ? 'real' : String(key)}/back:${back}`, () => render(false));
+            }
+          }
+          S.article = someStory(); S.back = null;
+        }
+        if (sc === 'search') {
+          for (const q of ['', 'raza', 'zzzzz', 'a', '<img src=x onerror=alert(1)>', 'september']) {
+            S.query = q; runs++;
+            attempt(`${vp}/${auth}/search("${q.slice(0, 12)}")`, () => render(false));
+          }
+          S.query = '';
+        }
+        if (sc === 'client' || sc === 'clients') {
+          for (const ct of CLIENT_TABS_T) {
+            S.clientTab = ct; runs++;
+            attempt(`${vp}/${auth}/${sc}/tab:${ct}`, () => render(false));
+          }
+          S.clientTab = 'overview';
+        }
         // the month grid carries its own state: which month, which day open
         if (sc === 'calendar') {
           for (const m of [-14, 0, 1, 18]) {
@@ -133,13 +179,6 @@
           S.calMonth = 0; S.calDay = null;
         }
       }
-      for (const q of ['', 'gaitonde', 'zzzz']) {
-        caught = []; S.searchOpen = true; S.query = q; runs++;
-        try { renderSheet(); renderSheetResults(); }
-        catch (e) { failures.push(`THREW ${vp}/${auth}/sheet("${q}") :: ${e.message}`); }
-        if (caught.length) failures.push(`GUARD ${vp}/${auth}/sheet("${q}") :: ${caught[0].slice(0, 120)}`);
-      }
-      S.searchOpen = false; renderSheet();
     }
   }
   // A pass here is not "it did not throw" \u2014 the bug never threw. On a wide
@@ -148,7 +187,7 @@
   isPad = true; isSplit = true;
   AUTH['stale-selection'](); STALE = false;
   S.screen = 'clients'; S.client = 'no-such-collector';
-  S.panel = null; S.draft = {}; S.confirmDelete = null; S.searchOpen = false;
+  S.panel = null; S.draft = {}; S.confirmDelete = null;
   render(false);
   if (S.client !== CID) failures.push(`STALE selection not repaired :: S.client=${S.client}`);
   const detailText = (document.querySelector('.split .detail') || { textContent: '' }).textContent;
@@ -194,31 +233,37 @@
     REAL = r;
     caught = [];
     try { rebuildFromReal(); } catch (e) { failures.push(`THREW ${label}/rebuildFromReal :: ${e.message}`); }
-    for (const sc of ['today', 'artists', 'market', 'clients', 'calendar', 'knowledge', 'more', 'dossier']) {
-      S.screen = sc; S.marketTab = 'results'; S.panel = null; S.searchOpen = false;
+    for (const sc of ['today', 'news', 'article', 'search', 'artists', 'market', 'clients',
+                      'calendar', 'knowledge', 'more', 'dossier']) {
+      S.screen = sc; S.marketTab = 'overview'; S.panel = null;
+      S.newsTab = 'foryou'; S.clientTab = 'overview';
+      S.article = (allStories()[0] || {}).key || null;
+      S.query = sc === 'search' ? 'raza' : '';
       S.artist = Object.keys(ARTISTS)[0] || 'missing';
       S.calMonth = sc === 'calendar' ? 1 : 0; S.calDay = null;
       runs++; attempt(`data:${label}/${sc}`, () => render(false));
     }
     S.calMonth = 0;
-    for (const mt of ['trending', 'news']) {
+    for (const mt of ['results', 'artists', 'auctions']) {
       S.screen = 'market'; S.marketTab = mt;
       runs++; attempt(`data:${label}/market:${mt}`, () => render(false));
     }
-    for (const q of ['', 'gaitonde']) {
-      caught = []; S.searchOpen = true; S.query = q; runs++;
-      try { renderSheet(); renderSheetResults(); }
-      catch (e) { failures.push(`THREW data:${label}/sheet("${q}") :: ${e.message}`); }
-      if (caught.length) failures.push(`GUARD data:${label}/sheet("${q}") :: ${caught[0].slice(0, 120)}`);
-      S.searchOpen = false; renderSheet();
+    for (const nt of ['foryou', 'all', 'saved']) {
+      S.screen = 'news'; S.newsTab = nt;
+      runs++; attempt(`data:${label}/news:${nt}`, () => render(false));
     }
+    for (const q of ['', 'gaitonde', 'september']) {
+      S.screen = 'search'; S.query = q;
+      runs++; attempt(`data:${label}/search("${q}")`, () => render(false));
+    }
+    S.query = '';
   }
 
   REAL = savedREAL; rebuildFromReal();
   Object.assign(S, savedS);
-  S.panel = null; S.draft = {}; S.confirmDelete = null; S.searchOpen = false;
+  S.panel = null; S.draft = {}; S.confirmDelete = null;
   S.calMonth = 0; S.calDay = null;
-  render(false); renderSheet();
+  render(false);
   console.error = realErr;
   ensureDetail = realEnsure;
   return { combinationsRun: runs, failureCount: failures.length, failures: failures.slice(0, 40) };

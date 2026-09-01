@@ -114,6 +114,21 @@ function safeJson(v) {
   try { return v ? JSON.parse(v) : []; } catch { return []; }
 }
 
+/* The Clients screen shows what was said lately across the whole book, and
+   Search looks through it. Both used to be impossible without opening all
+   thirty cards one at a time, because a conversation log only arrived with the
+   client record it belongs to. Read-only, and it carries the client name so the
+   row can say who it was. */
+async function recentActivity(env, limit) {
+  const { results } = await env.DB.prepare(
+    `SELECT l.id, l.client_id, l.happened, l.channel, l.note, c.name AS client_name, c.tier
+       FROM log l JOIN client c ON c.id = l.client_id
+      ORDER BY l.happened DESC, l.created_at DESC
+      LIMIT ?`
+  ).bind(limit).all();
+  return results;
+}
+
 /* ---------------------------------------------------------------- follow-ups */
 
 async function dueFollowups(env) {
@@ -461,6 +476,9 @@ export async function onRequest(context) {
       const c = await getClient(env, path.slice("/clients/".length));
       return c ? json(c) : json({ error: "No such client." }, 404);
     }
+    if (method === "GET" && path === "/activity") {
+      return json({ activity: await recentActivity(env, 60) });
+    }
     if (method === "GET" && path === "/followups") {
       return json({ followups: await dueFollowups(env) });
     }
@@ -468,8 +486,9 @@ export async function onRequest(context) {
       return json(await todaysDiary(env));
     }
     if (method === "GET" && path === "/brief") {
-      const [followups, diary] = await Promise.all([dueFollowups(env), todaysDiary(env)]);
-      return json({ followups, diary, as_of: now() });
+      const [followups, diary, activity] = await Promise.all([
+        dueFollowups(env), todaysDiary(env), recentActivity(env, 60)]);
+      return json({ followups, diary, activity, as_of: now() });
     }
 
     /* --- write ----------------------------------------------------------- */

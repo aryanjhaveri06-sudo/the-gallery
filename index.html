@@ -387,7 +387,9 @@ button.row:active{background:var(--gold-tint)}
 
 /* ---- Today, to the mockup (spec §3) ---- */
 .hero{position:relative;padding-top:6px}
-.hero-link{display:block;color:inherit;text-decoration:none}
+/* These three were anchors out to the publisher and are buttons into the
+   article now. A button does not fill its parent the way a block anchor does. */
+.hero-link{display:block;width:100%;color:inherit;text-decoration:none}
 .hero-media{position:relative;border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
 .hero-media img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
 .rank{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:var(--r-sm);
@@ -412,7 +414,7 @@ button.row:active{background:var(--gold-tint)}
 .mark.on svg{fill:currentColor}
 
 .scrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
-.sc{display:block;color:inherit;text-decoration:none}
+.sc{display:block;width:100%;color:inherit;text-decoration:none}
 .sc-media{position:relative;border-radius:var(--r-sm);overflow:hidden;background:var(--surface);
   aspect-ratio:4/3}
 .sc-media img{width:100%;height:100%;object-fit:cover;display:block}
@@ -446,7 +448,7 @@ button.row:active{background:var(--gold-tint)}
 .dayrow .dt b{font-family:var(--font-heading);font-weight:600;margin-right:3px}
 
 .mf{position:relative;border-bottom:1px solid var(--divider-soft)}
-.mf-link{display:block;color:inherit;text-decoration:none}
+.mf-link{display:block;width:100%;color:inherit;text-decoration:none}
 .mf-link, .mf > .mf-body{display:grid;grid-template-columns:1fr 66px;gap:14px;
   align-items:start;padding:15px 34px 15px 0}
 .mf-img{width:66px;aspect-ratio:1/1;object-fit:cover;border-radius:var(--r-sm);
@@ -920,6 +922,182 @@ input[data-ed][type=date]{min-height:46px}
 .sheet-hint{padding:22px 0 10px}
 .empty{padding:30px 0;text-align:center;font-size:14.2px;color:var(--ink-50);font-style:italic}
 
+
+/* ============================================================
+   PASS 3 — NEWS, ARTICLE, SEARCH, MARKET TABS, CLIENT TABS
+   ============================================================ */
+
+/* The handoff's tab strip: an underlined row, not the segmented control. Used
+   by News, Market and the client card, so the three read as one pattern. */
+.seg-tabs{
+  border:0;border-bottom:1px solid var(--divider);border-radius:0;
+  gap:20px;overflow-x:auto;scrollbar-width:none;margin-bottom:0;
+}
+.seg-tabs::-webkit-scrollbar{display:none}
+.seg-tabs button{
+  flex:0 0 auto;text-align:left;padding:2px 0 10px;border-right:0;
+  font-family:var(--font-body);font-weight:600;font-size:11.5px;letter-spacing:.08em;
+  border-bottom:2px solid transparent;white-space:nowrap;
+}
+.seg-tabs button[aria-pressed="true"]{
+  background:transparent;color:var(--ink);border-bottom-color:var(--gold);
+}
+.seg-tabs .tabn{
+  font-size:10px;margin-left:6px;color:var(--ink-40);letter-spacing:0;
+  font-variant-numeric:tabular-nums;
+}
+.seg-tabs button[aria-pressed="true"] .tabn{color:var(--gold-ink)}
+
+/* ---- news card (handoff's feed row) ---- */
+.scard{
+  position:relative;display:grid;grid-template-columns:1fr 58px;gap:12px;
+  align-items:start;border:1px solid var(--divider);border-radius:var(--r-md);
+  padding:13px 34px 13px 14px;margin-bottom:10px;
+}
+.scard.noimg{grid-template-columns:1fr}
+.scard-open{display:block;width:100%;text-align:left;color:inherit;min-width:0}
+.scard-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px}
+.scard-top .news-tag{margin-bottom:0}
+.scard-top .kick{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-50)}
+.scard-head{
+  display:block;font-family:var(--font-heading);font-weight:700;font-size:15px;
+  line-height:1.28;margin-top:6px;text-wrap:pretty;
+}
+.scard-open:hover .scard-head{color:var(--gold-ink)}
+.scard-sum{
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:12.5px;color:var(--ink-60);line-height:1.45;margin-top:5px;
+}
+.scard .story-why{margin-top:9px}
+.scard-img{
+  width:58px;height:58px;object-fit:cover;border-radius:var(--r-sm);
+  background:var(--surface);border:1px solid var(--divider-soft);
+}
+.scard .mark{top:6px;right:4px}
+
+/* ---- article ---- */
+.article-head .art-media{
+  border-radius:var(--r-md);overflow:hidden;background:var(--surface);margin-bottom:16px;
+}
+/* A 16/9 hero is 620px tall in a 1100px column, which is a whole screen of
+   press photograph before the headline. Cap it; the crop is a press photo, not
+   a painting, so cover is the right fit here. */
+.article-head .art-media img{
+  width:100%;aspect-ratio:16/9;max-height:min(46vh,400px);object-fit:cover;display:block;
+}
+.article-head .art-kick{position:relative;display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap;padding-right:38px}
+.hero-tag.static{position:static}
+.article-head h1{
+  font-family:var(--font-heading);font-weight:700;font-size:29px;line-height:1.14;
+  margin:12px 0 0;letter-spacing:-.008em;text-wrap:balance;
+}
+.article-head .art-sum{margin:10px 0 0;font-size:14.7px;color:var(--ink-72);line-height:1.55}
+.article-head .mark{position:absolute;top:-6px;right:0}
+
+/* how a story scored — a rule, shown as a rule */
+.sigs{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+.sig{display:flex;align-items:flex-start;gap:9px;font-size:12.6px;color:var(--ink-72);line-height:1.4}
+.sig .sd{width:7px;height:7px;border-radius:50%;flex:none;margin-top:5px;
+  border:1px solid var(--divider);background:transparent}
+.sig.on{color:var(--ink)}
+.sig.on .sd{background:var(--gold);border-color:var(--gold)}
+.sig.off{color:var(--ink-40)}
+
+/* a result line — article, market overview, search */
+.ares{
+  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  padding:11px 0;border-bottom:1px solid var(--divider-soft);color:inherit;text-decoration:none;
+}
+.ares-b{min-width:0}
+.ares-t{font-size:13.5px;line-height:1.35;text-wrap:pretty}
+.ares-m{font-size:11px;color:var(--ink-50);margin-top:3px}
+.ares-p{font-family:var(--font-heading);font-weight:600;font-size:14.5px;white-space:nowrap}
+.ares-p.up{color:var(--up)}
+.ares-p.down{color:var(--down)}
+a.ares:hover .ares-t{color:var(--gold-ink)}
+
+/* ---- market ---- */
+.tiles.three .tile .of{font-size:12.5px;color:var(--ink-40);font-weight:400;font-family:var(--font-body)}
+.mrow{
+  display:flex;align-items:center;gap:13px;width:100%;text-align:left;
+  padding:12px 0;border-bottom:1px solid var(--divider-soft);color:inherit;
+}
+.mrow .rk{font-family:var(--font-heading);font-weight:600;font-size:12.5px;color:var(--ink-40);flex:none}
+.mrow .mb{flex:1;min-width:0}
+.mrow .mn{display:block;font-family:var(--font-heading);font-weight:600;font-size:16px;line-height:1.25}
+.mrow .mm{display:block;font-size:11px;color:var(--ink-50);margin-top:3px}
+.mrow .md{font-family:var(--font-heading);font-weight:600;font-size:14.5px;white-space:nowrap}
+.mrow .md.up{color:var(--up)}
+.mrow .md.down{color:var(--down)}
+.mrow .md.flat{color:var(--ink-50)}
+
+.auc{
+  display:block;border:1px solid var(--divider);border-radius:var(--r-md);
+  padding:13px 15px;margin-bottom:10px;color:inherit;text-decoration:none;
+}
+.auc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:7px;flex-wrap:wrap}
+.auc-status{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.auc-status.open{color:var(--gold-ink)}
+.auc-status.closed{color:var(--ink-40)}
+.auc-name{font-family:var(--font-heading);font-weight:700;font-size:16px;line-height:1.25;text-wrap:pretty}
+.auc-meta{font-size:11.5px;color:var(--ink-60);margin-top:4px}
+.auc-link{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink);margin-top:9px}
+a.auc:hover .auc-name{color:var(--gold-ink)}
+
+/* ---- clients ---- */
+.curow{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:11px 0;border-bottom:1px solid var(--divider-soft);color:inherit;
+}
+.cav,.ch-av{
+  width:36px;height:36px;border-radius:50%;background:var(--gold-tint);flex:none;
+  display:flex;align-items:center;justify-content:center;color:var(--gold-ink);
+  font-family:var(--font-body);font-weight:700;font-size:11.5px;letter-spacing:.04em;
+}
+.curow .cub{flex:1;min-width:0}
+.curow .cun{display:block;font-family:var(--font-heading);font-weight:600;font-size:15.5px}
+.curow .cui{display:block;font-size:11.5px;color:var(--ink-50);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.curow .cud{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-50);
+  white-space:nowrap;flex:none}
+.curow .cud.over{color:var(--down)}
+.logbtn{width:100%;text-align:left;color:inherit;border-bottom:1px solid var(--divider-soft)}
+.logbtn .nt .row-sub{margin-top:5px}
+/* A logged note is free text she typed, and a pasted URL is one unbroken token
+   no wrapper can split. Let it break rather than push the column open. */
+.log .nt, .curow .cui, .row-name, .ares-t, .auc-name{overflow-wrap:anywhere}
+
+.ch-id{display:flex;align-items:center;gap:14px}
+.ch-av{width:52px;height:52px;font-family:var(--font-heading);font-size:16px}
+.glance{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+.glance .gr{display:flex;justify-content:space-between;gap:18px;font-size:13px;
+  padding-bottom:9px;border-bottom:1px solid var(--divider-soft)}
+.glance .gk{color:var(--ink-50);flex:none}
+.glance .gv{text-align:right;max-width:64%}
+
+/* ---- search ---- */
+.searchbar{
+  display:flex;align-items:center;gap:11px;border:1px solid var(--divider);
+  border-radius:999px;padding:9px 15px;margin-bottom:22px;background:var(--raised);
+}
+.searchbar .g{color:var(--ink-40);line-height:0;flex:none}
+.searchbar input{
+  flex:1;border:0;background:transparent;outline:none;font-family:var(--font-body);
+  font-size:15px;color:var(--ink);min-width:0;padding:0;
+}
+.searchbar input::-webkit-search-cancel-button{display:none}
+.searchbar .cancel{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold-ink);flex:none}
+
+@media (max-width:560px){
+  .article-head h1{font-size:25px}
+  .scard{grid-template-columns:1fr 52px}
+  .scard-img{width:52px;height:52px}
+  .glance .gr{font-size:12.5px}
+}
+
 /* ============================================================
    iPAD — 768px and up
    ============================================================ */
@@ -1064,7 +1242,7 @@ input[data-ed][type=date]{min-height:46px}
     <button class="fab" id="fab" data-nav="ask" aria-label="Ask AG Newsroom" hidden></button>
   </div>
 </div>
-<div id="sheet"></div>
+
 
 <script>
 "use strict";
@@ -1093,7 +1271,8 @@ const ICON = {
   more:   `<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>`,
   back:   `<path d="M15 18l-6-6 6-6"/>`,
   chev:   '<path d="m9 18 6-6-6-6"/>',
-  search: `<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>`
+  search: `<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>`,
+  news:   `<path d="M4 5h11a1 1 0 0 1 1 1v13H5a1 1 0 0 1-1-1z"/><path d="M16 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3"/><path d="M7 9h5M7 12h5M7 15h5"/>`
 };
 
 /* ============================================================
@@ -1423,9 +1602,26 @@ function scoreStory(n) {
   }
 
   // source authority 10
-  if (AUTHORITATIVE.some(t => src.includes(t))) score += 10;
+  const authoritative = AUTHORITATIVE.some(t => src.includes(t));
+  if (authoritative) score += 10;
 
-  return { score: Math.round(score), reasons, artists: hits };
+  /* The chips are what the desk shows on a card, and they only cover the
+     signals worth a chip. The article screen shows the whole scoring, because
+     "why is this at the top" should be answerable, and answerable from the
+     rule rather than from prose somebody wrote. */
+  const signals = [
+    { label: "Published " + (days < 1 ? "today" : Math.round(days) + (days < 2 ? " day" : " days") + " ago"),
+      on: days <= 14 },
+    { label: "Names India or an Indian city", on: INDIA_WORDS.some(t => hay.includes(t)) },
+    { label: mk.length ? "Auction language: " + mk.slice(0, 4).join(", ") : "No auction language",
+      on: !!mk.length },
+    { label: hits.length ? listOf(hits.slice(0, 3).map(k => ARTISTS[k].name)) + " on the desk"
+                         : "No artist you track is named", on: !!hits.length },
+    { label: authoritative ? n.source + " is a desk source" : (n.source || "Source not on the desk list"),
+      on: authoritative },
+  ];
+
+  return { score: Math.round(score), reasons, artists: hits, signals };
 }
 
 const INDIA_WORDS = ["india", "indian", "mumbai", "delhi", "kolkata", "chennai",
@@ -1434,10 +1630,9 @@ const INDIA_WORDS = ["india", "indian", "mumbai", "delhi", "kolkata", "chennai",
 
 /* Ranked once per render, cached on the object so the Today hero and the feed
    agree about what matters. */
-function rankedStories() {
-  const all = ((REAL.news || {}).on_market || []).map(n => ({ ...n, ...scoreStory(n) }));
-  return all.sort((a, b) => b.score - a.score || String(b.date).localeCompare(String(a.date)));
-}
+/* rankedStories() was here. allStories() replaced it: the same ranking, but
+   scored once per feed rather than once per render, carrying a stable key so a
+   card can open the story it belongs to, and covering the wider pool too. */
 
 const newsTag = n => {
   const hay = (n.headline || "") + " " + (n.why || "");
@@ -1445,38 +1640,62 @@ const newsTag = n => {
   return hit ? hit[0] : null;
 };
 
-const newsRow = n => {
-  const u = safeUrl(n.url);
-  const tag = newsTag(n);
-  const img = safeUrl(n.image);
-  const body = `<div>
-      ${tag ? `<span class="news-tag">${esc(tag)}</span>` : ""}
-      <div class="kick">${esc(fmtDate(n.date))} \u00b7 ${esc(n.source)}</div>
-      <h3>${esc(n.headline)}</h3>${n.why ? `<p>${esc(n.why)}</p>` : ""}
-    </div>${img
-      ? `<img class="nimg" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">`
-      : ""}`;
-  return u
-    ? `<a class="news" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${body}</a>`
-    : `<div class="news">${body}</div>`;
-};
+/* newsRow / newsBlock / onMarketCount lived here until the news desk got its own
+   screen. Nothing had rendered them since Today became picture-led — they were
+   still being built on every paint and thrown away. storyCard() is the one news
+   row now, and every screen that shows a headline uses it. */
 
-function newsBlock(nMine, nWider) {
+/* Both news pools as one scored list. Today's hero, the News screen, Search and
+   the article all read this, so they cannot disagree about what a story is or
+   why it ranked. Scoring walks 48 artists per headline, so it is cached until
+   the feed or the book changes under it \u2014 loadNews() and loadCRM() both land
+   mid-session. */
+let _stories = null, _storiesOn = null;
+function allStories() {
   const d = REAL.news || {};
-  const mine = (d.on_market || []).slice(0, nMine);
-  const wider = (d.wider || []).slice(0, nWider);
-  if (!mine.length && !wider.length) {
-    return `<div class="empty">No headlines pulled yet. The nightly refresh fills this.</div>`;
-  }
-  return `<div class="rows">`
-    + mine.map(newsRow).join("")
-    + (wider.length
-        ? `<div class="label" style="padding:20px 0 2px">Wider art market</div>` + wider.map(newsRow).join("")
-        : "")
-    + `</div>`;
+  /* The tracked set belongs in the stamp. A story carries the artist keys it
+     matched, and loadLiveData() can swap REAL under a running session — cache
+     across that and the keys point at artists that are no longer there. */
+  const stamp = [d.generated_at, (d.on_market || []).length, (d.wider || []).length,
+                 artistKeys.length, artistKeys[0],
+                 CRM.live ? (CRM.clients || []).length : -1].join("|");
+  if (_stories && _storiesOn === stamp) return _stories;
+  const mk = (rows, scope) => (rows || []).filter(n => n && n.headline)
+    .map(n => ({ ...n, scope, key: storyKey(n), ...scoreStory(n) }));
+  _stories = [...mk(d.on_market, "India"), ...mk(d.wider, "Wider")];
+  _storiesOn = stamp;
+  return _stories;
 }
+const storyByKey = k => allStories().find(x => x.key === k) || null;
+const byDateDesc = (a, b) => String(b.date).localeCompare(String(a.date));
 
-const onMarketCount = () => ((REAL.news || {}).on_market || []).length;
+/* The bookmark toggle. It was a closure inside viewToday, which meant only
+   Today could draw one; the News screen and the article need the same button
+   and the same state. */
+const markBtn = n => `<button class="mark ${isMarked(n) ? "on" : ""}" data-mark="${esc(markKey(n))}"
+    aria-label="${isMarked(n) ? "Saved" : "Save"}" aria-pressed="${isMarked(n)}">${I(ICON.bookmark, 15)}</button>`;
+
+/* The handoff's news card: tag, source and time, headline, summary, a square
+   thumbnail and a save toggle. It opens the article rather than the publisher \u2014
+   the article screen is where the desk says what the story touches, and it
+   carries the link out. */
+function storyCard(n) {
+  const img = safeUrl(n.image), tag = newsTag(n);
+  return `<div class="scard${img ? "" : " noimg"}">
+    <button class="scard-open" data-open-story="${esc(n.key)}">
+      <span class="scard-top">
+        ${tag ? `<span class="news-tag">${esc(tag)}</span>` : ""}
+        <span class="kick">${esc(n.source || "")}${n.date ? " \u00b7 " + esc(fmtDate(n.date)) : ""}</span>
+      </span>
+      <span class="scard-head">${esc(n.headline)}</span>
+      ${n.why ? `<span class="scard-sum">${esc(n.why)}</span>` : ""}
+      ${(n.reasons || []).length ? `<span class="story-why">${n.reasons.map(r =>
+        `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</span>` : ""}
+    </button>
+    ${img ? `<img class="scard-img" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}
+    ${markBtn(n)}
+  </div>`;
+}
 
 function buildArtists() {
   const out = {};
@@ -1584,7 +1803,7 @@ const OBJECTIONS = [
    rather than breaking — the market data is the part that must never fail.
    ------------------------------------------------------------ */
 const CRM = { live: false, who: null, clients: null, followups: null, diary: null,
-              detail: {}, detailBusy: {}, detailError: {},
+              detail: {}, detailBusy: {}, detailError: {}, activity: null,
               guard: null, needsKey: false, keyError: null,
               ai: false };   // a Mistral key is set on this origin
 
@@ -1632,6 +1851,9 @@ async function loadCRM() {
     CRM.clients = clients.clients || [];
     CRM.followups = (brief && brief.followups) || [];
     CRM.diary = (brief && brief.diary) || null;
+    // /brief carries it now, so the Clients screen and Search have the whole
+    // book's recent conversation without opening thirty cards to get it.
+    CRM.activity = (brief && brief.activity) || [];
     return true;
   } catch (e) {
     return false;                    // sample book stands
@@ -1915,6 +2137,11 @@ const MARK_KEY = "gallery.marks";
 let MARKS = (() => { try { return new Set(JSON.parse(localStorage.getItem(MARK_KEY) || "[]")); }
                      catch (e) { return new Set(); } })();
 const markKey = n => (n && n.url) ? String(n.url).split("?")[0].slice(-90) : "";
+/* A story needs one stable identity for three different jobs \u2014 the bookmark
+   set, the article screen and search. The URL is that identity where there is
+   one; a headline slug stands in where there is not. */
+const storyKey = n => markKey(n) ||
+  ("h:" + String((n && n.headline) || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 80));
 const isMarked = n => MARKS.has(markKey(n));
 function toggleMark(n) {
   const k = markKey(n);
@@ -1936,7 +2163,11 @@ const S = {
      made from the book that is actually loaded now, or not made at all. */
   client: null,
   houseFilter: "All",
-  marketTab: "results",
+  marketTab: "overview",
+  newsTab: "foryou",      // news feed: for you / all / saved
+  clientTab: "overview",  // client card: overview / interests / activity / templates
+  article: null,          // the story open on the article screen
+  back: null,             // where a pushed screen (article, search) returns to
   knowTab: "scripts",
   calFilter: "All",
   resHouse: "All",          // results: auction house
@@ -1965,7 +2196,6 @@ const S = {
   openTemplate: null,
   bioOpen: false,
   query: "",
-  searchOpen: false,
   done: saved.done || {}
 };
 const persist = () => { try { localStorage.setItem(SAVED_KEY, JSON.stringify({ done: S.done, askBook: S.askBook })); } catch (e) {} };
@@ -2035,6 +2265,7 @@ function sparkline(values, width) {
 const NAV = [
   { id: "today",     label: "Today",    icon: "today",     badge: () => `${dueCount()} due` },
   { id: "artists",   label: "Artists",  icon: "artists",   badge: () => `${artistKeys.length}` },
+  { id: "news",      label: "News",     icon: "news",      badge: () => `${allStories().length}` },
   { id: "market",    label: "Market",   icon: "market",    badge: () => "live" },
   { id: "clients",   label: "Clients",  icon: "clients",   badge: () => CRM.live ? `${CRM.clients.length}` : "\u2014" },
   { id: "calendar",  label: "Calendar", icon: "calendar",  badge: () => "Sep–Nov" },
@@ -2045,21 +2276,35 @@ const NAV = [
    on the rail everywhere else. It also has a card on Today, which is where she
    actually starts. */
 const PHONE_TABS = ["today", "artists", "market", "clients", "more"];
+const PUSHED = ["article", "search", "news", "newclient", "unlock"];
 const tabForScreen = s => {
   if (s === "dossier") return "artists";
   if (s === "client") return "clients";
+  /* A pushed screen highlights the tab it was opened from, so the bar never
+     goes blank while she is two screens deep. S.back is ONE value, not a stack,
+     so recursing into it while it still names a pushed screen recurses for
+     ever — that blanked the tab bar with a stack overflow. One hop only; a
+     pushed screen reached from another falls back to the hub that holds it. */
+  if (PUSHED.includes(s)) {
+    const b = S.back;
+    return (b && !PUSHED.includes(b) && b !== s) ? tabForScreen(b) : (isPad ? "today" : "more");
+  }
   if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "more")) return "more";
   return s;
 };
 
 const TITLES = {
   today: "Start my day", artists: "Artists", dossier: "", market: "Market",
-  clients: "Clients", client: "", calendar: "Calendar", knowledge: "Knowledge", more: "More"
+  clients: "Clients", client: "", calendar: "Calendar", knowledge: "Knowledge",
+  more: "More", news: "News", article: "", search: "Search"
 };
 
 /* which screen a back chevron returns to, or null when nothing is pushed */
 function backTarget() {
+  // A pushed screen remembers where it was opened from — what the handoff
+  // means by "a back pointer, not a full stack".
   if (S.screen === "newclient" || S.screen === "unlock") return "clients";
+  if (PUSHED.includes(S.screen)) return S.back || (S.screen === "article" ? "news" : "today");
   if (!isSplit && S.screen === "dossier") return "artists";
   if (!isSplit && S.screen === "client") return "clients";
   if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask")) return "more";
@@ -2099,7 +2344,7 @@ function renderTopbar() {
       ${isPad ? "" : `<div class="wordmark">AG Newsroom</div>`}
       <div style="display:flex;align-items:center">
         <button class="theme-btn" data-act="toggle-theme" aria-label="Switch between light and dark">${I(themeIcon(), 19)}</button>
-        <button class="icon-btn" data-act="open-search" aria-label="Search artists">${I(ICON.search, 20)}</button>
+        <button class="icon-btn" data-act="open-search" aria-label="Search the desk">${I(ICON.search, 20)}</button>
       </div>
     </div>
 `;
@@ -2163,19 +2408,9 @@ function viewToday() {
             </div>`).join("") + `</div>`
         : '<div class="oneline">Nothing owed. Rare.</div>');
 
-  const news = newsBlock(6, 4);
-
-  const next = (REAL.events || []).slice(0, 3).map(e => {
-    const d = new Date(e.starts + "T00:00:00");
-    const day = `${String(d.getDate()).padStart(2, "0")} ${MON3[d.getMonth()]}`;
-    return `<button class="row" data-nav="calendar">
-      <div class="row-top"><span class="row-name">${esc(e.title || "Sale")}</span>${I(ICON.chev, 16)}</div>
-      <div class="row-sub">${houseTag(e.house)} <span class="tnum">\u00b7 ${esc(day)}${e.city ? " \u00b7 " + esc(e.city) : ""}</span></div>
-    </button>`;
-  }).join("");
-
   /* ---- Today, to the mockup (spec §3) ----------------------------------- */
-  const ranked = rankedStories();
+  const ranked = allStories().filter(n => n.scope === "India")
+    .sort((a, b) => b.score - a.score || byDateDesc(a, b));
 
   /* The top block is picture-led by design, so fill its three slots from the
      image-bearing stories first and only fall back to text when there are not
@@ -2200,7 +2435,9 @@ function viewToday() {
      in front of her — §11 forbids narrating a mood, so it does not. When there
      is genuinely nothing, it says so rather than reaching for something. */
   const marketStories = ranked.filter(r => r.reasons.some(x => x.kind === "market")).length;
-  const deskArtists = [...new Set(ranked.flatMap(r => r.artists))];
+  // Belt as well as braces: a key captured before a data swap is dropped here
+  // rather than read off a set that no longer holds it.
+  const deskArtists = [...new Set(ranked.flatMap(r => r.artists))].filter(k => ARTISTS[k]);
   const clientStories = ranked.filter(r => r.reasons.some(x => x.kind === "client"));
 
   const tiles = `<div class="tiles">
@@ -2230,15 +2467,12 @@ function viewToday() {
   const updated = stamp && String(stamp).length > 10
     ? "Updated " + String(stamp).slice(11, 16) + " UTC" : "";
 
-  const markBtn = n => `<button class="mark ${isMarked(n) ? "on" : ""}" data-mark="${esc(markKey(n))}"
-      aria-label="${isMarked(n) ? "Saved" : "Save"}" aria-pressed="${isMarked(n)}">${I(ICON.bookmark, 15)}</button>`;
-
   /* Hero: image with rank badge and category over it, then kicker, headline,
      summary and the reasons it ranked — the mockup's "Why it matters" line,
      except ours names the actual reason instead of promising an essay. */
   const heroCard = n => {
     if (!n) return `<div class="oneline">No headlines pulled yet.</div>`;
-    const u = safeUrl(n.url), img = safeUrl(n.image), tag = newsTag(n);
+    const img = safeUrl(n.image), tag = newsTag(n);
     const inner = `
       ${img ? `<div class="hero-media">
           <img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.parentElement.remove()">
@@ -2252,13 +2486,14 @@ function viewToday() {
         ${n.reasons.length ? `<div class="story-why">${n.reasons.map(r =>
           `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</div>` : ""}
       </div>`;
-    return `<div class="hero">${u
-      ? `<a class="hero-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-      : inner}${markBtn(n)}</div>`;
+    /* Opens the article rather than the publisher. The article screen is where
+       the desk says which artists it names, what they have sold and who in the
+       book collects them — and it carries the way out to the source. */
+    return `<div class="hero"><button class="hero-link" data-open-story="${esc(n.key)}">${inner}</button>${markBtn(n)}</div>`;
   };
 
   const smallCard = (n, i) => {
-    const u = safeUrl(n.url), img = safeUrl(n.image), tag = newsTag(n);
+    const img = safeUrl(n.image), tag = newsTag(n);
     const inner = `
       ${img ? `<div class="sc-media">
         <img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.parentElement.remove()">
@@ -2270,8 +2505,7 @@ function viewToday() {
           <span class="kicker">${esc(n.source)}</span></div>
         <h4>${esc(n.headline)}</h4>
       </div>`;
-    return u ? `<a class="sc" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-             : `<div class="sc">${inner}</div>`;
+    return `<button class="sc" data-open-story="${esc(n.key)}">${inner}</button>`;
   };
 
   /* Market Pulse. Four tiles, all from real rows. The mockup's "7-day Indian
@@ -2320,15 +2554,14 @@ function viewToday() {
 
   const moreRows = rest.length
     ? `<div class="rows">` + rest.map(n => {
-        const u = safeUrl(n.url), img = safeUrl(n.image);
+        const img = safeUrl(n.image);
         const body = `
           <div class="mf-body">
             <div class="kicker">${esc(n.source)} \u00b7 ${esc(fmtDate(n.date))}</div>
             <h4>${esc(n.headline)}</h4>
           </div>
           ${img ? `<img class="mf-img" src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}`;
-        return `<div class="mf">${u
-          ? `<a class="mf-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${body}</a>` : body}
+        return `<div class="mf"><button class="mf-link" data-open-story="${esc(n.key)}">${body}</button>
           ${markBtn(n)}</div>`;
       }).join("") + `</div>`
     : `<div class="oneline">Nothing further today.</div>`;
@@ -2342,6 +2575,7 @@ function viewToday() {
     <div class="view-body">
       ${tiles}${brief}
       <div class="sec">${sectionHead("Top stories", updated)}
+        <button class="more-link" data-nav="news">See all news →</button>
         <div class="topblock">
           ${heroCard(hero)}
           ${seconds.length ? `<div class="scrow">${seconds.map(smallCard).join("")}</div>` : ""}
@@ -2369,7 +2603,170 @@ function viewToday() {
         <div class="col sec">${sectionHead("Follow-ups due")}${fups}</div>
       </div>
 
-      <div class="sec">${sectionHead("More from the art world", updated)}${moreRows}</div>
+      <div class="sec">${sectionHead("More from the art world", updated)}${moreRows}
+        <button class="more-link" data-nav="news">Open the news desk →</button></div>
+    </div>`;
+}
+
+
+/* ============================================================
+   SCREEN: NEWS FEED
+   ============================================================ */
+/* The handoff's three tabs. "For You" is her market ranked by the same scorer
+   that draws the chips; "All news" is everything the desk pulled, newest first,
+   both pools; "Saved" is the bookmark set, which until now was write-only —
+   the toggle existed on every card and there was nowhere to read the result. */
+const NEWS_TABS = [["foryou", "For you"], ["all", "All news"], ["saved", "Saved"]];
+
+function newsRows(tab) {
+  const all = allStories();
+  if (tab === "saved") return all.filter(isMarked).sort(byDateDesc);
+  if (tab === "all") return all.slice().sort(byDateDesc);
+  return all.filter(n => n.scope === "India")
+            .sort((a, b) => b.score - a.score || byDateDesc(a, b));
+}
+
+function viewNews() {
+  const tab = S.newsTab;
+  const rows = newsRows(tab);
+  const all = allStories();
+  const stamp = (REAL.news || {}).generated_at || REAL.generated_at;
+  const updated = stamp && String(stamp).length > 10
+    ? "Updated " + String(stamp).slice(11, 16) + " UTC" : "";
+
+  const empty =
+      tab === "saved" ? `<div class="empty">Nothing saved yet. The bookmark on any
+        story keeps it here, on this device.</div>`
+    : `<div class="empty">No headlines pulled yet. The nightly refresh fills this.</div>`;
+
+  const counts = { foryou: all.filter(n => n.scope === "India").length,
+                   all: all.length, saved: all.filter(isMarked).length };
+
+  return `<div class="view-head"><h1>News</h1>
+      <p>${esc(all.length + (all.length === 1 ? " story" : " stories") + " on the desk")}</p></div>
+    <div class="view-body">
+      <div class="seg seg-tabs">
+        ${NEWS_TABS.map(([k, l]) =>
+          `<button data-news="${k}" aria-pressed="${tab === k}">${esc(l)}<span class="tabn tnum">${counts[k]}</span></button>`).join("")}
+      </div>
+      <div class="sec" style="margin-top:20px">
+        ${sectionHead(tab === "saved" ? "Saved" : tab === "all" ? "Everything pulled" : "Ranked for you", updated)}
+        ${rows.length ? `<div class="rows">${rows.map(storyCard).join("")}</div>` : empty}
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   SCREEN: ARTICLE
+   ============================================================ */
+/* The handoff wants "What Happened" prose and a Market Impact badge. The
+   pipeline stores a headline, a source, a date, a picture and a link — there is
+   no body text to summarise and no impact figure to grade, and writing either
+   would be the desk asserting something it cannot show. So neither is here.
+   What IS here is everything the record does hold about the story: why it
+   ranked, which tracked artists it names, what those artists have sold lately,
+   who in the book collects them, and the way out to the publisher. */
+function articleResults(keys) {
+  const seen = new Set();
+  const rows = [];
+  for (const k of keys) {
+    for (const f of (REAL.feed || [])) {
+      if (f.artist_key !== k || seen.has(f.url || f.title)) continue;
+      seen.add(f.url || f.title);
+      rows.push({ artist: f.artist, title: f.title, house: f.house, date: f.date, price: f.price,
+                  url: f.url, vs: f.vs_est });
+      if (rows.length >= 6) return rows;
+    }
+    const a = ARTISTS[k];
+    for (const r of ((a && a.records) || []).slice(0, 3)) {
+      const id = r.url || (r.title + r.date);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      rows.push({ artist: a.name, title: r.title, house: r.house, date: r.date, price: r.price,
+                  url: r.url, vs: null });
+      if (rows.length >= 6) return rows;
+    }
+  }
+  return rows;
+}
+
+function viewArticle(embedded) {
+  const n = storyByKey(S.article);
+  const head = t => `<div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
+    <h1>${esc(t)}</h1></div>`;
+  if (!n) {
+    return head("Story") + `<div class="view-body"><div class="empty">That story is no
+      longer in the feed. The desk keeps what the last refresh returned, not an archive.</div></div>`;
+  }
+
+  const img = safeUrl(n.image), tag = newsTag(n), out = safeUrl(n.url);
+  const artists = (n.artists || []).map(k => ARTISTS[k]).filter(Boolean);
+  const results = articleResults(n.artists || []);
+
+  /* The client angle only exists when the book is open on this device, and it
+     is built the same way the chip is counted — one matcher, not two. */
+  const hay = ((n.headline || "") + " " + (n.why || "")).toLowerCase();
+  const interested = (CRM.live && CRM.clients)
+    ? CRM.clients.filter(c => wantsMatchStory(c, hay, n.artists || [])) : [];
+
+  const signals = (n.signals || []).map(sg =>
+    `<div class="sig ${sg.on ? "on" : "off"}"><span class="sd"></span>${esc(sg.label)}</div>`).join("");
+
+  return `
+    <div class="view-head article-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
+      ${img ? `<div class="art-media"><img src="${esc(img)}" alt="" loading="lazy"
+        decoding="async" onerror="this.parentElement.remove()"></div>` : ""}
+      <div class="art-kick">
+        ${tag ? `<span class="hero-tag static">${esc(tag)}</span>` : ""}
+        <span class="kicker">${esc(n.source || "")}${n.date ? " · " + esc(fmtDate(n.date)) : ""}</span>
+        ${markBtn(n)}
+      </div>
+      <h1>${esc(n.headline)}</h1>
+      ${n.why ? `<p class="art-sum">${esc(n.why)}</p>` : ""}
+    </div>
+    <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
+      <div class="sec" style="margin-top:0">${sectionHead("Why it is on the desk", "scored " + n.score + " of 100")}
+        ${(n.reasons || []).length ? `<div class="story-why">${n.reasons.map(r =>
+          `<span class="why-chip ${esc(r.kind)}">${esc(r.label)}</span>`).join("")}</div>` : ""}
+        <div class="sigs">${signals}</div>
+        <div class="foot-note">Ranked by rule, not by opinion — recency, Indian
+          relevance, auction language, the artists you track and the book. No summary
+          of the piece is written here: the desk holds the headline and the link,
+          not the article.</div>
+      </div>
+
+      ${artists.length ? `<div class="sec">${sectionHead("Artists named", artists.length + " on the desk")}
+        <div class="chiprow" style="padding-left:0;padding-right:0;margin:10px 0 0;flex-wrap:wrap;overflow:visible">
+          ${artists.map(a => `<button class="chip" data-open-artist="${esc(a.key)}">${esc(a.name)}</button>`).join("")}
+        </div></div>` : ""}
+
+      ${results.length ? `<div class="sec">${sectionHead("What they have sold", "on the record")}
+        <div class="rows">${results.map(r => {
+          const u = safeUrl(r.url);
+          const inner = `<div class="ares-b">
+              <div class="ares-t">${esc(r.artist)}${r.title ? " — " + esc(r.title) : ""}</div>
+              <div class="ares-m">${esc(r.house || "")}${r.date ? " · " + esc(fmtDate(r.date)) : ""}</div>
+            </div>
+            <div class="ares-p tnum ${r.vs && r.vs.dir === "above" ? "up" : ""}">${esc(r.price || "—")}</div>`;
+          return u ? `<a class="ares" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+                   : `<div class="ares">${inner}</div>`;
+        }).join("")}</div></div>` : ""}
+
+      ${interested.length ? `<div class="sec">${sectionHead("Client angle", interested.length + " in the book")}
+        <div class="accent-box">
+          <div class="what">${esc(listOf(interested.slice(0, 4).map(c => c.name.split(" ")[0])))}
+            ${interested.length === 1 ? "has" : "have"} asked for work in this area.</div>
+        </div>
+        <div class="rows">${interested.slice(0, 6).map(c => `
+          <button class="row" data-open-client="${esc(c.id)}">
+            <div class="row-top"><span class="row-name">${esc(c.name)}</span>${I(ICON.chev, 16)}</div>
+            <div class="row-sub">${esc([c.tier, c.focus].filter(Boolean).join(" · "))}</div>
+          </button>`).join("")}</div></div>` : ""}
+
+      ${out ? `<div class="btnrow" style="margin-top:24px">
+        <a class="btn btn-primary btn-block" href="${esc(out)}" target="_blank"
+           rel="noopener noreferrer">Read it at ${esc(n.source || "the publisher")} →</a>
+      </div>` : `<div class="foot-note">This story arrived without a usable link.</div>`}
     </div>`;
 }
 
@@ -2407,7 +2804,7 @@ function viewArtists() {
     <div class="view-head"><h1>Artists</h1>
       <p>${Object.keys(ARTISTS).length} artists with enough depth to price</p></div>
     <div class="view-body">
-      <button class="btn btn-primary btn-block" data-act="open-search" style="margin-bottom:6px">${I(ICON.search, 15)} Search an artist</button>
+      <button class="btn btn-primary btn-block" data-act="open-search" style="margin-bottom:6px">${I(ICON.search, 15)} Search the desk</button>
       <div class="sec">${sectionHead("Tracked artists", artistKeys.length + " names")}${artistListRows()}</div>
     </div>`;
   if (!isSplit) return list;
@@ -2661,26 +3058,6 @@ function marketTrending() {
   }).join("") + `</div>`;
 }
 
-function marketNews() {
-  const d = REAL.news || {};
-  const pool = S.feedScope === "Wider" ? (d.wider || []) : (d.on_market || []);
-  const cats = ["All", ...new Set(pool.map(newsTag).filter(Boolean))];
-  const rows = pool.filter(n => S.feedCat === "All" || newsTag(n) === S.feedCat);
-
-  /* Scope is real: "Her market" is what the India-targeted feeds and queries
-     return, "Wider" is the international trade press, and the two are kept in
-     separate buckets by the pipeline rather than mixed and guessed at. */
-  const filters = `<div class="filterbar">
-    <div class="fgroup">${cats.map(c =>
-      `<button class="fchip" data-feed="cat:${esc(c)}" aria-pressed="${S.feedCat === c}">${esc(c === "All" ? "All categories" : c)}</button>`).join("")}</div>
-    <div class="fgroup">${[["India", "Her market"], ["Wider", "Wider art world"]].map(([k, l]) =>
-      `<button class="fchip" data-feed="scope:${esc(k)}" aria-pressed="${S.feedScope === k}">${esc(l)}</button>`).join("")}</div>
-  </div>`;
-
-  if (!rows.length) return filters + `<div class="oneline">Nothing in that category today.</div>`;
-  return filters + `<div class="rows">` + rows.map(newsRow).join("") + `</div>`;
-}
-
 function marketFx() {
   return `<div class="rows fx-list">` + FX.map(f => `
     <div class="fxr tnum"><span class="p">${esc(f.pair)}</span>
@@ -2689,36 +3066,172 @@ function marketFx() {
     + `</div>`;
 }
 
+/* The handoff's Overview leads on "₹56.8 Cr ↑22%, total auction turnover vs the
+   previous 30 days" over a sparkline. Neither figure is built here, and not for
+   want of trying:
+
+     the total  — a house's results page lists the lots that SOLD. A turnover
+                  summed from that is a sum of part of the market printed as all
+                  of it, and the desk carries prices as they were published
+                  ("₹53.5 cr"), not as numbers to add up.
+     the move   — two thirty-day windows in this market routinely hold one sale
+                  against three. A percentage across them measures the auction
+                  calendar, not the market. Same rule that keeps a 7-day
+                  momentum tile off Today and a delta off a thin artist.
+
+   Counts survive both objections, so counts are what this is. Everything below
+   is countable from rows the desk stores. */
+function marketOverview() {
+  const feed = REAL.feed || [];
+  const priced = feed.filter(f => f.vs_est);
+  const above = priced.filter(f => f.vs_est.dir === "above");
+  const below = priced.filter(f => f.vs_est.dir === "below");
+  const houses = [...new Set(feed.map(f => f.house).filter(Boolean))];
+  const dates = feed.map(f => f.date).filter(Boolean).sort();
+  const span = dates.length
+    ? (dates[0] === dates[dates.length - 1] ? fmtDate(dates[0])
+       : fmtDate(dates[0]) + " – " + fmtDate(dates[dates.length - 1]))
+    : "";
+
+  const tiles = `<div class="tiles three">
+    <div class="tile"><div class="tv">${feed.length}</div><div class="tl">Lots in the latest results</div></div>
+    <div class="tile"><div class="tv">${above.length}<span class="of"> of ${priced.length}</span></div>
+      <div class="tl">Cleared the high estimate</div></div>
+    <div class="tile"><div class="tv">${houses.length}</div><div class="tl">Houses reporting</div></div>
+  </div>${span ? `<div class="foot-note" style="margin-top:10px">${esc(span)} · ${esc(listOf(houses))}</div>` : ""}`;
+
+  /* Ordered on the percentage the pipeline already computed against the
+     estimate. An integer comparison — no money is parsed or re-formatted here,
+     which is where the two formatters have disagreed before. */
+  const estRow = (rows, dir) => rows.length
+    ? `<div class="rows">` + rows.slice().sort((a, b) => b.vs_est.pct - a.vs_est.pct).slice(0, 3)
+        .map(f => {
+          const u = safeUrl(f.url);
+          const inner = `<div class="ares-b">
+              <div class="ares-t">${esc(f.artist || "—")}${f.title ? " — " + esc(f.title) : ""}</div>
+              <div class="ares-m">${esc(f.house || "")} · ${esc(fmtDate(f.date))} · Est. ${esc(f.est || "—")}</div>
+            </div>
+            <div class="ares-p tnum ${dir}">${dir === "up" ? "↑" : "↓"} ${f.vs_est.pct}%</div>`;
+          return u ? `<a class="ares" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+                   : `<div class="ares">${inner}</div>`;
+        }).join("") + `</div>`
+    : `<div class="oneline">None in the latest results.</div>`;
+
+  const momentum = (REAL.trending || []).map(k => ARTISTS[k]).filter(Boolean).slice(0, 5);
+  const momentumRows = momentum.length
+    ? `<div class="rows">` + momentum.map((a, i) => {
+        const d = parseFloat(a.stats.delta);
+        const b = a.stats.deltaBasis || {};
+        return `<button class="mrow" data-open-artist="${esc(a.key)}">
+          <span class="rk tnum">${String(i + 1).padStart(2, "0")}</span>
+          <span class="mb"><span class="mn">${esc(a.name)}</span>
+            <span class="mm">${esc(b.medium || "comparable")} · ${b.n_now} v ${b.n_prior} lots</span></span>
+          <span class="md tnum ${d > 0 ? "up" : d < 0 ? "down" : "flat"}">${d > 0 ? "↑" : d < 0 ? "↓" : "→"} ${esc(a.stats.delta)}</span>
+        </button>`;
+      }).join("") + `</div>`
+    : `<div class="oneline">No artist has enough comparable lots in both windows to rank a move.</div>`;
+
+  const next = (REAL.events || []).slice(0, 3);
+  const nextRows = next.length
+    ? `<div class="rows">` + next.map(auctionCard).join("") + `</div>`
+    : `<div class="oneline">Nothing forthcoming in the diary.</div>`;
+
+  return `
+    ${tiles}
+    <div class="sec">${sectionHead("Market momentum", "Δ 12 mo, per sq in")}
+      ${momentumRows}
+      <button class="more-link" data-market="artists">See every artist →</button></div>
+    <div class="sec">${sectionHead("Furthest above estimate", "latest results")}${estRow(above, "up")}</div>
+    <div class="sec">${sectionHead("Furthest below estimate", "latest results")}${estRow(below, "down")}</div>
+    <div class="sec">${sectionHead("Next sales")}
+      ${nextRows}
+      <button class="more-link" data-market="auctions">Every sale →</button></div>
+    <div class="foot-note">No turnover total and no thirty-day move on this desk.
+      Public results list the lots that sold, so a total would be part of the market
+      printed as all of it; and two thirty-day windows here often hold one sale
+      against three, so a percentage between them measures the calendar. The counts
+      above are counts.</div>`;
+}
+
+/* One card for a sale, forthcoming or closed. The handoff puts "N clients
+   interested" on this card. Nothing on the record says who is interested in a
+   sale: forthcoming sales arrive as a house, a title and a date, with no lot
+   list to match a collector against. So the card carries what is published —
+   including the catalogue, which is a page and never a PDF — and claims nothing. */
+function auctionCard(e, closed) {
+  const u = safeUrl(e.url);
+  const when = closed
+    ? fmtDate(e.start_date)
+    : (e.starts === e.ends || !e.ends) ? fmtDate(e.starts) : fmtDate(e.starts) + " – " + fmtDate(e.ends);
+  const meta = [e.city, e.kind, e.lot_count ? e.lot_count + " lots" : ""].filter(Boolean);
+  const inner = `
+    <div class="auc-top">${houseTag(e.house)}
+      <span class="auc-status ${closed ? "closed" : "open"}">${closed ? "Closed" : "Forthcoming"}</span></div>
+    <div class="auc-name">${esc(e.title || e.name || "Sale")}</div>
+    <div class="auc-meta tnum">${esc(when)}${meta.length ? " · " + esc(meta.join(" · ")) : ""}</div>
+    ${u ? `<div class="auc-link">${closed ? "Results" : "Catalogue"} →</div>` : ""}`;
+  return u ? `<a class="auc" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+           : `<div class="auc">${inner}</div>`;
+}
+
+function marketAuctions() {
+  const up = REAL.events || [];
+  const done = REAL.recent_sales || [];
+  return `
+    <div class="sec" style="margin-top:0">${sectionHead("Forthcoming", up.length + " in the diary")}
+      ${up.length ? `<div class="rows">${up.map(e => auctionCard(e, false)).join("")}</div>`
+                  : `<div class="oneline">Nothing forthcoming in the diary.</div>`}</div>
+    <div class="sec">${sectionHead("Recently closed", done.length + " sales")}
+      ${done.length ? `<div class="rows">${done.map(e => auctionCard(e, true)).join("")}</div>`
+                    : `<div class="oneline">No closed sales on the record yet.</div>`}</div>
+    <div class="foot-note">No sale total is quoted. Neither house publishes a
+      turnover figure, and one summed from the lots on the results page would leave
+      out everything that did not sell.</div>`;
+}
+
+function marketArtists() {
+  return artistListRows();
+}
+
 function viewMarket() {
   const head = `<div class="view-head"><h1>Market</h1>
     <p>${REAL.coverage.lots.toLocaleString()} lots \u00b7 ${esc(listOf(REAL.coverage.houses))} \u00b7 ${esc(REAL.coverage.from.slice(0, 4))}\u2013${esc(REAL.coverage.to.slice(0, 4))}</p></div>`;
 
+  const body = S.marketTab === "results"  ? marketResults()
+    : S.marketTab === "artists"  ? marketArtists()
+    : S.marketTab === "auctions" ? marketAuctions()
+    : marketOverview();
+
+  const tabs = `<div class="seg seg-tabs">
+    ${MARKET_TABS.map(([k, l]) =>
+      `<button data-market="${k}" aria-pressed="${S.marketTab === k}">${esc(l)}</button>`).join("")}
+  </div>`;
+
+  /* Wide screens get the currency block beside the tab, because it is a
+     reference the rest of the screen never scrolls past. The tabs stay: four
+     views of the same market do not want to be four stacked screens. */
   if (isSplit) {
-    return head + `<div class="view-body market-grid">
-      <div class="main-col">
-        <div class="sec">${sectionHead("Latest results")}${marketResults()}</div>
-        <div class="sec">${sectionHead("Trending artists", "Δ vs prior year")}${marketTrending()}</div>
-      </div>
-      <div class="rail-col">
-        <div class="sec">${sectionHead("The feed")}${marketNews()}</div>
-        <div class="sec">${sectionHead("Currency", "against INR")}${marketFx()}</div>
+    return head + `<div class="view-body">
+      ${tabs}
+      <div class="market-grid" style="margin-top:22px">
+        <div class="main-col"><div class="sec" style="margin-top:0">${body}</div></div>
+        <div class="rail-col">
+          <div class="sec" style="margin-top:0">${sectionHead("Currency", "against INR")}${marketFx()}</div>
+          <div class="sec">${sectionHead("The feed")}
+            <button class="more-link" data-nav="news">Open the news desk →</button></div>
+        </div>
       </div>
     </div>`;
   }
 
-  const body = S.marketTab === "results" ? marketResults()
-    : S.marketTab === "trending" ? marketTrending()
-    : marketNews();
-
   return head + `<div class="view-body">
-    <div class="seg">
-      <button data-market="results" aria-pressed="${S.marketTab === "results"}">Results</button>
-      <button data-market="trending" aria-pressed="${S.marketTab === "trending"}">Trending</button>
-      <button data-market="news" aria-pressed="${S.marketTab === "news"}">The feed</button>
-    </div>
+    ${tabs}
     <div class="sec" style="margin-top:22px">${body}</div>
   </div>`;
 }
+
+const MARKET_TABS = [["overview", "Overview"], ["results", "Results"],
+                     ["artists", "Artists"], ["auctions", "Auctions"]];
 
 /* ============================================================
    SCREEN: CLIENTS + CARD
@@ -2764,23 +3277,74 @@ function clientListRows() {
   }).join("") + `</div>`;
 }
 
+/* The handoff opens Clients on follow-ups, forthcoming sales and recent
+   activity rather than on the roster. It is the right order — she comes here to
+   act, not to browse — but the roster cannot go: thirty collectors have to stay
+   reachable. So the three sections lead and the book sits under them.
+
+   The handoff also puts "N clients interested" on each sale. Nothing on the
+   record says that: a forthcoming sale arrives as a house, a title and a date,
+   with no lot list to match a collector against. The sales are listed plainly. */
+/* `compact` is the split view's list column, which is 284px of content. A sale
+   card does not fit that and does not need to: the calendar is one tap away and
+   Market carries every sale. Follow-ups and what was said last do fit, and they
+   are the two she comes to this screen for. */
+function clientsBrief(compact) {
+  const fups = CRM.followups || [];
+  const due = fups.length
+    ? `<div class="rows">` + fups.slice(0, 8).map(f => `
+        <button class="curow" data-open-client="${esc(f.client_id)}">
+          <span class="cav">${esc(initials(f.client_name))}</span>
+          <span class="cub"><span class="cun">${esc(f.client_name)}</span>
+            <span class="cui">${esc(f.reason || "Follow up")}</span></span>
+          <span class="cud ${f.overdue ? "over" : ""}">${esc(f.age || "")}</span>
+        </button>`).join("") + `</div>`
+    : `<div class="oneline">Nothing owed. Rare.</div>`;
+
+  const next = (REAL.events || []).slice(0, 4);
+  const sales = next.length
+    ? `<div class="rows">${next.map(e => auctionCard(e, false)).join("")}</div>`
+    : `<div class="oneline">Nothing forthcoming in the diary.</div>`;
+
+  const acts = CRM.activity || [];
+  const activity = acts.length
+    ? `<div class="rows">` + acts.slice(0, 8).map(l => `
+        <button class="log logbtn" data-open-client="${esc(l.client_id)}">
+          <div><div class="d tnum">${esc(fmtDate(l.happened))}</div>
+            <div class="ch">${esc(l.channel || "note")}</div></div>
+          <div class="nt">${esc(l.note || "")}<div class="row-sub">${esc(l.client_name || "")}</div></div>
+        </button>`).join("") + `</div>`
+    : `<div class="oneline">Nothing logged yet. A conversation logged on a card appears here.</div>`;
+
+  return `
+    <div class="sec" style="margin-top:0">${sectionHead("Follow-ups due", fups.length ? String(fups.length) : "")}${due}</div>
+    <div class="sec">${sectionHead("Sales ahead", (REAL.events || []).length + " in the diary")}
+      ${compact ? "" : sales}
+      <button class="more-link" data-nav="calendar">The whole diary →</button></div>
+    <div class="sec">${sectionHead("Recent activity", acts.length ? String(acts.length) : "")}${activity}</div>`;
+}
+
 function viewClients() {
   const count = CRM.live ? CRM.clients.length : 0;
   const addBtn = CRM.live
     ? `<button class="btn btn-primary btn-block" data-act="new-client" style="margin-bottom:6px">+ Add a client</button>`
     : "";
+  const brief = CRM.live ? clientsBrief(false) : "";
+  const briefCompact = CRM.live ? clientsBrief(true) : "";
 
   const list = `
     <div class="view-head"><h1>Clients</h1>
       <p>${CRM.live ? `${count} active` : (CRM.needsKey ? "locked" : "private")}</p></div>
     <div class="view-body">
-      ${addBtn}
-      <div class="sec">${sectionHead("The book", CRM.live ? count + " active" : "")}${clientListRows()}</div>
+      ${brief}
+      <div class="sec">${sectionHead("The book", CRM.live ? count + " active" : "")}
+        ${addBtn}${clientListRows()}</div>
     </div>`;
   if (!isSplit) return list;
   return `<div class="split">
     <div class="list"><div class="sec" style="margin-top:26px">
       ${addBtn}${sectionHead("Book", CRM.live ? count + " active" : "")}${clientListRows()}
+      ${briefCompact}
     </div></div>
     <div class="detail">${CRM.live && CRM.clients.length ? viewClient(true) : ""}</div>
   </div>`;
@@ -2851,7 +3415,8 @@ function viewClient(embedded) {
       id: h.id, artist: h.artist_name, work: h.work || "", acquired: h.acquired || "" })),
     referrals: (d.referrals || []).map(r => ({ name: r.name, tie: r.tie || "" })),
     next: { when: d.next_when || "", what: d.next_what || "" },
-    log: (d.log || []).map(l => ({ id: l.id, date: fmtDate(l.happened), channel: l.channel || "", note: l.note || "" })),
+    log: (d.log || []).map(l => ({ id: l.id, iso: l.happened || "", date: fmtDate(l.happened),
+      channel: l.channel || "", note: l.note || "" })),
     followups: d.followups || [],
   } : null;
 
@@ -3040,60 +3605,127 @@ function viewClient(embedded) {
         </div>`).join("") + `</div>`
     : `<div class="empty">Nothing owed.</div>`;
 
+  /* ---- the handoff's four tabs -------------------------------------------
+     Overview / Interests / Activity / Notes. The fourth is Templates here: the
+     desk has no freeform-notes field, and an empty tab is worse than a useful
+     one — the message templates were homeless at the bottom of the card and
+     this is where they belong. Everything else maps onto a tab that already
+     had a section, and every editor moved with the thing it edits. */
+
+  // At a glance, from the record and nothing else. Budget and Source are in the
+  // handoff and not in the tracker she gave us, so they are simply not here.
+  const lastLog = c.log[0];
+  const daysAgo = lastLog && lastLog.iso
+    ? Math.round((Date.parse(todayIso()) - Date.parse(lastLog.iso)) / 86400000) : null;
+  const glance = [
+    ["Tier", c.tier],
+    ["Collecting focus", c.focus],
+    ["Looking for", c.wants.join(", ")],
+    ["Client since", c.since],
+    ["Lifetime with the house", c.lifetime === "—" ? "" : c.lifetime],
+    ["Works recorded", c.holdings.length ? String(c.holdings.length) : ""],
+    ["Last contact", lastLog
+      ? lastLog.date + (daysAgo == null ? "" : daysAgo === 0 ? " (today)"
+          : ` (${daysAgo} ${daysAgo === 1 ? "day" : "days"} ago)`)
+      : ""],
+    ["Follow-ups open", String(c.followups.filter(f => !f.done).length)],
+  ].filter(([, v]) => v !== "" && v != null);
+
+  const glanceRows = `<div class="glance">${glance.map(([k, v]) =>
+    `<div class="gr"><span class="gk">${esc(k)}</span><span class="gv">${esc(v)}</span></div>`).join("")}</div>`;
+
+  /* The handoff's "Latest relevant update" — the top-scoring story that actually
+     matches this collector, by the same matcher that draws the client chip. No
+     story rather than a loose one. */
+  const rel = allStories()
+    .filter(n => wantsMatchStory({ focus: c.focus, wants: c.wants },
+      ((n.headline || "") + " " + (n.why || "")).toLowerCase(), n.artists || []))
+    .sort((a, b) => b.score - a.score || byDateDesc(a, b))[0];
+
+  const update = rel ? `
+    <div class="sec">${sectionHead("Latest relevant update")}
+      ${storyCard(rel)}</div>` : "";
+
+  const overview = `
+    ${(c.next.when || c.next.what) ? `
+    <div class="accent-box">
+      <div class="when">${esc(c.next.when || "Next")}</div>
+      ${c.next.what ? `<div class="what">${esc(c.next.what)}</div>` : ""}
+    </div>` : ""}
+    <div class="btnrow">
+      <button class="btn btn-primary" data-act="pitch-for" data-client="${esc(cid)}">Draft a pitch</button>
+      <button class="btn" data-panel="client">Edit card</button>
+      <button class="btn" data-nav="knowledge" data-know="scripts">Objection scripts</button>
+    </div>
+    ${editPanel}
+    <div class="sec">${sectionHead("At a glance")}${glanceRows}</div>
+    ${update}
+    <div class="sec">${sectionHead("Follow-ups", c.followups.filter(f => !f.done).length + " open")}
+      ${fuRows}
+      <div class="btnrow"><button class="chip" data-panel="followup">Set a follow-up</button></div>
+      ${followupPanel}</div>`;
+
+  const interests = `
+    <div class="sec" style="margin-top:0">${sectionHead("Looking for", c.wants.length ? String(c.wants.length) : "")}
+      ${c.wants.length ? `<div class="tags">${c.wants.map(w => `<span class="tag">${esc(w)}</span>`).join("")}</div>`
+                       : `<div class="oneline">Nothing recorded. Edit the card to add it.</div>`}</div>
+    <div class="sec">${sectionHead("Collecting brief")}
+      ${c.brief ? `<div class="brief-p">${esc(c.brief)}</div>`
+                : `<div class="oneline">No brief written yet.</div>`}</div>
+    <div class="sec">${sectionHead("Holdings", c.holdings.length + " works")}
+      <div class="rows">${holdings}</div>
+      ${c.holdings.length ? "" : `<div class="empty">Nothing recorded yet.</div>`}
+      <div class="btnrow"><button class="chip" data-panel="holding">Add a holding</button></div>
+      ${holdingPanel}</div>
+    <div class="sec">${sectionHead("Referral web")}<div class="rows">${refs}</div>
+      ${c.referrals.length ? "" : `<div class="empty">No referrals recorded.</div>`}</div>`;
+
+  const activity = `
+    <div class="sec" style="margin-top:0">${sectionHead("Conversation log", c.log.length + " entries")}
+      <div class="rows">${log}</div>
+      ${c.log.length ? "" : `<div class="empty">Nothing logged yet.</div>`}
+      <div class="btnrow"><button class="chip" data-panel="log">Log a conversation</button></div>
+      ${logPanel}</div>`;
+
+  const templates = `
+    <div class="sec" style="margin-top:0">${sectionHead("Message templates", TEMPLATES.length + "")}
+      <div class="rows">${tpls}</div>
+      <div class="foot-note">A blank in a template is a fact the desk does not
+        hold. It stays blank rather than being filled with a plausible number.</div></div>`;
+
+  const body = S.clientTab === "interests" ? interests
+    : S.clientTab === "activity" ? activity
+    : S.clientTab === "templates" ? templates
+    : overview;
+
   return `
     <div class="view-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
       <div class="card-head">
-        <span class="kicker">${[c.tier, c.since ? "since " + c.since : ""].filter(Boolean).map(esc).join(" · ")}</span>
-        <h1>${esc(c.name)}</h1>
-        <div class="ti">${[c.title, c.city].filter(Boolean).map(esc).join(" · ")}</div>
-        <div class="lv"><span class="amt tnum">${esc(c.lifetime)}</span><span class="cap">lifetime with the house</span></div>
+        <div class="ch-id">
+          <span class="ch-av">${esc(initials(c.name))}</span>
+          <div>
+            <h1>${esc(c.name)}</h1>
+            <div class="ti">${[c.title, c.city].filter(Boolean).map(esc).join(" · ") || esc(c.tier)}</div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
-      ${(c.next.when || c.next.what) ? `
-      <div class="accent-box">
-        ${c.next.when ? `<div class="when">${esc(c.next.when)}</div>` : ""}
-        ${c.next.what ? `<div class="what">${esc(c.next.what)}</div>` : ""}
-      </div>` : ""}
-      <div class="btnrow">
-        <button class="btn btn-primary" data-act="pitch-for" data-client="${esc(cid)}">Draft a pitch</button>
-        <button class="btn" data-panel="client">Edit card</button>
-        <button class="btn" data-nav="knowledge" data-know="scripts">Objection scripts</button>
+      <div class="seg seg-tabs">
+        ${CLIENT_TABS.map(([k, l]) =>
+          `<button data-client-tab="${k}" aria-pressed="${S.clientTab === k}">${esc(l)}</button>`).join("")}
       </div>
-      ${editPanel}
-
-      <div class="cols two">
-        <div class="col sec">${sectionHead("Collecting brief")}
-          <div class="brief-p">${esc(c.brief)}</div>
-          <div class="tags">${c.wants.map(w => `<span class="tag">${esc(w)}</span>`).join("")}</div>
-        </div>
-        <div class="col sec">${sectionHead("Holdings", c.holdings.length + " works")}
-          <div class="rows">${holdings}</div>
-          ${c.holdings.length ? "" : `<div class="empty">Nothing recorded yet.</div>`}
-          <div class="btnrow"><button class="chip" data-panel="holding">Add a holding</button></div>
-          ${holdingPanel}
-          <div class="sec">${sectionHead("Referral web")}<div class="rows">${refs}</div>
-            ${c.referrals.length ? "" : `<div class="empty">No referrals recorded.</div>`}</div>
-        </div>
-      </div>
-
-      <div class="cols two">
-        <div class="col sec">${sectionHead("Conversation log", c.log.length + " entries")}
-          <div class="rows">${log}</div>
-          ${c.log.length ? "" : `<div class="empty">Nothing logged yet.</div>`}
-          <div class="btnrow"><button class="chip" data-panel="log">Log a conversation</button></div>
-          ${logPanel}
-        </div>
-        <div class="col sec">${sectionHead("Follow-ups", c.followups.filter(f => !f.done).length + " open")}
-          ${fuRows}
-          <div class="btnrow"><button class="chip" data-panel="followup">Set a follow-up</button></div>
-          ${followupPanel}
-        </div>
-      </div>
-
-      <div class="sec">${sectionHead("Message templates")}<div class="rows">${tpls}</div></div>
+      <div style="margin-top:20px">${body}</div>
     </div>`;
 }
+
+const CLIENT_TABS = [["overview", "Overview"], ["interests", "Interests"],
+                     ["activity", "Activity"], ["templates", "Templates"]];
+
+/* Opening a panel has to bring its tab with it, or the editor renders on a tab
+   that is not showing and the tap looks dead. */
+const PANEL_TAB = { client: "overview", followup: "overview",
+                    holding: "interests", log: "activity" };
 
 /* ============================================================
    SCREEN: KNOWLEDGE
@@ -3604,20 +4236,185 @@ function viewCalendar() {
 /* ============================================================
    SCREEN: MORE (phone hub)
    ============================================================ */
+/* ============================================================
+   SCREEN: SEARCH
+   ============================================================ */
+/* This was a sheet over the page that searched artists and nothing else. The
+   handoff makes it a screen with grouped, counted sections, and every group it
+   asks for has a real source here except two:
+
+     "Upcoming lots"  — no house publishes a lot list for a sale that has not
+                        happened, so this searches forthcoming SALES instead.
+     "User notes"     — the desk has no notes entity. What it does have is her
+                        own writing: follow-up reasons and logged conversations.
+                        That is the group, named for what it is.
+
+   Both client groups are behind the desk key and simply absent without it. */
+const searchHit = (q, ...vals) => {
+  const hay = vals.filter(Boolean).join(" ").toLowerCase();
+  return hay.includes(q);
+};
+
+function searchGroups(q) {
+  const g = [];
+  const artists = artistKeys.filter(k =>
+    searchHit(q, A(k).name, A(k).movement, A(k).years)).slice(0, 12);
+  if (artists.length) g.push({ label: "Artist", n: artists.length,
+    html: `<div class="rows arows">${artists.map(k => {
+      const a = A(k);
+      return `<button class="arow" data-open-artist="${esc(k)}">
+        <span class="av">${esc(initials(a.name))}</span>
+        <span class="ab"><span class="an">${esc(a.name)}</span>
+          <span class="ay">${esc([a.years, a.movement].filter(Boolean).join(" · "))}</span></span>
+      </button>`;
+    }).join("")}</div>` });
+
+  const news = allStories().filter(n =>
+    searchHit(q, n.headline, n.source, n.why)).sort(byDateDesc).slice(0, 8);
+  if (news.length) g.push({ label: "News", n: news.length,
+    html: `<div class="rows">${news.map(storyCard).join("")}</div>` });
+
+  const lots = (REAL.feed || []).filter(f =>
+    searchHit(q, f.artist, f.title, f.house, f.medium)).slice(0, 8);
+  if (lots.length) g.push({ label: "Auction results", n: lots.length,
+    html: `<div class="rows">${lots.map(f => {
+      const u = safeUrl(f.url);
+      const inner = `<div class="ares-b">
+          <div class="ares-t">${esc(f.artist || "—")}${f.title ? " — " + esc(f.title) : ""}</div>
+          <div class="ares-m">${esc(f.house || "")}${f.date ? " · " + esc(fmtDate(f.date)) : ""}</div>
+        </div><div class="ares-p tnum">${esc(f.price || "—")}</div>`;
+      return u ? `<a class="ares" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+               : `<div class="ares">${inner}</div>`;
+    }).join("")}</div>` });
+
+  const sales = (REAL.events || []).filter(e =>
+    searchHit(q, e.title, e.house, e.city, e.kind)).slice(0, 8);
+  if (sales.length) g.push({ label: "Forthcoming sales", n: sales.length,
+    html: `<div class="rows">${sales.map(e => auctionCard(e, false)).join("")}</div>` });
+
+  if (CRM.live && CRM.clients) {
+    const cls = CRM.clients.filter(c =>
+      searchHit(q, c.name, c.focus, c.city, c.title, (c.wants || []).join(" "))).slice(0, 10);
+    if (cls.length) g.push({ label: "Clients", n: cls.length,
+      html: `<div class="rows">${cls.map(c => `
+        <button class="row" data-open-client="${esc(c.id)}">
+          <div class="row-top"><span class="row-name">${esc(c.name)}</span>${I(ICON.chev, 16)}</div>
+          <div class="row-sub">${esc([c.tier, c.city, c.focus].filter(Boolean).join(" · "))}</div>
+        </button>`).join("")}</div>` });
+
+    /* Her own writing: what is owed, and what was said. Follow-ups arrive with
+       /brief on every load; the conversation log arrives with /activity. Neither
+       needs a card to be open first, which the old lazy detail load did. */
+    const notes = [
+      ...(CRM.followups || []).filter(f => searchHit(q, f.reason, f.client_name))
+        .map(f => ({ who: f.client_name, id: f.client_id, when: f.due,
+                     kind: f.overdue ? "overdue" : "due", text: f.reason })),
+      ...(CRM.activity || []).filter(l => searchHit(q, l.note, l.client_name, l.channel))
+        .map(l => ({ who: l.client_name, id: l.client_id, when: l.happened,
+                     kind: l.channel || "note", text: l.note })),
+    ].slice(0, 10);
+    if (notes.length) g.push({ label: "Your diary", n: notes.length,
+      html: `<div class="rows">${notes.map(x => `
+        <button class="log logbtn" data-open-client="${esc(x.id)}">
+          <div><div class="d tnum">${esc(fmtDate(x.when))}</div><div class="ch">${esc(x.kind)}</div></div>
+          <div class="nt">${esc(x.text || "")}<div class="row-sub">${esc(x.who || "")}</div></div>
+        </button>`).join("")}</div>` });
+  }
+  return g;
+}
+
+/* The field is painted once and the results are painted into their own node,
+   because re-rendering the screen on every keystroke replaces the <input> the
+   caret is sitting in — the sheet learned that the hard way and this inherits
+   the lesson rather than the bug. */
+function renderSearchResults() {
+  const el = document.getElementById("search-results");
+  if (!el) return;
+  const q = (S.query || "").trim().toLowerCase();
+  const groups = q ? searchGroups(q) : [];
+  const total = groups.reduce((a, g) => a + g.n, 0);
+
+  const body = !q
+    ? `<div class="sec">${sectionHead("Everything on the desk",
+          artistKeys.length + " artists · " + REAL.coverage.lots.toLocaleString() + " lots")}
+        <div class="foot-note">Artists, headlines, results, forthcoming sales${CRM.live ? ", the book and your own diary" : ""} — all at once.</div>
+        <div class="chiprow" style="padding-left:0;padding-right:0;margin:14px 0 0;flex-wrap:wrap;overflow:visible">
+          ${artistKeys.slice(0, 14).map(k =>
+            `<button class="chip" data-open-artist="${esc(k)}">${esc(A(k).name)}</button>`).join("")}
+        </div></div>`
+    : !groups.length
+      ? `<div class="empty">Nothing on the desk matches “${esc(S.query)}”.</div>`
+      : groups.map(g => `<div class="sec">${sectionHead(g.label, String(g.n))}${g.html}</div>`).join("");
+
+  const count = q
+    ? total + (total === 1 ? " match" : " matches") + " across " + groups.length
+      + (groups.length === 1 ? " section" : " sections")
+    : "";
+  el.innerHTML = (count ? `<div class="foot-note" style="margin:0 0 4px">${esc(count)}</div>` : "") + body;
+  guard("sparks", drawSparks);
+}
+
+function viewSearch() {
+  return `<div class="view-head"><h1>Search</h1>
+      <p>Everything the desk holds, at once</p></div>
+    <div class="view-body">
+      <div class="searchbar">
+        <span class="g">${I(ICON.search, 20)}</span>
+        <input id="q" data-q="1" type="search" autocomplete="off" autocorrect="off"
+          spellcheck="false" placeholder="Gaitonde, Saffronart, September, a client…"
+          value="${esc(S.query)}">
+        <button class="cancel" data-act="clear-search">Clear</button>
+      </div>
+      <div id="search-results"></div>
+    </div>`;
+}
+
+/* The handoff's More is a settings list. Two of its four rows are settings this
+   desk does not have — there are no notifications to configure — so the list
+   carries the places she can actually go, and then says plainly what the desk
+   holds, what it sends and what it does not. Data & privacy is not decoration
+   here: it is the one page that answers "where does the client book go". */
 function viewMore() {
   const items = [
     { nav: "ask", icon: "ask", t: "Ask AG Newsroom", s: CRM.ai ? "Anything about the desk, answered from the records" : "Needs a Mistral key on this desk" },
+    { act: "open-search", icon: "search", t: "Search the desk", s: "Artists, headlines, results, sales, the book and your diary" },
+    { nav: "news", icon: "news", t: "News", s: "Ranked for you, everything pulled, and what you saved" },
     { nav: "calendar", icon: "calendar", t: "Calendar", s: "Sales, previews and fairs · Sep–Nov" },
     { nav: "knowledge", icon: "knowledge", t: "Knowledge", s: "Objection scripts and the pitch generator" }
   ];
   return `<div class="view-head"><h1>More</h1></div>
     <div class="view-body">
       <div class="sec"><div class="rows hub">
-        ${items.map(i => `<button class="hrow" data-nav="${i.nav}">
+        ${items.map(i => `<button class="hrow" ${i.act ? `data-act="${i.act}"` : `data-nav="${i.nav}"`}>
           <span class="ic">${I(ICON[i.icon], 20)}</span>
           <span class="tx"><span class="tt">${i.t}</span><span class="sb" style="display:block">${i.s}</span></span>
           ${I(ICON.chev, 16)}</button>`).join("")}
       </div></div>
+      <div class="sec">${sectionHead("Data and privacy")}
+        <div class="rows">
+          <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">The client book</span>
+            <span class="row-meta">${CRM.live ? "open on this device" : CRM.needsKey ? "locked" : "not on this origin"}</span></div>
+            <div class="row-sub">Stored in the desk’s own database, behind the key, and
+              served from this same origin. It is never written into the page and never
+              reaches the public site.</div></div>
+          <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">Send the book with a question</span>
+            <span class="row-meta">${S.askBook ? "on" : "off"}</span></div>
+            <div class="row-sub">Ask AG Newsroom can read the roster to answer. Turned off,
+              it never leaves the origin. The switch is on the Ask screen.</div></div>
+          <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">Drafting</span>
+            <span class="row-meta">${CRM.ai ? "configured" : "off"}</span></div>
+            <div class="row-sub">A pitch sends a first name, a tier, what they collect and
+              up to four public results — never a surname, never what they paid, never a
+              logged note. Every figure in the draft is checked back against the record
+              before it is shown.</div></div>
+          <div class="row"><div class="row-top"><span class="row-sub" style="margin:0">Saved stories</span>
+            <span class="row-meta">${MARKS.size} on this device</span></div>
+            <div class="row-sub">Bookmarks live in this browser only.</div></div>
+        </div>
+        <div class="btnrow" style="margin-top:14px">
+          <button class="btn" data-nav="unlock">${CRM.live ? "Change the desk key" : "Enter the desk key"}</button>
+          ${deskKey() ? `<button class="btn" data-act="forget-key">Forget this device</button>` : ""}
+        </div></div>
       <div class="sec">${sectionHead("Currency", "against INR")}${marketFx()}</div>
       <div class="sec">${sectionHead("The desk")}
         <div class="rows">
@@ -3630,59 +4427,11 @@ function viewMore() {
     </div>`;
 }
 
-/* ============================================================
-   SEARCH SHEET
-   ============================================================ */
-/* The search sheet is built ONCE per opening. It used to re-render itself on
-   every keystroke, which replaced the <input> the caret was sitting in — so on
-   an iPad each letter tore down the field, dropped focus and dismissed the
-   keyboard, and typing "Gaitonde" meant nine separate taps on the search icon.
-   Only the results list is allowed to redraw while she types. */
-function renderSheetResults() {
-  const el = document.getElementById("sheet-body");
-  if (!el) return;
-  const q = S.query.trim().toLowerCase();
-  const matches = artistKeys.filter(k =>
-    A(k).name.toLowerCase().includes(q) || A(k).movement.toLowerCase().includes(q)).slice(0, 8);
-
-  const body = q === ""
-    ? `<div class="sheet-hint"><div class="label">Quick picks</div>
-        <div class="chiprow" style="padding-left:0;padding-right:0;margin:0;flex-wrap:wrap;overflow:visible">
-          ${artistKeys.map(k => `<button class="chip" data-open-artist="${k}">${esc(A(k).name)}</button>`).join("")}
-        </div></div>`
-    : matches.length
-      ? matches.map(k => `<button class="sug" data-open-artist="${k}">
-          <span class="n">${esc(A(k).name)}</span>
-          <span class="m tnum">${[A(k).years, `${A(k).stats.lots12} lots / 12 mo`].filter(Boolean).map(esc).join(" · ")}</span></button>`).join("")
-      : `<div class="empty">No artist matches “${esc(S.query)}”. Try Gaitonde, Raza or Baroda.</div>`;
-
-  el.innerHTML = `<div class="label" style="padding:18px 0 4px">${q === "" ? artistKeys.length + " artists \u00b7 " + REAL.coverage.lots.toLocaleString() + " lots" : matches.length + " match" + (matches.length === 1 ? "" : "es")}</div>${body}`;
-}
-
-function renderSheet() {
-  const el = document.getElementById("sheet");
-  if (!S.searchOpen) { el.innerHTML = ""; return; }
-
-  el.innerHTML = `<div class="sheet-bg" data-act="close-search-bg">
-    <div class="sheet" role="dialog" aria-label="Search artists">
-      <div class="sheet-top">
-        <span class="g">${I(ICON.search, 21)}</span>
-        <input id="q" data-q="1" type="search" autocomplete="off" autocorrect="off" spellcheck="false"
-          placeholder="Gaitonde, Raza, Sher-Gil, Khakhar…" value="${esc(S.query)}">
-        <button class="cancel" data-act="close-search">Cancel</button>
-      </div>
-      <div class="sheet-body" id="sheet-body"></div>
-    </div></div>`;
-  renderSheetResults();
-
-  // Typing is handled by the delegated input listener, so no per-render
-  // addEventListener here — that used to stack a fresh one on every keystroke.
-  const inp = document.getElementById("q");
-  if (inp) {
-    inp.focus();
-    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
-  }
-}
+/* renderSheet() / renderSheetResults() lived here. Search is a screen now, with
+   grouped sections over everything the desk holds rather than an overlay that
+   could only find an artist. viewSearch() + renderSearchResults() replaced them,
+   and kept the one thing the sheet got right: the field is never redrawn while
+   she is typing in it. */
 
 /* ============================================================
    RENDER
@@ -3692,6 +4441,9 @@ function view() {
     case "today": return viewToday();
     case "artists": return viewArtists();
     case "dossier": return isSplit ? viewArtists() : viewDossier(false);
+    case "news": return viewNews();
+    case "article": return viewArticle(false);
+    case "search": return viewSearch();
     case "market": return viewMarket();
     case "clients": return viewClients();
     case "newclient": return viewNewClient();
@@ -3760,6 +4512,10 @@ function render(keepScroll) {
   renderedScreenKey = S.screen;
   renderedRecordKey = splitRecordKey();
   renderedSplit = split;
+  // The field is inside `main`, so its results have to be painted after it and
+  // never by it. Anything that changes what search would match \u2014 the book
+  // loading, a news refresh \u2014 lands here without touching the input.
+  if (S.screen === "search") guard("search", renderSearchResults);
   guard("rail", renderRail);
   guard("topbar", renderTopbar);
   guard("tabbar", renderTabbar);
@@ -3829,6 +4585,17 @@ function askSend() {
     .then(() => { S.askBusy = false; render(true); askScroll(); });
 }
 
+/* Focus is deliberately not taken on every render \u2014 only when she has just
+   asked for the search screen. Stealing it on a repaint would fight the caret. */
+function focusSearch() {
+  requestAnimationFrame(() => {
+    const inp = document.getElementById("q");
+    if (!inp) return;
+    inp.focus();
+    try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) {}
+  });
+}
+
 function askScroll() {
   requestAnimationFrame(() => {
     const el = document.getElementById("askScroll");
@@ -3855,23 +4622,26 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev],[data-open-story],[data-news],[data-client-tab]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
 
   if (attr("data-open-artist")) {
-    S.searchOpen = false; S.query = "";
     return go(isSplit ? "artists" : "dossier", { artist: attr("data-open-artist"), houseFilter: "All", bioOpen: false });
   }
   if (attr("data-open-client")) {
     const ck = attr("data-open-client");
-    S.searchOpen = false;
-    go(isSplit ? "clients" : "client", { client: ck, openTemplate: null });
+    go(isSplit ? "clients" : "client", { client: ck, openTemplate: null, clientTab: "overview" });
     ensureDetail(ck);
     return;
   }
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
+  if (attr("data-open-story")) {
+    return go("article", { article: attr("data-open-story"), back: S.screen === "article" ? S.back : S.screen });
+  }
+  if (attr("data-news")) { S.newsTab = attr("data-news"); return render(true); }
+  if (attr("data-client-tab")) { S.clientTab = attr("data-client-tab"); return render(true); }
   if (attr("data-market")) { S.marketTab = attr("data-market"); return render(true); }
   if (attr("data-cal")) { S.calFilter = attr("data-cal"); S.calDay = null; S.calEvent = null; return render(true); }
   if (attr("data-res")) {
@@ -3940,6 +4710,7 @@ document.addEventListener("click", e => {
     }
     const d = CRM.detail[S.client] || {};
     S.panel = which;
+    if (PANEL_TAB[which]) S.clientTab = PANEL_TAB[which];
     S.draftError = null;
     S.confirmDelete = null;
     S.draft =
@@ -3968,6 +4739,7 @@ document.addEventListener("click", e => {
                :                      (d.followups || [])).find(x => x.id === rid);
     if (!row) return;
     S.panel = `${kind}:${rid}`;
+    if (PANEL_TAB[kind]) S.clientTab = PANEL_TAB[kind];
     S.confirmDelete = null;
     S.draftError = null;
     S.draft = kind === "holding"
@@ -3984,6 +4756,8 @@ document.addEventListener("click", e => {
     // First tap arms it, second does it. Nothing is deleted on one tap.
     if (S.confirmDelete !== token) {
       S.confirmDelete = token; S.panel = null; S.draft = {}; S.draftError = null;
+      const k = token.slice(0, token.indexOf(":"));
+      if (PANEL_TAB[k]) S.clientTab = PANEL_TAB[k];
       return render(true);
     }
     const kind = token.slice(0, token.indexOf(":"));
@@ -4022,6 +4796,13 @@ document.addEventListener("click", e => {
     delete CRM.detailError[cid];
     ensureDetail(cid, true);
     return render(true);
+  }
+  if (act === "forget-key") {
+    setDeskKey("");
+    CRM.live = false; CRM.needsKey = true; CRM.clients = []; CRM.detail = {};
+    CRM.detailBusy = {}; CRM.detailError = {}; CRM.followups = []; CRM.activity = [];
+    S.client = null;
+    return render(false);
   }
   if (act === "new-client") {
     return go("newclient", { newClient: {}, newClientError: null });
@@ -4165,9 +4946,12 @@ document.addEventListener("click", e => {
     });
     return;
   }
-  if (act === "open-search") { S.searchOpen = true; S.query = ""; return renderSheet(); }
-  if (act === "close-search") { S.searchOpen = false; S.query = ""; return renderSheet(); }
-  if (act === "close-search-bg" && e.target.classList.contains("sheet-bg")) { S.searchOpen = false; S.query = ""; return renderSheet(); }
+  if (act === "open-search") {
+    if (S.screen === "search") return focusSearch();
+    go("search", { query: "", back: S.screen });
+    return focusSearch();
+  }
+  if (act === "clear-search") { S.query = ""; renderSearchResults(); return focusSearch(); }
   if (act === "toggle-bio") { S.bioOpen = !S.bioOpen; return render(true); }
   if (act === "pitch-for") {
     const cid = attr("data-client");
@@ -4224,7 +5008,7 @@ document.addEventListener("click", e => {
 
 document.addEventListener("input", e => {
   const q = e.target.closest("[data-q]");
-  if (q) { S.query = q.value; renderSheetResults(); return; }   // never redraws the field
+  if (q) { S.query = q.value; renderSearchResults(); return; }   // never redraws the field
   const nc = e.target.closest("[data-nc]");
   if (nc) { S.newClient = { ...S.newClient, [nc.getAttribute("data-nc")]: nc.value }; return; }
   const ed = e.target.closest("[data-ed]");
@@ -4242,7 +5026,7 @@ document.addEventListener("submit", e => {
 });
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape" && S.searchOpen) { S.searchOpen = false; S.query = ""; renderSheet(); }
+  if (e.key === "Escape" && S.screen === "search") { go(S.back || "today", { query: "" }); }
   // Enter sends, shift-Enter breaks the line — what every other chat box does.
   if (e.key === "Enter" && !e.shiftKey && e.target.closest(".ask-input")) {
     e.preventDefault(); askSend();
