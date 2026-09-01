@@ -2280,14 +2280,22 @@ const PUSHED = ["article", "search", "news", "newclient", "unlock"];
 const tabForScreen = s => {
   if (s === "dossier") return "artists";
   if (s === "client") return "clients";
-  /* A pushed screen highlights the tab it was opened from, so the bar never
-     goes blank while she is two screens deep. S.back is ONE value, not a stack,
-     so recursing into it while it still names a pushed screen recurses for
-     ever — that blanked the tab bar with a stack overflow. One hop only; a
-     pushed screen reached from another falls back to the hub that holds it. */
+  /* The rail carries an entry per screen, so a screen with one lights it — News
+     included, even though it is opened rather than tabbed to. The phone bar has
+     only five slots, so there the same test is against those five. */
+  if (isPad ? NAV.some(n => n.id === s) : PHONE_TABS.includes(s)) return s;
+  /* A pushed screen highlights where it was opened from, so nothing goes blank
+     while she is two screens deep. S.back is ONE value, not a stack, so
+     recursing into it while it still names a pushed screen recurses for ever —
+     that blanked the tab bar with a stack overflow. One hop, and a pushed screen
+     opened from another lights that one only if it has a place of its own. */
   if (PUSHED.includes(s)) {
     const b = S.back;
-    return (b && !PUSHED.includes(b) && b !== s) ? tabForScreen(b) : (isPad ? "today" : "more");
+    if (b && b !== s) {
+      if (!PUSHED.includes(b)) return tabForScreen(b);
+      if (isPad && NAV.some(n => n.id === b)) return b;
+    }
+    return isPad ? "today" : "more";
   }
   if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "more")) return "more";
   return s;
@@ -5002,7 +5010,17 @@ document.addEventListener("click", e => {
   const nav = attr("data-nav");
   if (nav) {
     const know = attr("data-know");
-    return go(nav, know ? { knowTab: know } : {});
+    const opts = know ? { knowTab: know } : {};
+    /* A pushed screen has to be told where it came from, and the nav is one of
+       the things that opens one — News from the rail, Search from the More hub.
+       Without this S.back kept whatever the last push had left in it, so the
+       back chevron pointed somewhere she had never been and the tab bar lit the
+       wrong tab. Arriving from another pushed screen falls back to Today rather
+       than chaining, because S.back is a pointer and not a stack. */
+    if (PUSHED.includes(nav)) {
+      opts.back = PUSHED.includes(S.screen) ? (S.back || "today") : S.screen;
+    }
+    return go(nav, opts);
   }
 });
 
