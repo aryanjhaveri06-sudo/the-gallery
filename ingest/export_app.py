@@ -126,6 +126,13 @@ def main():
                 "index_houses": s.get("index_houses") or [],
             },
             "index": s["index"],
+            # The picture goes with the record. Roughly half of every house's
+            # catalogue is genuinely untitled, so an auction record without
+            # images is a column of the word "Untitled" — the picture is the
+            # only thing that tells one work from another. build_desk.py has
+            # always carried it; this used to drop it on the way out.
+            # Costs ~110 KB raw across 48 artists, ~21 KB gzipped: these URLs
+            # share long prefixes and compress about five to one.
             "records": [{
                 "date": r["date"], "house": r["house"], "lot": r["lot"],
                 "title": r["title"], "medium": r["medium"], "size": r["size"],
@@ -134,6 +141,7 @@ def main():
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
                 "url": r["url"],
+                "image": r.get("image"),
             } for r in recs],
         }
 

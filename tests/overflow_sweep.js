@@ -87,6 +87,19 @@
     }
   }
 
+  /* The auction record carries a picture now, and app_data.json only gains the
+     field on the next CI rebuild — so measure the layout that IS coming, not
+     the one that happens to be in the file today. */
+  const someImg = (REAL.feed || []).map(f => f.image).filter(Boolean);
+  if (someImg.length) {
+    let n = 0;
+    for (const a of Object.values(REAL.artists)) for (const r of a.records) r.image = someImg[n++ % someImg.length];
+    // and one without, because a record with no picture takes the full width
+    const first = Object.values(REAL.artists)[0];
+    if (first && first.records[0]) first.records[0].image = null;
+    ARTISTS = buildArtists();
+  }
+
   const SCREENS = ['today','news','market','artists','clients','calendar','knowledge','more','search','ask'];
   for (const sc of SCREENS) {
     if (sc === 'search') { go(sc, { query: 'raza' }); renderSearchResults(); }

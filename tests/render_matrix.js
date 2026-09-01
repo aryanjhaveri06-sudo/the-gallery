@@ -214,6 +214,15 @@
     'artists empty': r => { r.artists = {}; },
     'artist index null': r => { const k = Object.keys(r.artists)[0]; r.artists[k].index = null; },
     'artist records empty': r => { const k = Object.keys(r.artists)[0]; r.artists[k].records = []; },
+    // The auction record carries a picture now, and the URL comes from a house
+    // feed. safeUrl() is what stands between that and a live javascript: link.
+    'record image is a script': r => { for (const a of Object.values(r.artists))
+      for (const x of a.records) x.image = 'javascript:alert(1)'; },
+    'record image missing': r => { for (const a of Object.values(r.artists))
+      for (const x of a.records) delete x.image; },
+    'record image is junk': r => { for (const a of Object.values(r.artists))
+      for (const x of a.records) x.image = { nope: true }; },
+    'feed image is a script': r => { for (const f of (r.feed || [])) f.image = 'JaVaScRiPt:alert(1)'; },
     'artist stats empty': r => { const k = Object.keys(r.artists)[0]; r.artists[k].stats = {}; },
     'coverage stripped': r => { r.coverage = {}; },
     'coverage.houses missing': r => { delete r.coverage.houses; },

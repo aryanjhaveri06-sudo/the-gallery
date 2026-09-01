@@ -516,6 +516,10 @@ button.row:active{background:var(--gold-tint)}
 .more-link{margin-top:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink);font-family:var(--font-heading);font-weight:600}
 
 .rec{padding:22px 0}
+/* A record with a picture is two columns; one without keeps the full width
+   rather than sitting beside an empty frame. */
+.rec.has-pic{display:grid;grid-template-columns:96px 1fr;gap:18px;align-items:start}
+.rec-body{min-width:0}
 .rec-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
 .rec-work{font-family:var(--font-heading);font-weight:600;font-style:italic;font-size:19.9px;line-height:1.25;margin-top:7px}
 .rec-med{font-size:13.1px;color:var(--ink-60);margin-top:3px}
@@ -548,12 +552,21 @@ button.row:active{background:var(--gold-tint)}
 .lotwrap + .lotwrap, .lotwrap + .lotcard, .lotcard + .lotwrap{border-top:1px solid var(--divider-soft)}
 .lotwrap .lotcard{border-top:0}
 .lot-dossier{margin:0 0 16px 96px;font-size:10.5px}
-.lotcard .thumb{
-  /* contain, never cover: cropping a painting to fit a box defeats the point of
-     showing it. Saffronart serves squares, AstaGuru tall scans; both fit. */
-  width:80px;aspect-ratio:3/4;object-fit:contain;display:block;
+/* contain, never cover: cropping a painting to fit a box defeats the point of
+   showing it. Saffronart serves squares, AstaGuru tall scans; both fit. One
+   rule for every thumbnail; only the box size differs. */
+.thumb{
+  object-fit:contain;display:block;flex:none;
   background:var(--surface);border:1px solid var(--divider-soft);
   border-radius:var(--r-sm);
+}
+.thumb.t-lot{width:80px;aspect-ratio:3/4}
+.thumb.t-rec{width:96px;aspect-ratio:3/4}
+.thumb.t-ares{width:46px;aspect-ratio:1/1}
+.thumb.ph{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-40);
+  padding:4px;line-height:1.3;
 }
 .lotcard .thumb.ph{
   display:flex;align-items:center;justify-content:center;text-align:center;
@@ -1006,7 +1019,7 @@ input[data-ed][type=date]{min-height:46px}
 
 /* a result line — article, market overview, search */
 .ares{
-  display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:11px 0;border-bottom:1px solid var(--divider-soft);color:inherit;text-decoration:none;
 }
 .ares-b{min-width:0}
@@ -1092,6 +1105,11 @@ a.auc:hover .auc-name{color:var(--gold-ink)}
   color:var(--gold-ink);flex:none}
 
 @media (max-width:560px){
+  /* The picture keeps its place on a phone — it is the thing that identifies an
+     untitled work — but takes less of the row. */
+  .rec.has-pic{grid-template-columns:74px 1fr;gap:14px}
+  .thumb.t-rec{width:74px}
+  .thumb.t-ares{width:40px}
   .article-head h1{font-size:25px}
   .scard{grid-template-columns:1fr 52px}
   .scard-img{width:52px;height:52px}
@@ -1727,6 +1745,7 @@ function buildArtists() {
       index: (a.index || []).map(p => p.value),
       indexYears: (a.index || []).map(p => p.year),
       records: (a.records || []).map(r => ({
+        image: r.image || null,
         date: fmtDate(r.date), house: r.house,
         work: r.title || "Untitled",
         medium: [r.medium, r.size].filter(Boolean).join(", ") || "—",
@@ -2703,7 +2722,7 @@ function articleResults(keys) {
       if (f.artist_key !== k || seen.has(f.url || f.title)) continue;
       seen.add(f.url || f.title);
       rows.push({ artist: f.artist, title: f.title, house: f.house, date: f.date, price: f.price,
-                  url: f.url, vs: f.vs_est });
+                  url: f.url, vs: f.vs_est, image: f.image });
       if (rows.length >= 6) return rows;
     }
     const a = ARTISTS[k];
@@ -2712,7 +2731,7 @@ function articleResults(keys) {
       if (seen.has(id)) continue;
       seen.add(id);
       rows.push({ artist: a.name, title: r.title, house: r.house, date: r.date, price: r.price,
-                  url: r.url, vs: null });
+                  url: r.url, vs: null, image: r.image });
       if (rows.length >= 6) return rows;
     }
   }
@@ -2772,7 +2791,8 @@ function viewArticle(embedded) {
       ${results.length ? `<div class="sec">${sectionHead("What they have sold", "on the record")}
         <div class="rows">${results.map(r => {
           const u = safeUrl(r.url);
-          const inner = `<div class="ares-b">
+          const inner = `${workThumb(r.image, [r.artist, r.title].filter(Boolean).join(" — "), "t-ares")}
+            <div class="ares-b">
               <div class="ares-t">${esc(r.artist)}${r.title ? " — " + esc(r.title) : ""}</div>
               <div class="ares-m">${esc(r.house || "")}${r.date ? " · " + esc(fmtDate(r.date)) : ""}</div>
             </div>
@@ -2884,17 +2904,28 @@ function viewDossier(embedded) {
   // from public results, so any figure would read near 100% and be false.
   const sellNote = "";
 
-  const recs = rows.map(r => `
-    <div class="rec">
-      <div class="rec-top">${houseTag(r.house)}<span class="row-meta tnum">${esc(r.date)}</span></div>
-      <div class="rec-work">${esc(r.work)}</div>
-      <div class="rec-med">${esc(r.medium)}${r.sale ? " \u00b7 " + esc(r.sale) : ""}${r.nat ? ' \u00b7 <span style="color:var(--gold-ink)">Art Treasure, non-exportable</span>' : ""}</div>
-      <div class="rec-foot">
-        <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
-          ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}</div>
-        <div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>
+  /* The picture sits beside the record. Half this market's works are genuinely
+     untitled, so without it the column reads "Untitled, Untitled, Untitled" and
+     nothing distinguishes a ₹61.8 cr canvas from a ₹17 lakh drawing. A record
+     with no picture simply has no column — the text takes the full width rather
+     than sitting next to an empty frame. */
+  const recs = rows.map(r => {
+    const pic = workThumb(r.image, [a.name, r.work].filter(Boolean).join(" \u2014 "), "t-rec");
+    return `
+    <div class="rec${pic ? " has-pic" : ""}">
+      ${pic}
+      <div class="rec-body">
+        <div class="rec-top">${houseTag(r.house)}<span class="row-meta tnum">${esc(r.date)}</span></div>
+        <div class="rec-work">${esc(r.work)}</div>
+        <div class="rec-med">${esc(r.medium)}${r.sale ? " \u00b7 " + esc(r.sale) : ""}${r.nat ? ' \u00b7 <span style="color:var(--gold-ink)">Art Treasure, non-exportable</span>' : ""}</div>
+        <div class="rec-foot">
+          <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
+            ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}</div>
+          <div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>
+        </div>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 
   const talk = a.talking.map(t => `<div class="talk"><span class="mk">§</span><span>${esc(t)}</span></div>`).join("");
 
@@ -2984,20 +3015,35 @@ function lotThumbFail(img) {
     img.src = fb;
     return;
   }
+  // Keep the size class, or the placeholder collapses to a different box than
+  // the picture it is standing in for.
+  const size = [...img.classList].find(c => c.startsWith("t-")) || "";
   img.replaceWith(Object.assign(document.createElement("div"),
-    { className: "thumb ph", textContent: "no image" }));
+    { className: `thumb ${size} ph`, textContent: "no image" }));
 }
 
 /* loading="lazy" because forty house-hosted JPEGs should not block the tab, and
    decoding="async" so one slow image cannot stall the list. */
-function lotThumb(f) {
-  const orig = safeUrl(f.image);
-  if (!orig) return `<div class="thumb ph">no image</div>`;
+/* One implementation, three call sites: the results feed, an artist's auction
+   record, and the result rows on an article or a search. They must not drift —
+   the Saffronart variant swap and the fallback are easy to get subtly wrong
+   twice. `cls` only sizes the box; the fit is always contain.
+
+   Where there is no picture this renders NOTHING, not a frame saying so, except
+   in the results feed where the card's grid reserves the column and an empty
+   cell would read as a broken image. */
+function workThumb(image, alt, cls, placeholder) {
+  const orig = safeUrl(image);
+  if (!orig) return placeholder ? `<div class="thumb ${cls} ph">no image</div>` : "";
   const shown = orig.replace("_aucres.", "_thumb.");
-  const alt = [f.artist, f.title].filter(Boolean).join(" \u2014 ") || "Lot";
-  return `<img class="thumb" src="${esc(shown)}" alt="${esc(alt)}"
+  return `<img class="thumb ${cls}" src="${esc(shown)}" alt="${esc(alt || "")}"
     ${shown !== orig ? `data-fallback="${esc(orig)}"` : ""}
     loading="lazy" decoding="async" onerror="lotThumbFail(this)">`;
+}
+
+function lotThumb(f) {
+  return workThumb(f.image, [f.artist, f.title].filter(Boolean).join(" \u2014 ") || "Lot",
+                   "t-lot", true);
 }
 
 function marketResults() {
@@ -3145,7 +3191,8 @@ function marketOverview() {
     ? `<div class="rows">` + rows.slice().sort((a, b) => b.vs_est.pct - a.vs_est.pct).slice(0, 3)
         .map(f => {
           const u = safeUrl(f.url);
-          const inner = `<div class="ares-b">
+          const inner = `${workThumb(f.image, [f.artist, f.title].filter(Boolean).join(" — "), "t-ares")}
+            <div class="ares-b">
               <div class="ares-t">${esc(f.artist || "—")}${f.title ? " — " + esc(f.title) : ""}</div>
               <div class="ares-m">${esc(f.house || "")} · ${esc(fmtDate(f.date))} · Est. ${esc(f.est || "—")}</div>
             </div>
@@ -4324,7 +4371,8 @@ function searchGroups(q) {
   if (lots.length) g.push({ label: "Auction results", n: lots.length,
     html: `<div class="rows">${lots.map(f => {
       const u = safeUrl(f.url);
-      const inner = `<div class="ares-b">
+      const inner = `${workThumb(f.image, [f.artist, f.title].filter(Boolean).join(" — "), "t-ares")}
+        <div class="ares-b">
           <div class="ares-t">${esc(f.artist || "—")}${f.title ? " — " + esc(f.title) : ""}</div>
           <div class="ares-m">${esc(f.house || "")}${f.date ? " · " + esc(fmtDate(f.date)) : ""}</div>
         </div><div class="ares-p tnum">${esc(f.price || "—")}</div>`;
