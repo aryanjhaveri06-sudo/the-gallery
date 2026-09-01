@@ -315,12 +315,36 @@ export async function onRequest(context) {
         })().catch(e => { console.error("ask/book", e && e.message); book = null; }));
       }
       jobs.push((async () => { diary = await todaysDiary(env); })().catch(() => { diary = null; }));
-      // The browser holds the MERGED feed — the nightly Google-sourced stories
-      // plus the live publisher layer — and neither alone is enough. Prefer what
-      // she is actually looking at; fall back to the live layer if it sent none.
-      const sentNews = b.news && Array.isArray(b.news.on_market) ? b.news : null;
-      if (sentNews) news = sentNews;
-      else jobs.push((async () => { news = await liveNews(context); })().catch(() => { news = null; }));
+      // The browser sends the stories already ranked (client-relevant first),
+      // already aged out at a month, and already numbered for citation — it is
+      // the only side that holds both the merged feed and the client interests
+      // needed to rank against. The live layer is a fallback, shaped the same
+      // way so the numbers still mean something.
+      if (Array.isArray(b.news) && b.news.length) {
+        news = b.news.slice(0, 24).map((r, i) => ({
+          n: i + 1,
+          date: String(r.date || "").slice(0, 10),
+          source: String(r.source || "").slice(0, 60),
+          headline: String(r.headline || "").slice(0, 240),
+          url: String(r.url || "").slice(0, 500),
+          clients: (Array.isArray(r.clients) ? r.clients : []).slice(0, 6).map(c => String(c).slice(0, 80)),
+          artists: (Array.isArray(r.artists) ? r.artists : []).slice(0, 3).map(c => String(c).slice(0, 80)),
+          age_days: Number.isFinite(+r.age_days) ? Math.max(0, Math.round(+r.age_days)) : 0,
+        }));
+      } else {
+        jobs.push((async () => {
+          const live = await liveNews(context);
+          const today = Date.now();
+          news = [...((live && live.on_market) || []), ...((live && live.wider) || [])]
+            .filter(x => x && x.headline && x.date)
+            .map(x => ({ date: x.date, source: x.source, headline: x.headline, url: x.url || "",
+                         clients: [], artists: [],
+                         age_days: Math.round((today - Date.parse(x.date + "T00:00:00")) / 86400000) }))
+            .filter(x => x.age_days <= 31 && x.age_days >= -1)
+            .slice(0, 24)
+            .map((x, i) => ({ ...x, n: i + 1 }));
+        })().catch(() => { news = null; }));
+      }
       await Promise.all(jobs);
 
       const facts = buildFacts({
@@ -364,7 +388,7 @@ export async function onRequest(context) {
       if (book) sources.push("Client book");
       if (diary && diary.configured && !diary.error) sources.push("Her diary");
       if (Array.isArray(b.events) && b.events.length) sources.push("Sale calendar");
-      if (news && ((news.on_market || []).length || (news.wider || []).length)) sources.push("Headlines");
+      if (Array.isArray(news) && news.length) sources.push("Headlines");
       if (b.market && ((b.market.lots || []).length || (b.market.artists || []).length)) sources.push("Auction results");
 
       await audit(env, who.email, "ask", "desk", null);
@@ -374,6 +398,11 @@ export async function onRequest(context) {
         unverified: unverified.slice(0, 8),
         used_book: withBook,
         sources,
+        // The citation table, so the browser can turn [3] into a real anchor
+        // from a URL that never went near the model.
+        cited: (Array.isArray(news) ? news : []).map(r => ({
+          n: r.n, headline: r.headline, source: r.source, date: r.date, url: r.url,
+        })),
       });
     }
 

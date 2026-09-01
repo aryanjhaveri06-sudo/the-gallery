@@ -100,12 +100,48 @@ function diaryFacts(diary, events) {
   return lines.join("\n");
 }
 
+/**
+ * The stories, already ordered and already filtered by the browser: nothing
+ * older than a month, and everything a collector in the book cares about ahead
+ * of everything else. The model is not asked to sort or to date-check — it
+ * would drift, and a list that arrives correct cannot.
+ *
+ * Each one carries a number. That number is how the answer refers to a story;
+ * the URL is deliberately NOT here, so there is no link for the model to get
+ * wrong. The browser turns [3] back into an anchor from its own record.
+ */
 function newsFacts(news) {
-  const rows = [...((news && news.on_market) || []), ...((news && news.wider) || [])].slice(0, 24);
-  if (!rows.length) return "No headlines were available.";
-  return ["Headlines on the desk right now:",
-    ...rows.map(n => `- ${n.date || "undated"} ${clip(n.source, 40)}: ${clip(n.headline || n.title, 160)}`)
-  ].join("\n");
+  const rows = Array.isArray(news) ? news.slice(0, 24) : [];
+  if (!rows.length) {
+    return "No headlines from the past month were available. Say so rather than reaching further back.";
+  }
+  const withClients = rows.filter(r => (r.clients || []).length);
+  const lines = [
+    `${rows.length} stories, none older than a month, already ordered: the ones a`,
+    `collector in her book cares about first.`,
+    "",
+  ];
+  if (withClients.length) {
+    lines.push(`Stories that touch a collector in the book (${withClients.length}) — lead with these:`);
+    for (const r of withClients) lines.push(newsLine(r));
+    lines.push("");
+    const rest = rows.filter(r => !(r.clients || []).length);
+    if (rest.length) {
+      lines.push("Everything else, most significant first:");
+      for (const r of rest) lines.push(newsLine(r));
+    }
+  } else {
+    lines.push("No story this month touches a collector in the book. Say so, then give her these:");
+    for (const r of rows) lines.push(newsLine(r));
+  }
+  return lines.join("\n");
+}
+
+function newsLine(r) {
+  const age = r.age_days === 0 ? "today" : r.age_days === 1 ? "yesterday" : `${r.age_days} days ago`;
+  return `[${r.n}] ${r.date} (${age}) ${clip(r.source, 40)}: ${clip(r.headline, 180)}`
+    + ((r.clients || []).length ? ` — matters to ${r.clients.join(", ")}` : "")
+    + ((r.artists || []).length ? ` — names ${r.artists.join(", ")}` : "");
 }
 
 /** The market slice the browser sent — it already holds app_data, the Worker does not. */
@@ -173,9 +209,11 @@ export function buildFacts({ today, book, diary, events, news, market }) {
 export { bookFacts };
 
 export const ASK_SYSTEM = [
-  "You are the assistant on a private art sales desk. The desk belongs to an",
-  "advisor who sells Indian modern and contemporary art. She is asking you about",
-  "her own records.",
+  "You are Aashna's assistant on her private art sales desk. She advises",
+  "collectors on Indian modern and contemporary art and she is asking you about",
+  "her own records. Behave like a good assistant, not a search engine: answer the",
+  "question she asked, then — only when the record actually supports one — say",
+  "what it means for her day or who it is worth a call to.",
   "",
   "Absolute rules:",
   "- Everything you know is in the FACTS block. Use nothing else. You have no",
@@ -188,9 +226,22 @@ export const ASK_SYSTEM = [
   "- If FACTS does not answer the question, say so plainly and say what is",
   "  missing. Never fill a gap with something plausible. A wrong price here goes",
   "  to a collector.",
+  "- Never invent a next step you cannot ground. \"Worth a word with Nanda, who",
+  "  collects the Progressives\" is fine because FACTS says so; \"the market is",
+  "  heating up\" is not.",
   "",
-  "Style: brief and direct, British English. She is at her desk and wants the",
-  "answer, not an essay. Lead with it. Use short prose or a simple dash list; no",
-  "markdown headings, no bold, no tables. Name people and works exactly as FACTS",
-  "spells them. Two hundred words is usually too many.",
+  "Citing stories:",
+  "- Every story in FACTS carries a number. Refer to one by writing its number in",
+  "  square brackets at the end of the sentence, like this: [3]. Cite the story",
+  "  you actually used, and cite nothing that is not in FACTS.",
+  "- Never write a URL, a domain, or a link of any kind. The desk turns your",
+  "  numbers into links itself.",
+  "- The stories arrive ordered: those touching a collector in her book come",
+  "  first. Keep that order. Lead with who it matters to and why, then the rest.",
+  "",
+  "Style: brief and direct, British English, warm but unfussy. She is at her desk",
+  "and wants the answer, not an essay. Lead with it. Short prose, or a simple",
+  "dash list when there are several items. No markdown headings, no bold, no",
+  "tables. Name people and works exactly as FACTS spells them. Two hundred words",
+  "is usually too many; for a roundup, one line per story is usually right.",
 ].join("\n");

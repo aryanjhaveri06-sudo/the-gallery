@@ -100,10 +100,13 @@
         }
         // the month grid carries its own state: which month, which day open
         if (sc === 'calendar') {
-          for (const m of [-14, -1, 0, 1, 3, 18]) {
-            for (const day of [null, '2026-09-10', '2026-02-30', 'not-a-date', '']) {
-              S.calMonth = m; S.calDay = day;
-              runs++; attempt(`${vp}/${auth}/calendar/m${m}/d:${day}`, () => render(false));
+          for (const m of [-14, 0, 1, 18]) {
+            for (const day of [null, '2026-09-10', 'not-a-date', '']) {
+              for (const ev of [null, 'no-such-key', (REAL.events && REAL.events[0]
+                    ? `${REAL.events[0].starts}|${REAL.events[0].house}|${(REAL.events[0].title||'').slice(0,40)}` : 'x')]) {
+              S.calMonth = m; S.calDay = day; S.calEvent = ev;
+              runs++; attempt(`${vp}/${auth}/calendar/m${m}/d:${day}/e:${ev}`, () => render(false));
+              }
             }
           }
           S.calMonth = 0; S.calDay = null;

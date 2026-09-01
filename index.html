@@ -45,6 +45,12 @@
   --font-body:"Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --r-sm:2px; --r-md:6px; --r-lg:10px; --r-pill:20px;
+
+  /* One easing curve and two durations for the whole app, so nothing moves at a
+     speed nothing else moves at. Fast is for a control answering a touch; slow
+     is for something arriving on screen. */
+  --ease:cubic-bezier(.32,.72,0,1);
+  --t-fast:.14s; --t-slow:.34s;
   --shadow-md:0 3px 10px color-mix(in srgb, var(--ink) 16%, transparent);
   --shadow-lg:0 12px 32px color-mix(in srgb, var(--ink) 22%, transparent);
 
@@ -93,6 +99,39 @@
    BASE
    ============================================================ */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+/* Motion. Everything below is decoration on top of a layout that already works,
+   so all of it comes off in one block for anyone who asks for less. */
+@media (prefers-reduced-motion: no-preference){
+  .main, .split .list, .split .detail, .ask-scroll{scroll-behavior:smooth}
+
+  /* A screen arriving. Only when the screen actually CHANGED — re-rendering the
+     same screen on every keystroke and fading it each time would be a strobe. */
+  .wrap.enter{animation:screen-in var(--t-slow) var(--ease) both}
+  @keyframes screen-in{
+    from{opacity:0;transform:translateY(6px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* A sale's summary unfolding. Height is not animatable from `auto`, so this
+     moves the things inside it instead — same read, no measuring. */
+  .ev-sum{animation:unfold var(--t-slow) var(--ease) both}
+  @keyframes unfold{
+    from{opacity:0;transform:translateY(-4px)}
+    to{opacity:1;transform:none}
+  }
+
+  /* Chat turns land rather than blink into place. */
+  .ask-q, .ask-a{animation:turn-in var(--t-slow) var(--ease) both}
+  @keyframes turn-in{
+    from{opacity:0;transform:translateY(8px)}
+    to{opacity:1;transform:none}
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation-duration:1ms !important;animation-iteration-count:1 !important;
+    transition-duration:1ms !important;scroll-behavior:auto !important}
+}
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--paper);color:var(--ink);
@@ -143,7 +182,8 @@ svg{display:block}
 .main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .wrap{padding:0 var(--pad) 48px}
 .wrap.wide{max-width:none}
-.main.ask-main{overflow:hidden}
+.main.ask-main, .main.split-main{overflow:hidden}
+.wrap.split-wrap{height:100%;padding-bottom:0}
 .wrap.ask-wrap{height:100%;padding:12px var(--pad) 0;display:flex;flex-direction:column;min-height:0}
 
 /* ---- top bar ---- */
@@ -166,7 +206,7 @@ svg{display:block}
 }
 .icon-btn{
   width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  color:var(--ink-60);border-radius:var(--r-md);transition:color .12s,background .12s;
+  color:var(--ink-60);border-radius:var(--r-md);transition:color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
 .icon-btn:active{background:var(--gold-tint);color:var(--gold-ink)}
 .icon-btn.back{justify-content:flex-start;color:var(--gold-ink)}
@@ -190,7 +230,7 @@ svg{display:block}
 }
 .tabbar button{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:2px;min-height:44px;color:var(--ink-60);transition:color .12s;
+  padding:2px;min-height:44px;color:var(--ink-60);transition:color var(--t-fast) var(--ease);
 }
 /* Sans, 9px, barely tracked — the handoff sets section and nav labels in
    Source Sans, not the display serif. */
@@ -207,7 +247,7 @@ svg{display:block}
   width:48px;height:48px;border-radius:50%;background:var(--gold);
   display:flex;align-items:center;justify-content:center;color:var(--paper);
   box-shadow:0 6px 16px -4px color-mix(in srgb, var(--gold) 50%, transparent);
-  z-index:5;transition:transform .12s;
+  z-index:5;transition:transform var(--t-fast) var(--ease);
 }
 .fab:active{transform:scale(.94)}
 .fab[hidden]{display:none}   /* [hidden] alone loses to the class above */
@@ -222,7 +262,7 @@ svg{display:block}
   display:inline-block;padding:8px 13px;border-radius:var(--r-md);
   font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;
   border:1px solid var(--divider);color:var(--ink-60);background:transparent;
-  transition:border-color .12s,color .12s,background .12s;
+  transition:border-color var(--t-fast) var(--ease),color var(--t-fast) var(--ease),background var(--t-fast) var(--ease);
 }
 .chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
 .chip:active{border-color:var(--gold)}
@@ -248,7 +288,7 @@ svg{display:block}
 /* row list — the workhorse */
 .rows > *{border-top:1px solid var(--divider)}
 .rows > *:first-child{border-top:1px solid var(--divider-soft)}
-.row{display:block;width:100%;padding:19px 0;transition:background .12s}
+.row{display:block;width:100%;padding:19px 0;transition:background var(--t-fast) var(--ease)}
 button.row:active{background:var(--gold-tint)}
 .row-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
 .row-name{font-family:var(--font-heading);font-weight:600;font-size:19.9px;line-height:1.24}
@@ -272,7 +312,7 @@ button.row:active{background:var(--gold-tint)}
 .seg button{
   flex:1;text-align:center;padding:11px 6px;font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;font-family:var(--font-heading);font-weight:600;
-  color:var(--ink-50);border-right:1px solid var(--divider);transition:all .12s;
+  color:var(--ink-50);border-right:1px solid var(--divider);transition:all var(--t-fast) var(--ease);
 }
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--gold-tint);color:var(--gold-ink)}
@@ -290,7 +330,7 @@ button.row:active{background:var(--gold-tint)}
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   min-height:40px;padding:9px 16px;border:1px solid var(--divider);border-radius:var(--r-md);
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  font-family:var(--font-heading);font-weight:600;color:var(--ink-72);transition:all .12s;
+  font-family:var(--font-heading);font-weight:600;color:var(--ink-72);transition:all var(--t-fast) var(--ease);
 }
 .btn:active{background:var(--gold-tint)}
 .btn-primary{border-color:var(--gold);color:var(--gold-ink)}
@@ -624,6 +664,19 @@ button.row:active{background:var(--gold-tint)}
 .ask-src{display:flex;gap:6px;flex-wrap:wrap}
 .ask-src span{font-size:10px;color:var(--gold-ink);border:1px solid var(--divider);
   border-radius:var(--r-pill);padding:3px 9px}
+/* Citations. The marker in the prose stays small and quiet; the list beneath is
+   where she actually clicks. */
+.ask-cite{color:var(--gold-ink);text-decoration:none;font-size:11px;
+  vertical-align:super;line-height:0;padding:0 1px}
+.ask-cite:hover{text-decoration:underline}
+.ask-refs{display:flex;flex-direction:column;gap:1px;margin:8px 0 6px}
+.ask-refs a{display:grid;grid-template-columns:18px 1fr;gap:0 8px;padding:7px 0;
+  color:inherit;text-decoration:none;border-top:1px solid var(--divider-soft)}
+.ask-refs a:hover .rt{color:var(--gold-ink)}
+.ask-refs .rn{font-size:10px;color:var(--gold-ink);padding-top:2px}
+.ask-refs .rt{font-size:12px;line-height:1.4}
+.ask-refs .rs{grid-column:2;font-size:10px;color:var(--ink-60);margin-top:2px;
+  letter-spacing:.03em;text-transform:uppercase}
 .ask-thinking .ask-body{color:var(--ink-60)}
 .ask-warn{font-size:11px;line-height:1.5;color:var(--down);
   border:1px solid color-mix(in srgb, var(--down) 35%, transparent);
@@ -731,7 +784,18 @@ button.row:active{background:var(--gold-tint)}
   .cal-cell .hd{margin-bottom:3px}
   .cal-title{font-size:22.1px}
 }
-.ev{display:grid;grid-template-columns:1fr auto;gap:14px;padding:16px 0;align-items:start}
+.ev{display:grid;grid-template-columns:1fr auto;gap:0 14px;padding:16px 0;align-items:start}
+.ev-hit{grid-column:1;text-align:left;width:100%;color:inherit;display:block}
+.ev .rs{grid-column:2;grid-row:1}
+.ev .rs svg{transition:transform var(--t-slow) var(--ease);color:var(--ink-40)}
+.ev.open .rs svg{transform:rotate(90deg);color:var(--gold-ink)}
+.ev-sum{grid-column:1 / -1;overflow:hidden}
+.ev-sum dl{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin:14px 0 0;
+  padding:14px 0 0;border-top:1px solid var(--divider-soft)}
+.ev-sum dt{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-60);padding-top:3px}
+.ev-sum dd{margin:0;font-size:13.1px;line-height:1.5}
+.ev-sum .chip{margin-top:14px}
+.ev-nocat{font-size:12px;color:var(--ink-60);font-style:italic;margin-top:12px}
 .ev .day{font-family:var(--font-heading);font-weight:600;font-size:16.8px;margin-bottom:5px}
 .ev .ti{font-family:var(--font-heading);font-weight:600;font-size:19.9px;line-height:1.22;margin-top:6px}
 .ev .ci{font-size:13.1px;color:var(--ink-60);margin-top:3px}
@@ -838,7 +902,7 @@ input[data-ed][type=date]{min-height:46px}
   .rail-nav{padding:14px 0 0;display:flex;flex-direction:column;gap:2px}
   .rail-nav button{
     display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--r-md);
-    color:var(--ink-60);transition:all .12s;min-height:44px;
+    color:var(--ink-60);transition:all var(--t-fast) var(--ease);min-height:44px;
   }
   /* Sentence case in Source Sans, not tracked-out small caps: the handoff's
      sidebar reads as a list of places, not as a set of labels. */
@@ -900,9 +964,24 @@ input[data-ed][type=date]{min-height:46px}
 /* iPad landscape — wide enough for a genuine list-and-detail split */
 @media (min-width:1024px){
   .wrap{max-width:1180px;margin-inline:auto}
-  .split{display:grid;grid-template-columns:308px 1fr;align-items:start}
-  .split .list{border-right:1px solid var(--divider);padding-right:24px;position:sticky;top:0}
-  .split .detail{padding-left:30px;min-width:0}
+  /* Two columns, two scrollbars. The list used to be position:sticky against a
+     page that scrolled as one, so reading down a dossier dragged the artist list
+     off the top with it and getting back to it meant scrolling the whole page
+     up again. Each column now owns its own overflow and keeps its own place. */
+  .split{display:grid;grid-template-columns:308px 1fr;align-items:stretch;height:100%;min-height:0}
+  .split .list{border-right:1px solid var(--divider);padding-right:24px;
+    overflow-y:auto;min-height:0;padding-bottom:40px;overscroll-behavior:contain}
+  .split .detail{padding-left:30px;min-width:0;
+    overflow-y:auto;min-height:0;padding-bottom:56px;overscroll-behavior:contain}
+  /* Thin, and only while the column is in use — two permanent scrollbars either
+     side of a reading column is noise. */
+  .split .list, .split .detail{scrollbar-width:thin;scrollbar-color:transparent transparent}
+  .split .list:hover, .split .detail:hover{scrollbar-color:var(--divider) transparent}
+  .split .list::-webkit-scrollbar, .split .detail::-webkit-scrollbar{width:8px}
+  .split .list::-webkit-scrollbar-thumb, .split .detail::-webkit-scrollbar-thumb{
+    background:transparent;border-radius:4px;border:2px solid transparent;background-clip:content-box}
+  .split .list:hover::-webkit-scrollbar-thumb, .split .detail:hover::-webkit-scrollbar-thumb{
+    background:var(--divider);background-clip:content-box}
   .market-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:0 38px;align-items:start}
   .market-grid .rail-col{border-left:1px solid var(--divider);padding-left:34px;min-width:0}
   .market-grid .main-col{min-width:0}
@@ -1256,6 +1335,18 @@ function artistsInText(hay) {
   return out;
 }
 
+/* Does a collector's stated interest actually appear in this story?
+   Word boundaries matter more than they look: "Bengal" is a substring of
+   "Bengaluru", so the loose test promoted a wrestling exhibition in Bengaluru
+   over a Jamini Roy sale for a Bengal School collector. */
+function wantsMatchStory(client, hay, artistHits) {
+  const wants = [(client.focus || ""), ...(client.wants || [])].join(" ").toLowerCase();
+  if (!wants.trim()) return false;
+  if (artistHits.some(k => wants.includes(ARTISTS[k].name.toLowerCase().split(" ").pop()))) return true;
+  return wants.split(/[^a-z]+/).some(w =>
+    w.length > 4 && new RegExp("(?<!\\w)" + w + "(?!\\w)").test(hay));
+}
+
 function scoreStory(n) {
   const hay = ((n.headline || "") + " " + (n.why || "")).toLowerCase();
   const src = (n.source || "").toLowerCase();
@@ -1282,12 +1373,7 @@ function scoreStory(n) {
 
   // client relevance 15 — only when the book is actually open
   if (CRM.live && CRM.clients) {
-    const matched = CRM.clients.filter(c => {
-      const wants = [(c.focus || ""), ...(c.wants || [])].join(" ").toLowerCase();
-      if (!wants.trim()) return false;
-      return hits.some(k => wants.includes(ARTISTS[k].name.toLowerCase().split(" ").pop()))
-        || wants.split(/[^a-z]+/).some(w => w.length > 4 && hay.includes(w));
-    });
+    const matched = CRM.clients.filter(c => wantsMatchStory(c, hay, hits));
     if (matched.length) {
       score += 15;
       reasons.push({ kind: "client",
@@ -1548,10 +1634,7 @@ async function aiAsk(question) {
       include_book: S.askBook,
       history: S.askLog.slice(-6).map(m => ({ role: m.role, content: m.content })),
       market: askMarketSlice(question),
-      news: { on_market: (((REAL.news || {}).on_market) || []).slice(0, 20).map(n => ({
-                date: n.date, source: n.source, headline: n.headline })),
-              wider: (((REAL.news || {}).wider) || []).slice(0, 6).map(n => ({
-                date: n.date, source: n.source, headline: n.headline })) },
+      news: askNewsSlice(),
       events: (REAL.events || []).slice(0, 20).map(e => ({
         starts: e.starts, ends: e.ends, title: e.title, house: e.house,
         kind: e.kind, city: e.city, lot_count: e.lot_count })),
@@ -1748,6 +1831,7 @@ const S = {
   feedScope: "India",       // feed: her market vs the wider trade press
   calMonth: 0,            // months from the current one, for the grid
   calDay: null,           // the day whose detail is open
+  calEvent: null,         // the sale whose summary is expanded
   pitchClient: "sethi",
   aiDrafts: {},           // client id -> the drafted note, for this session only
   aiBusy: null,           // client id currently being drafted for
@@ -2977,6 +3061,65 @@ function askMarketSlice(question) {
   };
 }
 
+/* The news the assistant is allowed to talk about.
+ *
+ * Three things she asked for, all of them decided HERE rather than hoped for in
+ * the prompt — a model told to "prefer relevant stories" will drift, a list that
+ * arrives already ordered cannot.
+ *
+ *   1. Client-relevant first. scoreStory() already computes that (it is what
+ *      draws the "3 clients in the book" chip on Today), so this reuses it
+ *      rather than growing a second, drifting copy of the same rules.
+ *   2. Nothing older than a month. Filtered, not requested.
+ *   3. Links. The URL never passes through the model — every story goes in
+ *      numbered, the model cites [3], and the browser turns [3] back into an
+ *      anchor from its own record. A model cannot fabricate a link it was never
+ *      asked to reproduce.
+ */
+const ASK_NEWS_MAX_AGE_DAYS = 31;
+
+function askNewsSlice() {
+  const now = Date.now();
+  const pool = [...(((REAL.news || {}).on_market) || []),
+                ...(((REAL.news || {}).wider) || [])];
+
+  const scored = [];
+  for (const n of pool) {
+    if (!n || !n.headline) continue;
+    const t = Date.parse((n.date || "") + "T00:00:00");
+    if (!Number.isFinite(t)) continue;                       // undated cannot be aged
+    const days = (now - t) / 86400000;
+    if (days > ASK_NEWS_MAX_AGE_DAYS || days < -1) continue; // her month rule
+
+    const sc = scoreStory(n);
+    // scoreStory reports how MANY clients matched; the assistant is more use if
+    // it can say who, so name them from the same test.
+    const hay = ((n.headline || "") + " " + (n.why || "")).toLowerCase();
+    const who = (CRM.live && CRM.clients ? CRM.clients : [])
+      .filter(c => wantsMatchStory(c, hay, sc.artists))
+      .map(c => c.name);
+    scored.push({ n, score: sc.score, who, days: Math.round(days),
+                  artists: sc.artists.map(k => ARTISTS[k].name) });
+  }
+
+  // Client-relevant first — most collectors, then score. Everything else after.
+  scored.sort((a, b) =>
+    (b.who.length > 0) - (a.who.length > 0) ||
+    b.who.length - a.who.length ||
+    b.score - a.score);
+
+  return scored.slice(0, 24).map((x, i) => ({
+    n: i + 1,                                   // the citation handle
+    date: x.n.date,
+    source: x.n.source,
+    headline: x.n.headline,
+    url: safeUrl(x.n.url) || "",                // checked here, not trusted later
+    clients: x.who.slice(0, 6),
+    artists: x.artists.slice(0, 3),
+    age_days: x.days,
+  }));
+}
+
 function viewAsk() {
   if (!CRM.live || !CRM.ai) {
     const why = !CRM.live
@@ -2995,7 +3138,8 @@ function viewAsk() {
          ${m.unverified && m.unverified.length ? `<div class="ask-warn">
            Not from the record: ${m.unverified.map(f => esc(f)).join(", ")}. Check
            ${m.unverified.length === 1 ? "it" : "them"} before you use ${m.unverified.length === 1 ? "it" : "them"}.</div>` : ""}
-         <div class="ask-body">${esc(m.content)}</div>
+         <div class="ask-body">${askBody(m)}</div>
+         ${askCitedList(m)}
          ${(m.sources || []).length ? `<div class="ask-src">${
             m.sources.map(x => `<span>${esc(x)}</span>`).join("")}</div>` : ""}
        </div>`).join("");
@@ -3041,6 +3185,72 @@ function viewAsk() {
 /* ============================================================
    SCREEN: CALENDAR
    ============================================================ */
+/* A sale's own summary, opened by tapping its row.
+ *
+ * Everything here is read off the record — the dates, the house, the lot count —
+ * plus one thing worth knowing that the row cannot show: how that house has
+ * actually been performing on this desk lately. No forecast, no commentary:
+ * §11 applies here as much as anywhere. */
+const evKey = e => `${e.starts}|${e.house}|${(e.title || "").slice(0, 40)}`;
+
+function houseRecord(house) {
+  const lots = (REAL.feed || []).filter(f => f.house === house);
+  if (!lots.length) return null;
+  return { n: lots.length, above: lots.filter(f => f.above).length };
+}
+
+function eventSummary(e) {
+  const start = new Date(e.starts + "T00:00:00");
+  const end = e.ends && e.ends !== e.starts ? new Date(e.ends + "T00:00:00") : null;
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const days = Math.round((start - today) / 86400000);
+  const when = days < 0 ? "under way or just closed"
+    : days === 0 ? "today"
+    : days === 1 ? "tomorrow"
+    : days <= 7 ? `in ${days} days, this week`
+    : `in ${days} days`;
+
+  const long = d => d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const rec = houseRecord(e.house);
+
+  const facts = [
+    ["When", (end ? `${long(start)} to ${long(end)}` : long(start)) + ` \u00b7 ${when}`],
+    ["Where", [e.city, e.kind].filter(Boolean).join(" \u00b7 ") || "Not stated"],
+    e.lot_count ? ["Size", `${e.lot_count} lots catalogued`] : null,
+    rec ? ["This house on the desk",
+      `${rec.n} recent ${rec.n === 1 ? "result" : "results"} recorded`
+      + (rec.above ? `, ${rec.above} above the high estimate` : ", none above the high estimate")] : null,
+    String(e.id || "").startsWith("manual:") ? ["Source", "Added by hand \u2014 not from a house feed"] : null,
+  ].filter(Boolean);
+
+  return `<div class="ev-sum">
+    <dl>${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+    ${safeUrl(e.url)
+      ? `<a class="chip" href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener noreferrer">Open the catalogue</a>`
+      : `<div class="ev-nocat">No catalogue link published for this sale yet.</div>`}
+  </div>`;
+}
+
+/* One row shape for both the day detail and the forthcoming list, so the two
+   cannot drift. `lead` is whatever that list puts above the house tag. */
+function eventRow(e, lead) {
+  const k = evKey(e);
+  const open = S.calEvent === k;
+  const multi = e.ends && e.ends !== e.starts;
+  return `<div class="ev${open ? " open" : ""}">
+    <button class="ev-hit" data-cal-ev="${esc(k)}" aria-expanded="${open}">
+      ${lead || ""}
+      ${houseTag(e.house)}
+      <div class="ti">${esc(e.title || "Sale")}</div>
+      <div class="ci">${[e.city, e.kind, multi ? `${fmtDate(e.starts)}\u2013${fmtDate(e.ends)}` : ""]
+        .filter(Boolean).map(esc).join(" \u00b7 ")}</div>
+      ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots</div>` : ""}
+    </button>
+    <div class="rs">${I(ICON.chev, 15)}</div>
+    ${open ? eventSummary(e) : ""}
+  </div>`;
+}
+
 function viewCalendar() {
   const all = (REAL.events || []).slice();
   // The filter chips used to sit over an authored "fairs and previews" list.
@@ -3151,22 +3361,7 @@ function viewCalendar() {
     <div class="cal-day-detail">
       <div class="label">${esc(new Date(S.calDay + "T00:00:00")
         .toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }))}</div>
-      <div class="rows">${selList.map(e => {
-        const multi = e.ends && e.ends !== e.starts;
-        return `<div class="ev">
-          <div>
-            ${houseTag(e.house)}
-            <div class="ti">${esc(e.title || "Sale")}</div>
-            <div class="ci">${[e.city, e.kind,
-              multi ? `${fmtDate(e.starts)}\u2013${fmtDate(e.ends)}` : ""]
-              .filter(Boolean).map(esc).join(" \u00b7 ")}</div>
-            ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots</div>` : ""}
-          </div>
-          <div class="rs">${safeUrl(e.url)
-            ? `<a class="chip" href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener noreferrer">Catalogue</a>`
-            : ""}</div>
-        </div>`;
-      }).join("")}</div>
+      <div class="rows">${selList.map(e => eventRow(e)).join("")}</div>
     </div>`;
 
   const byMonth = {};
@@ -3181,16 +3376,7 @@ function viewCalendar() {
     <div class="rows">${list.map(e => {
       const d = new Date(e.starts + "T00:00:00");
       const day = `${String(d.getDate()).padStart(2, "0")} ${MON3[d.getMonth()]}`;
-      return `<div class="ev">
-        <div>
-          <div class="day tnum">${esc(day)}</div>
-          ${houseTag(e.house)}
-          <div class="ti">${esc(e.title || "Sale")}</div>
-          <div class="ci">${[e.city, e.kind].filter(Boolean).map(esc).join(" \u00b7 ")}</div>
-          ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots</div>` : ""}
-        </div>
-        <div class="rs">${safeUrl(e.url) ? `<a class="chip" href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener noreferrer">Catalogue</a>` : ""}</div>
-      </div>`;
+      return eventRow(e, `<div class="day tnum">${esc(day)}</div>`);
     }).join("")}</div>`).join("")
     : (active === "All"
         ? '<div class="empty">No sale is currently scheduled at the houses we track. New dates appear here as the houses publish them.</div>'
@@ -3325,16 +3511,51 @@ function guard(label, fn) {
   try { fn(); } catch (e) { console.error("render: " + label + " failed", e); }
 }
 
+/* Which record the detail column is showing, so a re-render for the same one
+   keeps its place and a move to a different one starts at the top. */
+let renderedScreenKey = null, renderedRecordKey = null, renderedSplit = false;
+const splitRecordKey = () =>
+  (S.screen === "artists" || S.screen === "dossier") ? "a:" + S.artist
+  : (S.screen === "clients" || S.screen === "client") ? "c:" + S.client
+  : null;
+
 function render(keepScroll) {
   const main = document.getElementById("main");
   const y = keepScroll ? main.scrollTop : 0;
   const split = (S.screen === "artists" || S.screen === "dossier" || S.screen === "clients" || S.screen === "client") && isSplit;
   const askable = S.screen === "ask" && CRM.live && CRM.ai;
+
+  /* On a split screen the scroll lives in the two columns, not in main, so
+     main.scrollTop alone no longer preserves anything. Picking a second artist
+     would otherwise throw the list back to the top every time — the exact thing
+     independent scrolling was meant to stop. The detail deliberately resets when
+     the record changes: a new dossier should start at its own beginning. */
+  // The list column is navigation furniture, not content: it holds its place
+  // whatever happens on the right, including a go() that asked for no scroll
+  // restore. Picking a second artist must not throw the list back to the top.
+  // It DOES start fresh when arriving from another screen entirely.
+  const prevList = renderedSplit ? (document.querySelector(".split .list") || {}).scrollTop : 0;
+  const prevDetail = keepScroll && renderedSplit ? (document.querySelector(".split .detail") || {}).scrollTop : 0;
+  const sameRecord = renderedRecordKey === splitRecordKey();
+
   main.classList.toggle("ask-main", askable);
+  main.classList.toggle("split-main", split);
   guard("main", () => {
-    main.innerHTML = `<div class="wrap ${split ? "wide" : ""}${askable ? " ask-wrap" : ""}">${view()}</div>`;
+    // Only a genuine change of screen animates. render(true) fires on every
+    // keystroke and every chip, and fading the page each time would strobe.
+    const arriving = S.screen !== renderedScreenKey ? " enter" : "";
+    main.innerHTML = `<div class="wrap ${split ? "wide split-wrap" : ""}${askable ? " ask-wrap" : ""}${arriving}">${view()}</div>`;
     main.scrollTop = y;
+    if (split) {
+      const list = main.querySelector(".split .list");
+      const detail = main.querySelector(".split .detail");
+      if (list) list.scrollTop = prevList || 0;
+      if (detail) detail.scrollTop = sameRecord ? (prevDetail || 0) : 0;
+    }
   });
+  renderedScreenKey = S.screen;
+  renderedRecordKey = splitRecordKey();
+  renderedSplit = split;
   guard("rail", renderRail);
   guard("topbar", renderTopbar);
   guard("tabbar", renderTabbar);
@@ -3346,6 +3567,38 @@ function render(keepScroll) {
 /* One question at a time, deliberately. The free tier is rate limited to about
    a request a minute, so a second question in flight would only earn a 429 and
    lose the first answer. */
+/* The answer arrives with bare [3] markers. Only a number the desk actually
+   sent is turned into a link; anything else stays plain text, because a citation
+   we cannot resolve is a citation we should not dress up as a source. The URL
+   comes from our own table, never from the model — so there is no link for it to
+   have got wrong. */
+function askBody(m) {
+  const byN = new Map((m.cited || []).map(c => [String(c.n), c]));
+  return esc(m.content).replace(/\[(\d{1,2})\]/g, (whole, n) => {
+    const c = byN.get(n);
+    const href = c && safeUrl(c.url);
+    if (!href) return whole;
+    return `<a class="ask-cite" href="${esc(href)}" target="_blank" rel="noopener noreferrer"`
+         + ` title="${esc(c.source + " \u00b7 " + c.date)}">${whole}</a>`;
+  });
+}
+
+/* Under the answer, the stories it actually cited — in the order it cited them,
+   so the list reads with the prose rather than against it. */
+function askCitedList(m) {
+  const used = [...new Set((String(m.content).match(/\[(\d{1,2})\]/g) || [])
+    .map(x => x.replace(/[^\d]/g, "")))];
+  const rows = used.map(n => (m.cited || []).find(c => String(c.n) === n))
+    .filter(c => c && safeUrl(c.url));
+  if (!rows.length) return "";
+  return `<div class="ask-refs">${rows.map(c => `
+    <a href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener noreferrer">
+      <span class="rn">${esc(String(c.n))}</span>
+      <span class="rt">${esc(c.headline)}</span>
+      <span class="rs">${esc(c.source)} \u00b7 ${esc(fmtDate(c.date))}</span>
+    </a>`).join("")}</div>`;
+}
+
 function askSend() {
   if (S.askBusy) return;
   const q = (S.askInput || "").trim();
@@ -3362,7 +3615,7 @@ function askSend() {
     .then(r => {
       S.askLog = [...S.askLog, { role: "assistant", content: r.answer, model: r.model,
                                  unverified: r.unverified || [], used_book: r.used_book,
-                                 sources: r.sources || [] }];
+                                 sources: r.sources || [], cited: r.cited || [] }];
     })
     .catch(err => {
       // Keep her question in the thread — retyping it after a rate limit is the
@@ -3398,7 +3651,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg]");
+  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -3420,7 +3673,7 @@ document.addEventListener("click", e => {
   }
   if (attr("data-house")) { S.houseFilter = attr("data-house"); return render(true); }
   if (attr("data-market")) { S.marketTab = attr("data-market"); return render(true); }
-  if (attr("data-cal")) { S.calFilter = attr("data-cal"); S.calDay = null; return render(true); }
+  if (attr("data-cal")) { S.calFilter = attr("data-cal"); S.calDay = null; S.calEvent = null; return render(true); }
   if (attr("data-res")) {
     const [k, v] = attr("data-res").split(":");
     S[k === "house" ? "resHouse" : "resPerf"] = v;
@@ -3442,11 +3695,18 @@ document.addEventListener("click", e => {
     const dir = attr("data-cal-nav");
     S.calMonth = dir === "today" ? 0 : (S.calMonth || 0) + (dir === "next" ? 1 : -1);
     S.calDay = null;                       // a day from another month must not stay open
+    S.calEvent = null;
+    return render(true);
+  }
+  if (attr("data-cal-ev")) {
+    const k = attr("data-cal-ev");
+    S.calEvent = S.calEvent === k ? null : k;   // tapping the open one closes it
     return render(true);
   }
   if (attr("data-cal-day")) {
     const k = attr("data-cal-day");
     S.calDay = S.calDay === k ? null : k;  // tapping the open day closes it
+    S.calEvent = null;
     return render(true);
   }
   if (attr("data-clear-followup")) {
