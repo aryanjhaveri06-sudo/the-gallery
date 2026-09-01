@@ -58,8 +58,22 @@
   };
 
   const SCREENS = ['today', 'artists', 'market', 'clients', 'calendar', 'knowledge',
-                   'more', 'newclient', 'unlock', 'dossier', 'client'];
+                   'more', 'newclient', 'unlock', 'dossier', 'client', 'ask'];
   const PANELS = [null, 'client', 'holding', 'log', 'followup', 'holding:h1', 'log:l1', 'followup:f1'];
+  const ASK_STATES = {
+    'ask-off':      () => { CRM.ai = false; S.askLog = []; S.askBusy = false; S.askError = null; },
+    'ask-empty':    () => { CRM.ai = true; S.askLog = []; S.askBusy = false; S.askError = null; },
+    'ask-busy':     () => { CRM.ai = true; S.askLog = [{ role: 'user', content: 'q' }]; S.askBusy = true; S.askError = null; },
+    'ask-answered': () => { CRM.ai = true; S.askBusy = false; S.askError = null;
+      S.askLog = [{ role: 'user', content: 'q' },
+                  { role: 'assistant', content: 'a', model: 'm', unverified: [], sources: ['Client book'] }]; },
+    'ask-warned':   () => { CRM.ai = true; S.askBusy = false; S.askError = null;
+      S.askLog = [{ role: 'user', content: 'q' },
+                  { role: 'assistant', content: 'a', model: 'm', unverified: ['34', '2019'], sources: [] }]; },
+    'ask-broken':   () => { CRM.ai = true; S.askLog = []; S.askBusy = false; S.askError = 'rate limited'; },
+    'ask-ragged':   () => { CRM.ai = true; S.askBusy = false; S.askError = null;
+      S.askLog = [{ role: 'assistant', content: 'a' }]; },   // no model, no sources, no unverified
+  };
   let runs = 0;
 
   // --- axis 1+2: viewport x auth state ------------------------------------
@@ -70,6 +84,14 @@
       for (const sc of SCREENS) {
         S.screen = sc; S.marketTab = 'results'; S.client = CID;
         S.artist = Object.keys(ARTISTS)[0]; S.panel = null; S.draft = {}; S.confirmDelete = null;
+        if (sc === 'ask') {
+          for (const [name, set] of Object.entries(ASK_STATES)) {
+            set(); runs++;
+            attempt(`${vp}/${auth}/ask/${name}`, () => render(false));
+          }
+          CRM.ai = true;
+          continue;
+        }
         for (const p of (sc === 'client' ? PANELS : [null])) {
           S.panel = p;
           S.draft = p === 'client' ? { name: 'X', tier: 'Growth' } : {};

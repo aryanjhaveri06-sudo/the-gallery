@@ -14,6 +14,7 @@ import { authenticate, unauthorised } from "../_lib/auth.js";
 import { parseIcs } from "../_lib/ics.js";
 import { liveNews } from "../_lib/news.js";
 import { chat, aiConfigured, unsupportedFigures, AiError } from "../_lib/ai.js";
+import { buildFacts, bookFacts, ASK_SYSTEM } from "../_lib/ask.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -287,6 +288,93 @@ export async function onRequest(context) {
     /* --- drafting -------------------------------------------------------- */
     if (method === "GET" && path === "/ai/status") {
       return json({ configured: aiConfigured(env), model: env.MISTRAL_MODEL || null });
+    }
+
+    if (method === "POST" && path === "/ai/ask") {
+      const b = await request.json().catch(() => ({}));
+      const question = String(b.question || "").trim().slice(0, 1000);
+      if (!question) return json({ error: "Ask something first." }, 400);
+
+      // The book is hers to share or withhold, and the switch is on the page —
+      // this route does not guess. Off means the roster never leaves the origin.
+      const withBook = b.include_book !== false;
+
+      let book = null, diary = null, news = null;
+      const jobs = [];
+      // Each source fails alone. One unreachable feed must not cost her the
+      // answer — the facts block just says that part is missing.
+      if (withBook) {
+        jobs.push((async () => {
+          const clients = await listClients(env);
+          // The roster alone says nothing about holdings or conversations, and
+          // those are most of what she asks about. One read per collector is
+          // fine at thirty; it would not be at three thousand.
+          const details = {};
+          for (const c of clients.slice(0, 60)) details[c.id] = await getClient(env, c.id);
+          book = bookFacts(clients, details, await dueFollowups(env));
+        })().catch(e => { console.error("ask/book", e && e.message); book = null; }));
+      }
+      jobs.push((async () => { diary = await todaysDiary(env); })().catch(() => { diary = null; }));
+      // The browser holds the MERGED feed — the nightly Google-sourced stories
+      // plus the live publisher layer — and neither alone is enough. Prefer what
+      // she is actually looking at; fall back to the live layer if it sent none.
+      const sentNews = b.news && Array.isArray(b.news.on_market) ? b.news : null;
+      if (sentNews) news = sentNews;
+      else jobs.push((async () => { news = await liveNews(context); })().catch(() => { news = null; }));
+      await Promise.all(jobs);
+
+      const facts = buildFacts({
+        today: now().slice(0, 10),
+        book, diary, news,
+        events: Array.isArray(b.events) ? b.events.slice(0, 20) : [],
+        market: b.market || null,
+      });
+
+      // A little history so follow-up questions work, but not so much that an
+      // old answer's wording starts standing in for the record.
+      const history = (Array.isArray(b.history) ? b.history : []).slice(-6).map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: String(m.content || "").slice(0, 1500),
+      }));
+
+      let out;
+      try {
+        out = await chat(env, {
+          system: ASK_SYSTEM,
+          user: `FACTS\n=====\n${facts}\n=====\n\n`
+              + (history.length ? `Earlier in this conversation:\n`
+                  + history.map(h => `${h.role === "user" ? "She" : "You"}: ${h.content}`).join("\n") + "\n\n" : "")
+              + `Her question: ${question}`,
+          maxTokens: 900,
+          temperature: 0.2,
+        });
+      } catch (err) {
+        if (err instanceof AiError) return json({ error: err.message, code: err.code }, err.status);
+        console.error("ai/ask", err && err.name, err && err.message);
+        return json({ error: "The assistant did not answer in time.", code: "timeout" }, 504);
+      }
+
+      // Flagged, not discarded — see the note at the top of _lib/ask.js.
+      const unverified = unsupportedFigures(out.text, facts + " " + question);
+
+      // The handoff shows source chips under every answer. They name the record
+      // sets that were actually put in front of the model — not a claim about
+      // which it used, but an honest account of what it could have used.
+      const sources = [];
+      if (book) sources.push("Client book");
+      if (diary && diary.configured && !diary.error) sources.push("Her diary");
+      if (Array.isArray(b.events) && b.events.length) sources.push("Sale calendar");
+      if (news && ((news.on_market || []).length || (news.wider || []).length)) sources.push("Headlines");
+      if (b.market && ((b.market.lots || []).length || (b.market.artists || []).length)) sources.push("Auction results");
+
+      await audit(env, who.email, "ask", "desk", null);
+      return json({
+        answer: out.text,
+        model: out.model,
+        unverified: unverified.slice(0, 8),
+        used_book: withBook,
+        sources,
+      });
     }
 
     if (method === "POST" && path === "/ai/pitch") {
