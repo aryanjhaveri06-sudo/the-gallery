@@ -1,9 +1,17 @@
 {
- "generated_at": "2026-09-01T22:46:36+00:00",
+ "generated_at": "2026-09-02T22:48:57+00:00",
  "on_market": [
   {
+   "date": "2026-09-02",
+   "source": "Hindustan Times",
+   "headline": "Air India Express rolls out new uniform for cabin crew with focus on Indian art forms, cultural heritage | India News",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPa2tfWEhEbVRXNGpvV3FNVmpVdDhHdzJPY2R3Q3NQT2lYNmpqRUpUZGpEUWtwVWlNYXdqOGZ6VnBuZnowa0JNdWEtY1JJZVJqYWgzRUF4YTlMR19HdlFQLU9VbFFBSTRnV0xKUkg1eXJzY3RQczAwaUtRaUFwS1ZHYV9INHdWX2lWQXpFOG9Rb3hyY2ZHWXhfQzFybFhMR3d5T3VYMjZNaUFMVjNSRENhWVdkWVY5WWRNXzlYZlFsREZrSkNSUks5Q2RTVnYxTXfSAdQBQVVfeXFMUHlWeTJJLVJieGFPS21tMThHekF1ZUJvSW9YNVR5djdfXzVobUIwV3g3WHVXbWVEanJxVGJNQTVIemdvZUdTbXZrSWV1N2hKMjR5MkxnbHV1TXNBam42amhjVFBuNHIyaUljdzBxYTJ2akdmbm04LWI1OGRQMVB0UFlqNDJFUF9VRFhLM0FJY1JXRlFYUE1wY3l5ZFNGVUt4c2pTb29xVDdxdzViMS1idmZka08tdlRZSTB2UVdKM2VWeHI0a1owVmxOZi1BRkxkcVNNYmk?oc=5",
+   "image": null
+  },
+  {
    "date": "2026-09-01",
-   "source": "Local Samosa",
+   "source": "localsamosa.com",
    "headline": "Akar Prakar Settles into a New Address that Keeps its History Alive with Delhi’s First Art District",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxPWVZmdm5wbml1OHBMcl9jbHUyU09IdEVjY2pJZWhGWV9KVEQ1WXY0TG04NldjNjllQ3ZEMk1JU0NDZTROV3RiZlRMRHotMXZoZ1F6ZFhfWDhISncwRjJmTkRUVjJQNlVyWU1mSzVOYlNPd3g0SUFNMXFnVnpmSVhKWm5NOWNWMmwtSzNRQzVtUEVwbWg50gGUAUFVX3lxTE9ZVmZ2bnBuaXU4cExyX2NsdTJTT0h0RWNjakllaEZZX0pURDVZdjRMbTg2V2M2OWVDdkQyTUlTQ0NlNE5XdGJmVExEei0xdmhnUXpkWF9YOEhKdzBGMmZORFRWMlA2VXJZTWZLNU5iU093eDRJQU0xcWdWemZJWEpabk05Y1YybC1LM1FDNW1QRXBtaDk?oc=5",
@@ -19,39 +27,31 @@
   },
   {
    "date": "2026-09-01",
-   "source": "Mid-Day",
-   "headline": "Family Resemblances traces a family’s lasting imprint on Mumbai’s art and architecture",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxNYmRObzBtdzBTamJiamFLekxQR080YkhrZWdpV3RDa0FmMHdYMkFJUWhFdzhRNjFuV1JYUnFicFVXUlFxQW5hVFl6WHVHTmJkZU0wa1YtdDZEN0VKREZCenJKN3ZIMkdnNXRzQjRiZFlkZ3JxVENsUTFsWjhoNzZqbkltS29yYVYyVEMyM2tjaGVzVm8tT0N4ZllXR0pUb1c2WDBjRkktRjEtTEM1OE1FZml5dHU2TUtyazhlaGZiN2JfMUpJUldlR3BmTGdTTHk2VFp4SWZCc0RXSkFOTGfSAd4BQVVfeXFMTWJkTm8wbXcwU2piYmphS3pMUEdPNGJIa2VnaVd0Q2tBZjB3WDJBSVFoRXc4UTYxbldSWFJxYnBVV1JRcUFuYVRZelh1R05iZGVNMGtWLXQ2RDdFSkRGQnpySjd2SDJHZzV0c0I0YmRZZGdycVRDbFExbFo4aDc2am5JbUtvcmFWMlRDMjNrY2hlc1ZvLU9DeGZZV0dKVG9XNlgwY0ZJLUYxLUxDNThNRWZpeXR1Nk1Lcms4ZWhmYjdiXzFKSVJXZUdwZkxnU0x5NlRaeElmQnNEV0pBTkxn?oc=5",
-   "image": null
-  },
-  {
-   "date": "2026-08-31",
-   "source": "CNBC TV18",
-   "headline": "Clay gods, a river, and 30,000-year-old cave art: This MP artist brings India's heritage to Cosmoscow 2026",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxPci0zTDB2eTlGY2tJVzAwT0tuNXY0Vm5QN2NLQmwwaWhIZHQ2Z3RrV1BmZlh0OVJxRnNKQllnVUdKSk9DUWNBdmxKODhaeHhDSWdmdVhvbWMtbVVxWGdBNndMYTdIbVlmZ3doZk1uNExyTk0wd2JNVW5DNmNtQl9CTVpnSUhJdGpOMDVlZmJ4VDlsVXZqbWhNa1NYQzVnNVBhQWhLTWFOdlNUMVpuRlNqTjh4UFlHYmg0dVBDX2o1WGVXMDc2OHhYT3h1NjQ2QTRxZlVNb29hT04tTjFEenhpM3RDRU5HZ9IB5gFBVV95cUxPci0zTDB2eTlGY2tJVzAwT0tuNXY0Vm5QN2NLQmwwaWhIZHQ2Z3RrV1BmZlh0OVJxRnNKQllnVUdKSk9DUWNBdmxKODhaeHhDSWdmdVhvbWMtbVVxWGdBNndMYTdIbVlmZ3doZk1uNExyTk0wd2JNVW5DNmNtQl9CTVpnSUhJdGpOMDVlZmJ4VDlsVXZqbWhNa1NYQzVnNVBhQWhLTWFOdlNUMVpuRlNqTjh4UFlHYmg0dVBDX2o1WGVXMDc2OHhYT3h1NjQ2QTRxZlVNb29hT04tTjFEenhpM3RDRU5HZw?oc=5",
-   "image": null
-  },
-  {
-   "date": "2026-08-31",
-   "source": "ANI News",
+   "source": "Business Standard",
    "headline": "ART MUMBAI 2026: Where Collections Take Shape",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxNbXBGdmlCdlQ5NV9vRnlCaE1pTWJjazVGSHh1dFNwbl9IVWIyTndzZ1U5RG1ub2tQT1pRcF85bWhfOXFvbGFaNEQ2emRJTzBLdjBxUTkwcXRvbWZGaDVQNC01MjB2cTE1T2VjalJONDNkNVI4NjZwSWFxVVhWWTVnVlhndkRpWHQyQlZkb0thdXZrSGVNMVdrV3I3MA?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPUGsxbjViV3lsRzBVMm8yWnRzQnN2N1VBWmFlS3hEd0diNzJNQmVxSjlxSUJfdzhwdzVvdzBiRVdiTmNPd28zVldBdF9OOTZCME1wNWFabmhvS3ppZHVaWmlaQWhnbzlNWmNQcmwzaFpFbEljV2U1Nndqc05rb2NCTnJURC1lb1hOS1Q1QTNEaVhfeW5qajhZS2VUQmhJektXb0laX1BnbzZHdmNZOVlHWXR1eC13S3psc0JXbVpFMnJUeVXSAcgBQVVfeXFMUFZDOUpLbzFrLUlVWXpGUXVwbEplcEdtREQzVlB0Tzl1UWRQRnNmQ0tKb2tvLWNIZjNHVzBTUGpxWWJmRVhOLVVCUWhtYzNnUWxkU1RxTC1wU0lpRGtNRTFwSFh0TnloLXBxSHRZMnpTVlJYQ09ETGVkOWliMUUydWltb210NFRFazJOQ3ZrUHNVSzRqN2dJb0RpaG9iby1uVlA1SWlTbUJoaW43SkJXakJibzU5akNGMWgxcUluazI4M3FMSmcwRDg?oc=5",
    "image": null
   },
   {
    "date": "2026-08-31",
-   "source": "Lifestyle Asia",
+   "source": "lifestyleasia.com",
    "headline": "The September art calendar: 15 Exhibitions rethinking Indian art",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPODNRYWE1alBHWklXQ29zNnRDM3RLM0ZnWmJfMUZLZHEwUkc1aF8wemVMMGZlNEU1NXI4QjBBQWttWkpvanZ3eWswbHhaS0Zld3pqSGszODFTTnRQazgweTNHWmRWb01vbkR5NHdNdGxTWDExUE5vLXpvcTNwbHNHWndjR3ZndlBic09jYkttMVdFdGZLM3hOTEVBdWs4MFNRQUZ1V3VMTmk0RnlFam9Z0gG0AUFVX3lxTE9naFhLOF9kWGsxd3lSeWdtOVFubU8teUh6eEdSZ0phTFg2R1Jpc09iODgtaVhtQnpwZmcwaUhvMzVXenVlMUNpLTZSQjRmRVZMNGJpSW1fX2x0eVliZ28yYUNoZjFjWW1xMmVaT3Nsd0YwNnhyWUEwMnZWZ2ZEWGNhdEx5bFNKU3Q3VGkxQ2N5MXpwV3NySVZsc01hVjZiZkNEYkhMYnhLcEd3VFM0WWVZYmxqZA?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPZ2hYSzhfZFhrMXd5UnlnbTlRbm1PLXlIenhHUmdKYUxYNkdSaXNPYjg4LWlYbUJ6cGZnMGlIbzM1V3p1ZTFDaS02UkI0ZkVWTDRiaUltX19sdHlZYmdvMmFDaGYxY1ltcTJlWk9zbHdGMDZ4cllBMDJ2VmdmRFhjYXRMeWxTSlN0N1RpMUNjeTF6cFdzcklWbHNNYVY2YmZDRGJITGJ4S3BHd1RTNFllWWJsamTSAbQBQVVfeXFMT2doWEs4X2RYazF3eVJ5Z205UW5tTy15SHp4R1JnSmFMWDZHUmlzT2I4OC1pWG1CenBmZzBpSG8zNVd6dWUxQ2ktNlJCNGZFVkw0YmlJbV9fbHR5WWJnbzJhQ2hmMWNZbXEyZVpPc2x3RjA2eHJZQTAydlZnZkRYY2F0THlsU0pTdDdUaTFDY3kxenBXc3JJVmxzTWFWNmJmQ0RiSExieEtwR3dUUzRZZVlibGpk?oc=5",
+   "image": null
+  },
+  {
+   "date": "2026-08-30",
+   "source": "Architectural Digest India",
+   "headline": "This 6,000-square-foot furniture showroom in Jaipur feels like an art collector’s home",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNZDhESWJUR0NDMS1FVXdBQmgwd2hncXZSS3QxRGNUZEs3RTBabnR3Q210RFBmWVB6QnJJeWtRZDlIRnFXSjluY0lFVkNEdG5FXzJlUmVtWVA5al9nOTFxX3ZzOGpzZHhYcjFnQ3dnTnh0NFhUdlR2enJVSzQ2VTktSUhhbXRuSi16YUNUYUdid3ROM2dZS2gwWXlPNDJGNXFCVmkydHFYX2gtS0lBcjlDVzFJdHpBT3Utd00xbU1KVHRWaGFJ?oc=5",
    "image": null
   },
   {
    "date": "2026-08-29",
-   "source": "hindustanmetro.com",
+   "source": "Hindustan Metro",
    "headline": "The New Luxury of Craftsmanship: Thomas Crick Celebrates the Art of Made-in-India Footwear",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxPU3JkOVgwdXdLS2twM3NNWDE2WlJDN0l5aUtnZUt4aUZuV29GSVp5YXBLU0RzVEFCVjZNRGh3SmNWd1FYSEoyWl85RGx1Wl9hcDBMeW54bks5XzJDcTFJTjcxdHBOdjNyckotUlhsMlNNVG55a3hvWFh5bDhYaUZFN3VQRXlWSnB1aE40MHRvaDljWTJnQWQtV044c1BQZXo2NEpIYVVTUDhBVHNBWGgtbzE2R1ZkT0k?oc=5",
@@ -100,100 +100,100 @@
  ],
  "wider": [
   {
-   "date": "2026-09-01",
-   "source": "Hyperallergic",
-   "headline": "15 Art Shows to See in Los Angeles This Fall",
-   "why": "Carmen Lomas Garza’s tender scenes of Chicanx community, Huguette Caland’s life in lines, Indigenous artists on fire and stewardship, photography of…",
-   "url": "https://hyperallergic.com/15-art-shows-to-see-in-los-angeles-this-fall/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/09/garza--heaven-and-hell-ii.jpg"
-  },
-  {
-   "date": "2026-09-01",
+   "date": "2026-09-02",
    "source": "ARTnews",
-   "headline": "UK Prime Minister Andy Burnham Reverses Call for British Museum to Return Parthenon Marbles",
-   "why": "The Greek government first formally requested the marbles’ restitution in 1983, which the British Museum has consistently rejected.",
-   "url": "https://www.artnews.com/art-news/news/andy-burnham-reverses-call-return-parthenon-marbles-1234796603/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/09/GettyImages-2210330310.jpg?w=1024"
+   "headline": "Politics Is Personal in “Turn the Volume Up!,” a Powerful Show of Protest Art at the Nasher Museum",
+   "why": "Taking its name from a line from a Zohran Mamdani speech, “Turn the volume up!” at Duke University's Nasher Museum of Art urges visitors to get…",
+   "url": "https://www.artnews.com/art-news/news/politics-is-personal-powerful-show-protest-art-nasher-museum-1234796737/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
   },
   {
-   "date": "2026-09-01",
+   "date": "2026-09-02",
+   "source": "Hyperallergic",
+   "headline": "Venice Biennale President Defends Russia Inclusion in New Interview",
+   "why": "Pietrangelo Buttafuoco said he would do “everything” again if he had to, despite the Italian Culture Ministry’s backlash and the European…",
+   "url": "https://hyperallergic.com/venice-biennale-president-defends-russia-inclusion-in-new-interview/",
+   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/09/GettyImages-2275153736.jpg"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "ARTnews",
+   "headline": "Kerstin Brätsch Wins the $160,000 Zurich Art Prize",
+   "why": "The German artist will receive prize money and a solo exhibition at the Museum Haus Konstruktiv next year.",
+   "url": "https://www.artnews.com/art-news/news/kerstin-bratsch-wins-2027-zurich-art-prize-1234796793/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/09/bratsch.jpeg?w=1024"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "Hyperallergic",
+   "headline": "Remembering Geles Cabrera, Helch, and Jay Maisel",
+   "why": "This week, we honor a sculptor who explored the body, a street artist who upset Queen Elizabeth, and a commercial photographer who shaped the medium.",
+   "url": "https://hyperallergic.com/remembering-geles-cabrera-helch-and-jay-maisel/",
+   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/09/MujeresSPM26.jpg"
+  },
+  {
+   "date": "2026-09-02",
    "source": "The Art Newspaper",
-   "headline": "Institute of Contemporary Art, San Diego faces financial and leadership crisis",
-   "why": "After the museum laid off almost half its staff over the summer, its main campus was shut down and employees are calling for the removal of its…",
-   "url": "https://www.theartnewspaper.com/2026/09/01/institute-contemporary-art-san-diego-financial-leadership-crisis-layoffs",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/24c6ac009926457d21d6c18e4e84d3d1f1e854aa-1080x900.jpg?w=140"
+   "headline": "Leader of the Art Gallery of Ontario will step down after a decade at the helm",
+   "why": "During Stephan Jost’s tenure, the leading art museum in Toronto has launched construction of a new contemporary art gallery, added more than 18,000…",
+   "url": "https://www.theartnewspaper.com/2026/09/02/art-gallery-ontario-director-stephan-jost-stepping-down",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/f593846e0c7e1b5584d4c4256a9a3449bf9e5058-2000x2000.jpg?w=140"
   },
   {
-   "date": "2026-09-01",
-   "source": "ARTnews",
-   "headline": "In the Face of European Colonization, Aboriginal Artists Created Images of Powerful Beings, Study Finds",
-   "why": "The study focused on images of Rainbow serpents, creatures associated with change.",
-   "url": "https://www.artnews.com/art-news/news/aboriginal-giant-rock-art-made-post-colonization-studied-1234796582/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/09/raaa_a_2676505_f0005_c.jpg?w=1024"
-  },
-  {
-   "date": "2026-09-01",
-   "source": "Hyperallergic",
-   "headline": "An Unprecedented Look at Renowned Photographer Peter Hujar’s New York in “Hujar:Contact”",
-   "why": "The Morgan Library & Museum presents “Hujar:Contact,” currently on view through October 25.",
-   "url": "https://hyperallergic.com/an-unprecedented-look-at-renowned-photographer-peter-hujars-new-york-in-hujar-contact/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/08/MOR-113788-026343-Hujar-HyperallergicBanners-Sep2026-1920x1080-1.jpg"
-  },
-  {
-   "date": "2026-09-01",
-   "source": "Hyperallergic",
-   "headline": "The Artists Paddling 350 Miles Up the Erie Canal",
-   "why": "As part of “Mule’s Passage,” artists Z Behl and Kim Moloney are paddling six hours a day and camping for five weeks.",
-   "url": "https://hyperallergic.com/the-artists-paddling-350-miles-up-the-erie-canal/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/09/1200MulesPassage_image1.jpg"
-  },
-  {
-   "date": "2026-09-01",
-   "source": "ARTnews",
-   "headline": "Art Gallery of Ontario Director Stephan Jost to Depart After a Decade",
-   "why": "The museum has experienced a period of controversy over the past few years.",
-   "url": "https://www.artnews.com/art-news/news/art-gallery-of-ontario-stephan-jost-departure-1234796535/",
-   "image": "https://www.artnews.com/wp-content/uploads/2024/01/GettyImages-1646500392.jpg?w=1024"
-  },
-  {
-   "date": "2026-09-01",
-   "source": "ARTnews",
-   "headline": "ICE Unit Says It Seized 22,000 Ancient Artifacts in Florida",
-   "why": "The Homeland Security Investigations unit said assessment of the treasures \"will take time.\"",
-   "url": "https://www.artnews.com/art-news/news/ice-unit-seizes-ancient-artifacts-1234796570/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/09/ICE-HSI-Seizes-More-Than-22000-Ancient-Artifacts-in-Florida-1.jpg?w=1000"
-  },
-  {
-   "date": "2026-09-01",
-   "source": "ARTnews",
-   "headline": "Christie’s London Offers a Restituted Kandinsky, Long Displayed in a German Museum, for $30 M.",
-   "why": "The painting has hung in the same Munich museum for some five decades.",
-   "url": "https://www.artnews.com/art-news/market/christies-london-offers-restituted-kandinsky-german-museum-1234796483/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/09/Wassily-Kandinsky-Das-bunte-Leben-1907.jpg?w=1024"
-  },
-  {
-   "date": "2026-09-01",
+   "date": "2026-09-02",
    "source": "Artforum",
-   "headline": "Supreme Court Green-Lights White House Ballroom Despite Lack of Congressional Approval",
-   "why": "The Supreme Court on August 31 voted 5–4 in favor of allowing the White House to proceed with the construction of its $400 million ballroom, the…",
-   "url": "https://www.artforum.com/news/supreme-court-gives-trump-ballroom-the-go-ahead-1234758581/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/09/GettyImages-2291330330.jpg?w=650"
+   "headline": "Serpentine Announces First Participants in AI-Centric Art Tech Fellowship",
+   "why": "This week, London’s Serpentine Galleries announced the launch of a six-month fellowship program, commencing in September, that will award four…",
+   "url": "https://www.artforum.com/news/serpentine-participants-in-ai-centric-art-tech-fellowship-1234758696/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/09/Serpentine-Pavilion-2026_Aerial-View_6_1989-1501x1001-1.jpg?w=650"
   },
   {
-   "date": "2026-09-01",
-   "source": "Hyperallergic",
-   "headline": "Minnesota State Fair Removes Anti-Trump Crop Art After Artist Was Harassed",
-   "why": "The piece, which read “8647” in yellow corn kernels, was taken down at the artist’s request after she was threatened and doxxed by right-wing…",
-   "url": "https://hyperallergic.com/minnesota-state-fair-removes-anti-trump-crop-art-after-artist-was-harassed/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/09/06-comp-seed-art3-1.jpg"
-  },
-  {
-   "date": "2026-09-01",
+   "date": "2026-09-02",
    "source": "Artforum",
-   "headline": "Repatriated Kandinsky Masterwork Will Go Up for Auction at Christie’s London",
-   "why": "The Colorful Life, 1907, a landmark painting by Wassily Kandinsky that was returned to the heirs of its original Dutch Jewish owners three years ago…",
-   "url": "https://www.artforum.com/news/repatriated-kandinsky-up-for-auction-at-christies-1234758611/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/09/GettyImages-2279267882.jpg?w=650"
+   "headline": "Anonymous Was a Woman Names Winners of 2026 Environmental Grants",
+   "why": "Anonymous Was a Woman (AWAW) in collaboration with the New York Foundation for the Arts (NYFA) has named the 2026 recipients of funds from AWAW’s…",
+   "url": "https://www.artforum.com/news/anonymous-was-a-woman-winners-of-2026-environmental-grants-1234758688/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/09/GettyImages-2286804086.jpg?w=650"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "artnet News",
+   "headline": "Meow Wolf L.A. Unveils Star-Studded Artist List",
+   "why": "The lineup aims to encapsulate the city's rich art scene. The post Meow Wolf L.A. Unveils Star-Studded Artist List appeared first on Artnet News .",
+   "url": "https://news.artnet.com/art-world/meow-wolf-los-angeles-artists-2806029",
+   "image": null
+  },
+  {
+   "date": "2026-09-02",
+   "source": "ARTnews",
+   "headline": "Your Fall Guide: 17 Art World Highlights Not to Miss",
+   "why": "See a survey of essential openings and other kinds of offerings in the art world.",
+   "url": "https://www.artnews.com/list/art-in-america/columns/fall-guide-art-world-datebook-1234796445/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/09/datebook_web_banner-1.jpg?w=1024"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "ARTnews",
+   "headline": "Mildred Howard Wins $25,000 Artist Award, Anonymous Was A Woman Names Environmental Art Grants, and More: Industry Moves for September 2, 2026",
+   "why": "Plus, the New Yorker profiles Susan Te Kahurangi King.",
+   "url": "https://www.artnews.com/art-news/market/industry-moves-september-2-2026-mildred-howard-1234796678/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/09/Mildred-Howard-CO.-Judy-Dater-2023.jpg?w=1024"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "ARTnews",
+   "headline": "Dealers Are Betting on the Future of South Korea Despite Measured First-Day Sales at Frieze and Kiaf",
+   "why": "The fairs saw a bustling VIP day with crowded aisles, though sales moved at a measured pace.",
+   "url": "https://www.artnews.com/art-news/market/frieze-seoul-kiaf-2026-sales-report-1234796717/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/09/Maat_Frieze_Seoul_2026_Image_by_WeCap_Studio_Courtesy_of_Frieze.jpg?w=1024"
+  },
+  {
+   "date": "2026-09-02",
+   "source": "The Art Newspaper",
+   "headline": "Paris prosecutors seek trial for Giuliano Ruffini over allegedly forged Old Master paintings",
+   "why": "Ruffini has been the focus of an international forgery scandal dating back to 2016",
+   "url": "https://www.theartnewspaper.com/2026/09/02/paris-prosecutors-seek-trial-for-giuliano-ruffini-over-allegedly-forged-old-master-paintings",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/d33586bdc569b3bc795f98a6310762a91250e986-6000x4000.jpg?w=140"
   }
  ]
 }
