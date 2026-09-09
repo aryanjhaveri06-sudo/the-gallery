@@ -51,6 +51,7 @@ const NOT_A_PUBLISHER = [
   "linkedin", "facebook", "instagram", "youtube", "reddit", "medium.com",
   "pr newswire", "prnewswire", "globenewswire", "businesswire", "yahoo finance",
   "vajiram", "testbook", "byjus", "unacademy", "adda247",
+  "openpr", "einpresswire", "einnews", "prlog", "issuewire",
 ];
 
 // This is an ART desk. "Indian art auction" also matches the closing auction in
@@ -61,6 +62,22 @@ const FINANCE_NOISE = [
   "closing auction", "trading session", "mutual fund", "sebi", "bond yield",
   "futures", "nasdaq", "dow jones", "quarterly results", "gdp", "inflation",
   "brokerage", "listing gains", "derivatives", "crore in market",
+];
+
+// ART_TERMS is not enough on its own: "art" and "arts" are in the name of things
+// she does not trade — a Performing ARTS Center, a stone ARTS company on
+// pooja-room decor, an experiential ART franchise. She sells Indian modern and
+// contemporary art at auction. Mirrors NOT_HER_ART in ingest/news.py; keep the
+// two in step.
+const NOT_HER_ART = [
+  "performing arts", "theatre", "theater", "dance", "dances", "dancer",
+  "dancers", "choreographer", "choreography", "music", "musical", "musician",
+  "concert", "orchestra", "recital", "ballet", "singer", "vocalist", "drama",
+  "film", "cinema", "movie", "actor", "actress", "screening",
+  "craft", "crafts", "handicraft", "handicrafts", "artisan", "artisans",
+  "interior design", "decor", "furniture", "pooja room", "tattoo",
+  "martial arts", "culinary", "rangoli", "embroidery", "pottery", "textile",
+  "franchise", "franchisee", "retailer", "showroom", "outlet",
 ];
 
 const ART_TERMS = [
@@ -107,6 +124,7 @@ function isHers(item) {
   if (NOT_HERS.some(t => hay.includes(t))) return false;
   if (NOT_A_PUBLISHER.some(t => item.source.toLowerCase().includes(t))) return false;
   if (FINANCE_NOISE.some(t => hasWord(hay, t))) return false;
+  if (NOT_HER_ART.some(t => hasWord(hay, t))) return false;
   if (!ART_TERMS.some(t => hasWord(hay, t))) return false;
   return INDIA_TERMS.some(t => hasWord(hay, t));
 }
@@ -174,7 +192,9 @@ const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 // BUMP THIS whenever the payload shape changes. Adding images went unnoticed
 // for a deploy because the edge kept serving the previous shape for 15 minutes
 // and the endpoint reported cached=true while looking simply broken.
-const CACHE_KEY = "https://gallery.internal/news-v2-images";
+// Bumped when the filter changed: the edge holds a payload for 15 minutes and
+// would keep serving the unfiltered set while reporting cached=true.
+const CACHE_KEY = "https://gallery.internal/news-v3-nother-art";
 const TTL_SECONDS = 900;   // 15 minutes at the edge
 
 export async function liveNews(ctx) {

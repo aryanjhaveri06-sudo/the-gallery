@@ -77,6 +77,7 @@ NOT_A_PUBLISHER = [
     "linkedin", "facebook", "instagram", "youtube", "reddit", "medium.com",
     "pr newswire", "prnewswire", "globenewswire", "businesswire", "yahoo finance",
     "vajiram", "testbook", "byjus", "unacademy", "adda247",   # exam-prep listicles
+    "openpr", "einpresswire", "einnews", "prlog", "issuewire",
 ]
 
 # Read directly, exactly as functions/_lib/news.js does. These are where the
@@ -358,6 +359,26 @@ FINANCE_NOISE = [
     "brokerage", "listing gains", "derivatives", "crore in market",
 ]
 
+# ART_TERMS is not enough on its own: "art" and "arts" are in the name of things
+# she does not trade. A weekend of classical dance at a Performing ARTS Center, a
+# stone ARTS company on pooja-room decor, and an experiential ART franchise all
+# cleared the art gate and reached the desk. She sells Indian modern and
+# contemporary art at auction — so reject the other arts by name, the same way
+# FINANCE_NOISE rejects the other kind of market.
+NOT_HER_ART = [
+    # performing arts
+    "performing arts", "theatre", "theater", "dance", "dances", "dancer",
+    "dancers", "choreographer", "choreography", "music", "musical", "musician",
+    "concert", "orchestra", "recital", "ballet", "singer", "vocalist", "drama",
+    "film", "cinema", "movie", "actor", "actress", "screening",
+    # crafts, decor and the trades that borrow the word
+    "craft", "crafts", "handicraft", "handicrafts", "artisan", "artisans",
+    "interior design", "decor", "furniture", "pooja room", "tattoo",
+    "martial arts", "culinary", "rangoli", "embroidery", "pottery", "textile",
+    # retail and franchising
+    "franchise", "franchisee", "retailer", "showroom", "outlet",
+]
+
 # ...and it has to be about art at all. Word-boundary matched, so "art" does not
 # fire on "part" or "start".
 ART_TERMS = [
@@ -393,7 +414,8 @@ def is_hers(item):
 
       - not Native American — "Indian" is ambiguous in the American press
       - from a publisher, not a LinkedIn post or an exam-prep listicle
-      - about ART, and not about the equity market
+      - about ART, and the kind she trades — not the equity market, not the
+        performing arts, not craft or decor
     """
     hay = (item["headline"] + " " + item.get("why", "")).lower()
     if any(t in hay for t in NOT_HERS):
@@ -401,6 +423,8 @@ def is_hers(item):
     if any(t in item["source"].lower() for t in NOT_A_PUBLISHER):
         return False
     if any(has_word(hay, t) for t in FINANCE_NOISE):
+        return False
+    if any(has_word(hay, t) for t in NOT_HER_ART):
         return False
     if not any(has_word(hay, t) for t in ART_TERMS):
         return False
