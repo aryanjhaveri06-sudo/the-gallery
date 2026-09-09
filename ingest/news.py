@@ -366,17 +366,13 @@ FINANCE_NOISE = [
 # contemporary art at auction — so reject the other arts by name, the same way
 # FINANCE_NOISE rejects the other kind of market.
 NOT_HER_ART = [
-    # performing arts
-    "performing arts", "theatre", "theater", "dance", "dances", "dancer",
-    "dancers", "choreographer", "choreography", "music", "musical", "musician",
-    "concert", "orchestra", "recital", "ballet", "singer", "vocalist", "drama",
-    "film", "cinema", "movie", "actor", "actress", "screening",
-    # crafts, decor and the trades that borrow the word
-    "craft", "crafts", "handicraft", "handicrafts", "artisan", "artisans",
-    "interior design", "decor", "furniture", "pooja room", "tattoo",
-    "martial arts", "culinary", "rangoli", "embroidery", "pottery", "textile",
-    # retail and franchising
-    "franchise", "franchisee", "retailer", "showroom", "outlet",
+    # Unambiguous only. Every one of these is a phrase no Indian art-market
+    # story says: a Performing Arts Center, a franchisee, a pooja room.
+    "performing arts", "theatre", "theater", "ballet", "orchestra", "recital",
+    "choreographer", "choreography", "opera", "stand-up", "sitcom",
+    "pooja room", "interior design", "showroom", "franchise", "franchisee",
+    "retailer", "tattoo", "martial arts", "culinary", "rangoli",
+    "handicraft", "handicrafts", "home decor",
 ]
 
 # ...and it has to be about art at all. Word-boundary matched, so "art" does not
@@ -389,6 +385,9 @@ ART_TERMS = [
     "lithograph", "masterpiece", "provenance", "antiquities", "memorabilia",
     "manuscript", "saffronart", "astaguru", "pundole", "sotheby", "sothebys",
     "christie", "christies", "bonhams", "phillips", "kiran nadar",
+    "auction", "auctions", "auctioned", "retrospective", "watercolours",
+    "watercolors", "sculptures", "lithographs", "manuscripts", "masterpieces",
+    "exhibitions", "etching", "etchings", "serigraph", "serigraphs", "print",
 ]
 
 INDIA_TERMS = [

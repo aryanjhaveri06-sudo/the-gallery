@@ -24,10 +24,6 @@ REJECT = [
     ("openpr.com",        "Tilak Stone Arts Discusses Trends Shaping Indian Pooja Room Design"),
     ("Indian Retailer",   "Franchise TV Exclusive: French Experiential Art Brand Iris Galerie "
                           "Prepares for India Entry"),
-    ("The Hindu",         "Sanskriti Museum at Humayun's Tomb celebrates India's everyday art "
-                          "and craft traditions"),
-    ("The Times of India","Indian classical dancer wins award at Mumbai arts festival"),
-    ("Variety",           "Indian film on a Mumbai painter wins at Cannes"),
     # the gates that already existed must still hold
     ("Mint",             "Top 10 Indian firms lose Rs 1.13 lakh crore in market cap"),
     ("Santa Fe New Mexican", "Native American Indian art market opens in Santa Fe"),
@@ -35,9 +31,24 @@ REJECT = [
     ("artnet News",      "Basquiat painting sells for $40M at Christie's"),      # no India
 ]
 
+# Gets through, and stays that way on purpose. Blocking any of these needs a word
+# back in NOT_HER_ART — "craft", "dancer", "film" — and each of those words kills
+# a story in KEEP below: a Saffronart sale of Jamini Roy's Santhal DANCERS, the
+# CRAFT of Tyeb Mehta's line, Husain FILM reels auctioned with his paintings.
+# The trade is deliberate and runs one way: a story she does not need costs her
+# one glance, a market result she never sees costs her the result. If a future
+# reader is tempted to tighten this, that is the thing to weigh.
+TOLERATED = [
+    ("The Hindu",         "Sanskriti Museum at Humayun's Tomb celebrates India's everyday art "
+                          "and craft traditions"),
+    ("The Times of India","Indian classical dancer wins award at Mumbai arts festival"),
+    ("Variety",           "Indian film on a Mumbai painter wins at Cannes"),
+]
+
 KEEP = [
+    # real, from the same day
     ("CNBC TV18",       "Mahatma Gandhi's handwritten manuscript sets world record at "
-                        "£1.34 million Saffronart auction"),
+                        "\u00a31.34 million Saffronart auction"),
     ("BLLNR.asia",      "AstaGuru Expands Into Singapore as Asia's Collector Market Grows"),
     ("Hindustan Times", "Mahatma Gandhi's manuscript sells for \u20b916.2 crore at auction, "
                         "sets record - Check details | India News"),
@@ -48,7 +59,30 @@ KEEP = [
                         "a new exhibition, co-curated by Naman Ahuja and Andrea Anastasio"),
     ("The Art Newspaper", "Tyeb Mehta canvas leads Pundole's Mumbai sale"),
     ("ARTnews",         "Kiran Nadar Museum of Art opens new Delhi building"),
+
+    # THE ONES THAT MATTER. Each carries a word the blocklist reaches for, in the
+    # context that makes it hers. The first version of NOT_HER_ART killed all of
+    # these — a Saffronart sale, an AstaGuru auction, a crore-level Sher-Gil —
+    # and the test passed anyway, because none of the fixtures above touch a
+    # blocked word. A blocklist is only as good as the keeps that constrain it.
+    ("The Hindu",       "Jamini Roy's Santhal dancers lead Saffronart's Mumbai sale"),
+    ("Mint",            "Husain's Bollywood muse: a painter's love affair with cinema, "
+                        "at Pundole's"),
+    ("The Hindu",       "The craft of Tyeb Mehta's line, revisited at Kiran Nadar Museum"),
+    ("Indian Express",  "Anjolie Ela Menon textile works head AstaGuru's September auction"),
+    ("The Hindu",       "Ceramics and pottery by Gurcharan Singh at Delhi gallery show"),
+    ("The Hindu",       "Raza's Bindu and the music of pure form: a Mumbai retrospective"),
+    ("Indian Express",  "The drama of Souza's brushwork: new Indian art exhibition in Delhi"),
+    ("Hindustan Times", "MF Husain film reels auctioned alongside Indian modern paintings"),
+    ("Telegraph India", "Bengal School artisans' watercolours at Kolkata auction"),
 ]
+
+# Known ceiling, not a bug to fix here: the India gate is literal, so a headline
+# that names only an artist ("Amrita Sher-Gil painting of Hungarian dancers sells
+# for Rs 12 crore") is dropped for want of an India word. Deliberate — it is what
+# keeps American community art-auction fundraisers off the desk. Teaching
+# INDIA_TERMS the 48 tracked artists would fix it and would also let a Souza in
+# Lisbon through.
 
 bad = 0
 for row in REJECT:
@@ -84,6 +118,11 @@ for name in ("NOT_HER_ART", "FINANCE_NOISE", "ART_TERMS", "INDIA_TERMS", "NOT_HE
     else:
         print(f"  ok in step   {name} ({len(in_py)} terms)")
 
-print(f"\n{len(REJECT)} reject + {len(KEEP)} keep + 6 list comparisons — "
+for row in TOLERATED:
+    source, headline, why = (row + ("",))[:3] if len(row) == 2 else row
+    verdict = "gets through" if is_hers({"headline": headline, "source": source, "why": why}) else "now blocked"
+    print(f"  tolerated: {verdict} — {headline[:56]}")
+
+print(f"\n{len(REJECT)} reject + {len(KEEP)} keep + {len(TOLERATED)} tolerated + 6 list comparisons — "
       f"{'all correct' if not bad else str(bad) + ' WRONG'}")
 sys.exit(1 if bad else 0)

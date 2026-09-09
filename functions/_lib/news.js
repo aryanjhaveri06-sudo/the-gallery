@@ -70,14 +70,13 @@ const FINANCE_NOISE = [
 // contemporary art at auction. Mirrors NOT_HER_ART in ingest/news.py; keep the
 // two in step.
 const NOT_HER_ART = [
-  "performing arts", "theatre", "theater", "dance", "dances", "dancer",
-  "dancers", "choreographer", "choreography", "music", "musical", "musician",
-  "concert", "orchestra", "recital", "ballet", "singer", "vocalist", "drama",
-  "film", "cinema", "movie", "actor", "actress", "screening",
-  "craft", "crafts", "handicraft", "handicrafts", "artisan", "artisans",
-  "interior design", "decor", "furniture", "pooja room", "tattoo",
-  "martial arts", "culinary", "rangoli", "embroidery", "pottery", "textile",
-  "franchise", "franchisee", "retailer", "showroom", "outlet",
+  // Unambiguous only. Every one of these is a phrase no Indian art-market
+  // story says: a Performing Arts Center, a franchisee, a pooja room.
+  "performing arts", "theatre", "theater", "ballet", "orchestra", "recital",
+  "choreographer", "choreography", "opera", "stand-up", "sitcom",
+  "pooja room", "interior design", "showroom", "franchise", "franchisee",
+  "retailer", "tattoo", "martial arts", "culinary", "rangoli",
+  "handicraft", "handicrafts", "home decor",
 ];
 
 const ART_TERMS = [
@@ -88,6 +87,9 @@ const ART_TERMS = [
   "lithograph", "masterpiece", "provenance", "antiquities", "memorabilia",
   "manuscript", "saffronart", "astaguru", "pundole", "sotheby", "sothebys",
   "christie", "christies", "bonhams", "phillips", "kiran nadar",
+  "auction", "auctions", "auctioned", "retrospective", "watercolours",
+  "watercolors", "sculptures", "lithographs", "manuscripts", "masterpieces",
+  "exhibitions", "etching", "etchings", "serigraph", "serigraphs", "print",
 ];
 
 const ENTITIES = {
@@ -194,7 +196,7 @@ const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 // and the endpoint reported cached=true while looking simply broken.
 // Bumped when the filter changed: the edge holds a payload for 15 minutes and
 // would keep serving the unfiltered set while reporting cached=true.
-const CACHE_KEY = "https://gallery.internal/news-v3-nother-art";
+const CACHE_KEY = "https://gallery.internal/news-v4-unambiguous";
 const TTL_SECONDS = 900;   // 15 minutes at the edge
 
 export async function liveNews(ctx) {
