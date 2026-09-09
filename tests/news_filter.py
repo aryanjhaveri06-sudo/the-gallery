@@ -24,6 +24,14 @@ REJECT = [
     ("openpr.com",        "Tilak Stone Arts Discusses Trends Shaping Indian Pooja Room Design"),
     ("Indian Retailer",   "Franchise TV Exclusive: French Experiential Art Brand Iris Galerie "
                           "Prepares for India Entry"),
+    # Reached the desk when "auction" was briefly an ART term. It is a market
+    # word, not an art word — the same mistake the MSCI comment in news.py warns
+    # about, made again one repair later.
+    ("Traders Union",     "\u20b916,900 crore SGS auction of Indian states on September 8"),
+    ("scanx.trade",       "Coal India offers 210.66 lakh tonnes in August e-auctions"),
+    ("kansan.com",        "Rock Chalk Roundup: KU Volleyball, Haskell Indian Art Market, "
+                          "KU Football, CAPS Skills"),
+
     # the gates that already existed must still hold
     ("Mint",             "Top 10 Indian firms lose Rs 1.13 lakh crore in market cap"),
     ("Santa Fe New Mexican", "Native American Indian art market opens in Santa Fe"),

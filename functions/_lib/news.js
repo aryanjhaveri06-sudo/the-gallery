@@ -44,7 +44,7 @@ const INDIA_TERMS = [
 const NOT_HERS = [
   "native american", "santa fe", "indigenous", "first nations", "navajo",
   "cherokee", "pueblo", "tribal nation", "indian country", "red cloud",
-  "southwestern association", "kiowa", "comanche", "apache",
+  "southwestern association", "kiowa", "comanche", "apache", "haskell", "haskell",
 ];
 
 const NOT_A_PUBLISHER = [
@@ -62,6 +62,7 @@ const FINANCE_NOISE = [
   "closing auction", "trading session", "mutual fund", "sebi", "bond yield",
   "futures", "nasdaq", "dow jones", "quarterly results", "gdp", "inflation",
   "brokerage", "listing gains", "derivatives", "crore in market",
+  "e-auction", "e-auctions", "tonnes", "securities", "treasury", "sgs",
 ];
 
 // ART_TERMS is not enough on its own: "art" and "arts" are in the name of things
@@ -87,7 +88,7 @@ const ART_TERMS = [
   "lithograph", "masterpiece", "provenance", "antiquities", "memorabilia",
   "manuscript", "saffronart", "astaguru", "pundole", "sotheby", "sothebys",
   "christie", "christies", "bonhams", "phillips", "kiran nadar",
-  "auction", "auctions", "auctioned", "retrospective", "watercolours",
+  "retrospective", "watercolours",
   "watercolors", "sculptures", "lithographs", "manuscripts", "masterpieces",
   "exhibitions", "etching", "etchings", "serigraph", "serigraphs", "print",
 ];
@@ -196,7 +197,7 @@ const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 // and the endpoint reported cached=true while looking simply broken.
 // Bumped when the filter changed: the edge holds a payload for 15 minutes and
 // would keep serving the unfiltered set while reporting cached=true.
-const CACHE_KEY = "https://gallery.internal/news-v4-unambiguous";
+const CACHE_KEY = "https://gallery.internal/news-v5-no-bond-auctions";
 const TTL_SECONDS = 900;   // 15 minutes at the edge
 
 export async function liveNews(ctx) {
