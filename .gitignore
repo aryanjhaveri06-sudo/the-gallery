@@ -59,3 +59,4 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+data/app_embed.json

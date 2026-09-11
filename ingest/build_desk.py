@@ -77,6 +77,7 @@ MIN_COMPARABLES = 10     # per window, before a % move may be quoted at all
 # lots only, which is why a blanket figure would read ~100%.
 SELL_THROUGH_HOUSES = {"Pundole's", "Christie's", "Bonhams"}
 MIN_ST_LOTS = 8          # below this the rate is noise, not a rate
+MIN_REPEATS = 3          # chains before an artist's annualised resale figure is quoted
 MIN_BALANCE = 0.45       # smaller window must be at least this share of the larger
 
 _SIZE = re.compile(r"(\d+(?:\.\d+)?)\s*[x\u00d7]\s*(\d+(?:\.\d+)?)\s*in")
@@ -288,6 +289,48 @@ def _above_rate(sold):
                  / len(graded) * 100)
 
 
+def repeat_chains(con, lots):
+    """Works sold more than once, from repeats.py — {artist_key: [chain, ...]}.
+
+    Each chain is the same physical work (confirmed by its picture) across two
+    or more sales, oldest first, with the multiple and the annualised move
+    between first and last. The table may not exist yet on a fresh database.
+    """
+    if not con.execute("SELECT name FROM sqlite_master WHERE name='repeat'").fetchone():
+        return {}
+    by_id = {r["id"]: r for r in lots}
+    chains = defaultdict(list)
+    for r in con.execute("SELECT lot_id, chain_id FROM repeat"):
+        lot = by_id.get(r["lot_id"])
+        if lot:
+            chains[r["chain_id"]].append(lot)
+    out = defaultdict(list)
+    for cid, members in chains.items():
+        members.sort(key=lambda r: r["sale_date"])
+        sales = [{"date": r["sale_date"], "house": r["house"], "price": r["price_inr"],
+                  "sold": bool(r["sold"]), "url": r["url"], "lot_id": r["id"]} for r in members]
+        priced = [m for m in members if m["sold"] and m["price_inr"]]
+        first, last = (priced[0], priced[-1]) if len(priced) >= 2 else (None, None)
+        years = None
+        if first and last:
+            d0, d1 = date.fromisoformat(first["sale_date"]), date.fromisoformat(last["sale_date"])
+            years = max((d1 - d0).days / 365.25, 0.1)
+        named = next((m for m in members if m["title"] and not m["title"].lower().startswith("untitled")), members[0])
+        out[members[0]["artist_key"]].append({
+            "id": cid,
+            "title": named["title"], "medium": named["medium"], "size": named["size"],
+            "image": next((m["image_url"] for m in members if m["image_url"]), None),
+            "sales": sales,
+            "multiple": round(last["price_inr"] / first["price_inr"], 2) if first and last else None,
+            "years": round(years, 1) if years else None,
+            "annualised_pct": round(((last["price_inr"] / first["price_inr"]) ** (1 / years) - 1) * 100)
+                              if first and last and years >= 1.0 else None,   # a six-month flip is not a rate
+        })
+    for k in out:
+        out[k].sort(key=lambda c: c["sales"][-1]["date"], reverse=True)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--min-lots", type=int, default=TRACKED_MIN_LOTS)
@@ -310,12 +353,24 @@ def main():
 
     names = {r["key"]: r["display"] for r in con.execute("SELECT key, display FROM artist")}
 
+    repeats = repeat_chains(con, lots)
+    print(f"{sum(len(v) for v in repeats.values())} works sold more than once, "
+          f"across {len(repeats)} artists")
+
     artists = {}
     for key, rows in by_artist.items():
         sold_n = sum(1 for r in rows if r["sold"] and r["price_inr"])
         if sold_n < args.min_lots:
             continue
         st = artist_stats(rows, today)
+        chains = repeats.get(key, [])
+        rates = sorted(c["annualised_pct"] for c in chains if c["annualised_pct"] is not None)
+        # Rule 1 again: a median of two resales is an anecdote. Below MIN_REPEATS
+        # the chains are listed and no figure is quoted.
+        st["repeat_count"] = len(chains)
+        st["repeat_annualised_pct"] = int(statistics.median(rates)) if len(rates) >= MIN_REPEATS else None
+        st["repeat_basis"] = len(rates)
+        chain_of = {s["lot_id"]: c["id"] for c in chains for s in c["sales"]}
         artists[key] = {
             "key": key,
             "name": names.get(key, key.title()),
@@ -327,12 +382,14 @@ def main():
                 "est_low": r["est_low_inr"], "est_high": r["est_high_inr"],
                 "price": r["price_inr"], "price_usd": r["price_usd"],
                 "currency": r["currency"], "price_native": r["price_native"],
+                "chain": chain_of.get(r["id"]),
                 "sold": bool(r["sold"]),
                 "above_high": bool(r["est_high_inr"] and r["price_inr"]
                                    and r["price_inr"] > r["est_high_inr"]),
                 "non_exportable": bool(r["non_exportable"]),
                 "url": r["url"], "image": r["image_url"],
             } for r in rows[:60]],
+            "repeats": chains,
         }
 
     # trending: biggest 12-month movers among artists with real recent volume
@@ -395,6 +452,11 @@ def main():
                      "Only lots carrying a medium and size can contribute — see "
                      "each artist's index_houses. Median and high figures cover "
                      "every house; the index may cover fewer.",
+            "repeats": "A work is called the same work only when its picture says so "
+                       "(two independent image correlations, both above threshold), "
+                       "never on title and size alone — Raza's Bindus share both. "
+                       "The annualised figure is the median across an artist's "
+                       "confirmed resales and is quoted only from three or more.",
             "coverage": "AstaGuru, Saffronart, Pundole's, Christie's (South Asian "
                         "Modern + Contemporary, from 2006) and Bonhams (Modern & "
                         "Contemporary South Asian Art, from 2006). Overseas prices "

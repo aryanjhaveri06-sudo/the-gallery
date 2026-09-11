@@ -1,0 +1,57 @@
+name: Match repeat sales
+
+# Finds the same work sold more than once by comparing pictures (ingest/repeats.py).
+# Separate from the nightly refresh because it needs Pillow, and the nightly is
+# stdlib-only on purpose. Shares the refresh's concurrency group and database
+# cache: it restores the newest DB, adds image signatures and chains, and saves
+# it back under a fresh key, which the next nightly restores and builds from.
+on:
+  schedule:
+    - cron: "30 22 * * 6"     # Saturday 04:00 IST, after that night's refresh
+  workflow_dispatch:
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet Pillow
+
+      - name: Restore database
+        uses: actions/cache/restore@v4
+        with:
+          path: data/artdesk.db
+          key: artdesk-db-${{ github.run_id }}
+          restore-keys: artdesk-db-
+
+      - name: Match pictures across sales
+        run: |
+          [ -f data/artdesk.db ] || { echo "::error::no database in cache — run the refresh first"; exit 1; }
+          cd ingest && python3 repeats.py
+
+      - name: Save database
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/artdesk.db
+          key: artdesk-db-${{ github.run_id }}
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TG_TOKEN" ] && { echo "no TELEGRAM_BOT_TOKEN; not alerting"; exit 0; }
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: repeat-sale matching FAILED. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"

@@ -527,6 +527,11 @@ button.row:active{background:var(--gold-tint)}
 .rec-est{font-size:12.6px;color:var(--ink-50)}
 .rec-price{font-family:var(--font-heading);font-weight:600;font-size:22.1px;text-align:right;line-height:1.1}
 .rec-price.up{color:var(--gold-ink)}
+.rp-path{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;margin-top:12px;font-size:13px}
+.rp-sale{white-space:nowrap}.rp-sale b{font-weight:600;margin-left:4px}
+.rp-arrow{color:var(--ink-50)}
+.rp-move{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--ink-60)}
+.rp-move.up{color:var(--gold-ink)}
 .native{font-size:11px;letter-spacing:.06em;color:var(--ink-60);text-align:right;margin-top:3px;white-space:nowrap}
 .foot-note{font-size:12.1px;font-style:italic;color:var(--ink-50);margin-top:16px;line-height:1.5}
 
@@ -1741,7 +1746,9 @@ function buildArtists() {
         sellBasis: s.sell_through_basis || null,
         delta: pctLabel(s.delta_12mo),
         deltaBasis: s.delta_basis || null,
-        indexHouses: s.index_houses || []
+        indexHouses: s.index_houses || [],
+        repeatAnnualised: s.repeat_annualised == null ? null : s.repeat_annualised,
+        repeatBasis: s.repeat_basis || 0
       },
       index: (a.index || []).map(p => p.value),
       indexYears: (a.index || []).map(p => p.year),
@@ -1752,9 +1759,10 @@ function buildArtists() {
         medium: [r.medium, r.size].filter(Boolean).join(", ") || "—",
         sale: r.lot ? "Lot " + r.lot : "",
         est: r.est || "Estimate not published",
-        price: r.price || "—", native: r.native || null,
+        price: r.price || "—", native: r.native || null, resold: !!r.resold,
         up: !!r.above, nat: !!r.nat, url: r.url
-      }))
+      })),
+      repeats: a.repeats || []
     };
   }
   return out;
@@ -2266,6 +2274,18 @@ const houseTag = h => `<span class="house" data-h="${esc(h)}">${esc(h)}</span>`;
 /* An overseas result is quoted by the trade in the currency it was set in;
    the rupee figure above it is the ECB rate on the sale day. */
 const nativeTag = n => n ? `<div class="native tnum">${esc(n)}</div>` : "";
+/* One work, two or more sales. The chain reads left to right, oldest first. */
+function repeatRow(c) {
+  const path = c.sales.map(x => `<span class="rp-sale"><span class="tnum">${esc(fmtDate(x.date))}</span> ${houseTag(x.house)} <b class="tnum">${esc(x.sold ? (x.price || "—") : "unsold")}</b></span>`).join('<span class="rp-arrow">→</span>');
+  const move = c.multiple != null ? `<span class="rp-move tnum ${c.multiple >= 1 ? "up" : "down"}">${c.multiple}× over ${c.years} yr${c.years === 1 ? "" : "s"}${c.annualised != null ? ` · ${c.annualised >= 0 ? "+" : ""}${c.annualised}%/yr` : ""}</span>` : "";
+  return `<div class="rec ${c.image ? "has-pic" : ""}">${workThumb(c.image, c.title || "", "t-rec")}
+    <div class="rec-body">
+      <div class="rec-work">${esc(c.title || "Untitled")}</div>
+      <div class="rec-med">${esc([c.medium, c.size].filter(Boolean).join(", "))}</div>
+      <div class="rp-path">${path}</div>
+      ${move}
+    </div></div>`;
+}
 const dueCount = () => (CRM.live && CRM.followups) ? CRM.followups.length : 0;
 
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
@@ -2924,7 +2944,7 @@ function viewDossier(embedded) {
         <div class="rec-med">${esc(r.medium)}${r.sale ? " \u00b7 " + esc(r.sale) : ""}${r.nat ? ' \u00b7 <span style="color:var(--gold-ink)">Art Treasure, non-exportable</span>' : ""}</div>
         <div class="rec-foot">
           <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
-            ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}</div>
+            ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}${r.resold ? '<div class="pill" style="margin-top:7px"><span class="dot"></span>sold more than once</div>' : ""}</div>
           <div><div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>${nativeTag(r.native)}</div>
         </div>
       </div>
@@ -2980,6 +3000,11 @@ function viewDossier(embedded) {
         <div class="bio ${S.bioOpen ? "" : "clamped"}" id="bio">${esc(a.bio)}</div>
         <button class="more-link" data-act="toggle-bio">${S.bioOpen ? "Show less" : "Read more"}</button>
         <div class="tags">${a.themes.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+      </div>` : ""}
+
+      ${a.repeats.length ? `<div class="sec">${sectionHead("Sold more than once", st.repeatAnnualised != null ? `${st.repeatAnnualised >= 0 ? "+" : ""}${st.repeatAnnualised}% a year, median of ${st.repeatBasis}` : a.repeats.length + (a.repeats.length === 1 ? " work" : " works"))}
+        <div class="rows">${a.repeats.map(repeatRow).join("")}</div>
+        <div class="foot-note">The same physical work, matched by its picture across sales — never on title and size alone. Prices as published, premium included. ${st.repeatAnnualised == null ? "No annualised figure is quoted from fewer than three resales." : "The annualised figure is the median across these resales; each one is a single work and a single pair of dates."}</div>
       </div>` : ""}
 
       <div class="sec">${sectionHead("Auction record", rows.length + " of " + a.records.length)}

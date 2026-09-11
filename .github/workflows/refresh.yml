@@ -106,10 +106,15 @@ jobs:
 
       - name: Rebuild derived figures
         run: |
+          # app_data.json is fetched at load and carries every artist with a
+          # dossier (~2 MB, ~320 KB over the wire). The copy embedded in the
+          # page is the offline / Artifact fallback and stays at the top 40 —
+          # embedding all of them would double the page for no one.
           cd ingest
           python3 build_desk.py
-          python3 export_app.py
-          python3 embed_app.py
+          python3 export_app.py --artists 300
+          python3 export_app.py --out ../data/app_embed.json
+          python3 embed_app.py --data ../data/app_embed.json
 
       - name: Commit refreshed data
         run: |

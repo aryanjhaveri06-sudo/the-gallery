@@ -133,7 +133,19 @@ def main():
                 "sell_through_basis": s["sell_through_basis"],
                 "non_exportable": s["non_exportable_count"],
                 "index_houses": s.get("index_houses") or [],
+                "repeat_count": s.get("repeat_count", 0),
+                "repeat_annualised": s.get("repeat_annualised_pct"),
+                "repeat_basis": s.get("repeat_basis", 0),
             },
+            # The same work sold more than once, confirmed by its picture. The
+            # first sale is what she can say "last seen at" about.
+            "repeats": [{
+                "title": c["title"], "medium": c["medium"], "size": c["size"],
+                "image": c["image"], "multiple": c["multiple"], "years": c["years"],
+                "annualised": c["annualised_pct"],
+                "sales": [{"date": x["date"], "house": x["house"], "price": inr(x["price"]),
+                           "sold": x["sold"], "url": x["url"]} for x in c["sales"]],
+            } for c in a.get("repeats", [])][:20],
             "index": s["index"],
             # The picture goes with the record. Roughly half of every house's
             # catalogue is genuinely untitled, so an auction record without
@@ -148,6 +160,7 @@ def main():
                 "est": band(r["est_low"], r["est_high"]),
                 "price": inr(r["price"]),
                 "native": native(r.get("currency"), r.get("price_native")),
+                "resold": bool(r.get("chain")),
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
                 "url": r["url"],
