@@ -235,6 +235,14 @@ def main():
     except (OSError, ValueError):
         news = {"on_market": [], "wider": []}
 
+    # What the watches fired lately, and the watch list itself, so the Alerts
+    # screen paints from the bundle even before the API answers.
+    try:
+        with open(ROOT / "data" / "alerts.json") as f:
+            alerts = json.load(f)
+    except (OSError, ValueError):
+        alerts = {"items": [], "watches": []}
+
     app = {
         "generated_at": desk["generated_at"],
         "news": news,
@@ -246,6 +254,7 @@ def main():
         "feed": feed,
         "recent_sales": desk["recent_sales"][:16],
         "events": events,
+        "alerts": {"items": alerts.get("items", [])[:60], "watches": alerts.get("watches", [])},
     }
 
     blob = json.dumps(app, ensure_ascii=False, separators=(",", ":"))

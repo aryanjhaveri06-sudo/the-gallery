@@ -79,7 +79,7 @@
 
   const SCREENS = ['today', 'news', 'article', 'search', 'artists', 'market', 'clients',
                    'calendar', 'knowledge', 'more', 'newclient', 'unlock', 'dossier',
-                   'client', 'ask'];
+                   'client', 'ask', 'value', 'alerts'];
   const MARKET_TABS_T = ['overview', 'results', 'artists', 'auctions', 'no-such-tab'];
   const NEWS_TABS_T = ['foryou', 'all', 'saved'];
   const CLIENT_TABS_T = ['overview', 'interests', 'activity', 'templates', 'no-such-tab'];

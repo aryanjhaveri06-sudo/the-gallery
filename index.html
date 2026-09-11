@@ -532,6 +532,19 @@ button.row:active{background:var(--gold-tint)}
 .rp-arrow{color:var(--ink-50)}
 .rp-move{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--ink-60)}
 .rp-move.up{color:var(--gold-ink)}
+/* ---- alerts ---- */
+.bell-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--divider);border-radius:var(--r-md);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);background:transparent;white-space:nowrap}
+.bell-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
+.bell-btn svg{width:15px;height:15px}
+.watch-sheet{margin-top:14px;padding:16px 18px 18px;background:var(--raised);border:1px solid var(--divider);border-radius:var(--r-md)}
+.watch-sheet .wrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--divider)}
+.watch-sheet .wrow:last-of-type{border-bottom:0}
+.watch-sheet .wl{font-size:14px}.watch-sheet .wl small{display:block;font-size:12px;color:var(--ink-60);margin-top:2px}
+.sw{width:40px;height:24px;border-radius:12px;background:var(--divider);position:relative;flex-shrink:0;border:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper);transition:left .15s}
+.sw[aria-checked="true"]{background:var(--gold-ink)}.sw[aria-checked="true"]::after{left:19px}
+.up-new{display:inline-block;padding:2px 7px;border-radius:10px;background:var(--gold-tint);color:var(--gold-ink);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-left:8px;vertical-align:middle}
+.al-kind{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
 /* ---- Value a work ---- */
 .val-form{margin-top:4px}
 .val-form .fld{margin-top:16px}
@@ -1774,7 +1787,8 @@ function buildArtists() {
         price: r.price || "—", native: r.native || null, resold: !!r.resold,
         up: !!r.above, nat: !!r.nat, url: r.url
       })),
-      repeats: a.repeats || []
+      repeats: a.repeats || [],
+      upcoming: a.upcoming || []
     };
   }
   return out;
@@ -1879,11 +1893,13 @@ async function loadCRM() {
     CRM.needsKey = false;
     // The drafter is optional: an origin with no MISTRAL_API_KEY is a working
     // desk, just without the button. Never let its absence fail the load.
-    const [clients, brief, ai] = await Promise.all([
+    const [clients, brief, ai, watches] = await Promise.all([
       api("/clients"),
       api("/brief"),
       api("/ai/status").catch(() => null),
+      api("/watches").catch(() => null),
     ]);
+    CRM.watches = (watches && watches.watches) || [];
     CRM.ai = !!(ai && ai.configured);
     if (!clients) return false;
     CRM.live = true;
@@ -2340,6 +2356,7 @@ const NAV = [
   { id: "calendar",  label: "Calendar", icon: "calendar",  badge: () => "Sep–Nov" },
   { id: "knowledge", label: "Knowledge",icon: "knowledge", badge: () => "scripts" },
   { id: "value",     label: "Value a work", icon: "value", badge: () => "" },
+  { id: "alerts",    label: "Alerts",   icon: "bell",      badge: () => alertsToday() ? `${alertsToday()} new` : `${(CRM.watches || (REAL.alerts || {}).watches || []).length}` },
   { id: "ask",       label: "Ask AG Newsroom", icon: "ask", badge: () => "" }
 ];
 /* Six tabs do not fit a 375px bar, so Ask lives in the More hub on a phone and
@@ -2367,14 +2384,14 @@ const tabForScreen = s => {
     }
     return isPad ? "today" : "more";
   }
-  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "value" || s === "more")) return "more";
+  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "value" || s === "alerts" || s === "more")) return "more";
   return s;
 };
 
 const TITLES = {
   today: "Start my day", artists: "Artists", dossier: "", market: "Market",
   clients: "Clients", client: "", calendar: "Calendar", knowledge: "Knowledge",
-  more: "More", news: "News", article: "", search: "Search", value: "Value a work"
+  more: "More", news: "News", article: "", search: "Search", value: "Value a work", alerts: "Alerts"
 };
 
 /* which screen a back chevron returns to, or null when nothing is pushed */
@@ -2385,7 +2402,7 @@ function backTarget() {
   if (PUSHED.includes(S.screen)) return S.back || (S.screen === "article" ? "news" : "today");
   if (!isSplit && S.screen === "dossier") return "artists";
   if (!isSplit && S.screen === "client") return "clients";
-  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask" || S.screen === "value")) return "more";
+  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask" || S.screen === "value" || S.screen === "alerts")) return "more";
   return null;
 }
 
@@ -2997,6 +3014,8 @@ function viewDossier(embedded) {
         ${st.delta ? `<span class="pm ${parseFloat(st.delta) >= 0 ? "up" : "down"}">
           ${parseFloat(st.delta) >= 0 ? "\u2191" : "\u2193"} ${esc(st.delta)}</span>` : ""}
       </div>
+      <div style="margin-top:12px">${bellButton(S.artist)}</div>
+      ${watchSheet(S.artist)}
     </div>
     <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
       <div class="sec">${sectionHead("Market card")}
@@ -3014,6 +3033,11 @@ function viewDossier(embedded) {
         <div class="bio ${S.bioOpen ? "" : "clamped"}" id="bio">${esc(a.bio)}</div>
         <button class="more-link" data-act="toggle-bio">${S.bioOpen ? "Show less" : "Read more"}</button>
         <div class="tags">${a.themes.map(t => `<span class="tag">${esc(t)}</span>`).join("")}</div>
+      </div>` : ""}
+
+      ${a.upcoming.length ? `<div class="sec">${sectionHead("Coming to auction", a.upcoming.length + (a.upcoming.length === 1 ? " lot" : " lots"))}
+        <div class="rows">${a.upcoming.map(upcomingRow).join("")}</div>
+        <div class="foot-note">Forthcoming catalogues at Christie's, Bonhams, Pundole's and AstaGuru, refreshed nightly. Saffronart does not publish its catalogues before a sale.</div>
       </div>` : ""}
 
       ${a.repeats.length ? `<div class="sec">${sectionHead("Sold more than once", st.repeatAnnualised != null ? `${st.repeatAnnualised >= 0 ? "+" : ""}${st.repeatAnnualised}% a year, median of ${st.repeatBasis}` : a.repeats.length + (a.repeats.length === 1 ? " work" : " works"))}
@@ -3307,7 +3331,7 @@ function auctionCard(e, closed) {
   const when = closed
     ? fmtDate(e.start_date)
     : (e.starts === e.ends || !e.ends) ? fmtDate(e.starts) : fmtDate(e.starts) + " – " + fmtDate(e.ends);
-  const meta = [e.city, e.kind, e.lot_count ? e.lot_count + " lots" : ""].filter(Boolean);
+  const meta = [e.city, e.kind, e.lot_count ? e.lot_count + " lots" : "", (e.names || []).slice(0, 3).join(", ")].filter(Boolean);
   const inner = `
     <div class="auc-top">${houseTag(e.house)}
       <span class="auc-status ${closed ? "closed" : "open"}">${closed ? "Closed" : "Forthcoming"}</span></div>
@@ -4228,7 +4252,7 @@ function eventRow(e, lead) {
       <div class="ti">${esc(e.title || "Sale")}</div>
       <div class="ci">${[e.city, e.kind, multi ? `${fmtDate(e.starts)}\u2013${fmtDate(e.ends)}` : ""]
         .filter(Boolean).map(esc).join(" \u00b7 ")}</div>
-      ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots</div>` : ""}
+      ${e.lot_count ? `<div class="nt tnum">${e.lot_count} lots${(e.names || []).length ? " \u00b7 " + esc(e.names.slice(0, 3).join(", ")) : ""}</div>` : ""}
     </button>
     <div class="rs">${I(ICON.chev, 15)}</div>
     ${open ? eventSummary(e) : ""}
@@ -4524,6 +4548,109 @@ function renderSearchResults() {
    The form is painted once and results render into #value-results, so the
    field she is typing in is never redrawn under her.
    ============================================================ */
+/* ============================================================
+   ALERTS — the bell on an artist, and what it fired
+
+   One tap on the bell watches an artist with the two things anyone wants:
+   a lot coming to auction, and a result. A second tap opens the sheet to
+   turn either off, set a rupee floor, or stop watching. The watch itself
+   lives in D1 behind the desk key; the nightly job matches it and the
+   morning roundup carries what fired. Everything here is written so the
+   public site (no API) still explains itself instead of failing.
+   ============================================================ */
+const watchFor = key => (CRM.watches || []).find(w => w.artist_key === key) || null;
+const alertsToday = () => {
+  const since = new Date(Date.now() - 26 * 3600e3).toISOString();
+  return ((REAL.alerts || {}).items || []).filter(i => (i.at || "") >= since).length;
+};
+const FLOORS = [[null, "Any price"], [1e6, "\u20b910 lakh+"], [5e6, "\u20b950 lakh+"], [1e7, "\u20b91 cr+"], [5e7, "\u20b95 cr+"]];
+
+async function saveWatch(key, patch) {
+  const a = ARTISTS[key];
+  const cur = watchFor(key) || { artist_key: key, artist_name: a ? a.name : key, upcoming: 1, results: 1, min_inr: null };
+  const next = { ...cur, ...patch };
+  const r = await api("/watches/" + encodeURIComponent(key), {
+    method: "PUT",
+    body: JSON.stringify({ artist_name: next.artist_name, upcoming: !!next.upcoming, results: !!next.results, min_inr: next.min_inr }),
+  });
+  if (!r) throw new Error("not signed in");
+  CRM.watches = (CRM.watches || []).filter(w => w.artist_key !== key).concat([r.watch]);
+}
+async function dropWatch(key) {
+  await api("/watches/" + encodeURIComponent(key), { method: "DELETE" });
+  CRM.watches = (CRM.watches || []).filter(w => w.artist_key !== key);
+}
+
+function bellButton(key) {
+  const w = watchFor(key);
+  return `<button class="bell-btn" data-act="bell" data-artist="${esc(key)}" aria-pressed="${!!w}" title="${w ? "Watching \u2014 tap to adjust" : "Watch this artist"}">${I(ICON.bell, 15)} ${w ? "Watching" : "Watch"}</button>`;
+}
+
+function watchSheet(key) {
+  if (S.watchSheet !== key) return "";
+  const w = watchFor(key);
+  if (!CRM.live) return `<div class="watch-sheet"><div class="empty">Sign in to the desk to set alerts \u2014 they reach you on Telegram every morning.</div></div>`;
+  if (!w) return "";
+  const sw = (field, label, sub) => `
+    <div class="wrow"><div class="wl">${label}<small>${sub}</small></div>
+      <button class="sw" role="switch" aria-checked="${!!w[field]}" data-act="watch-toggle" data-artist="${esc(key)}" data-field="${field}" aria-label="${label}"></button></div>`;
+  return `<div class="watch-sheet">
+    ${sw("upcoming", "Coming to auction", "The morning a lot appears in a forthcoming catalogue")}
+    ${sw("results", "Results", "The morning after a lot sells, or fails to")}
+    <div class="wrow"><div class="wl">Only above<small>The estimate or the price must clear this</small></div></div>
+    <div class="chiprow" style="padding:0;margin-top:2px">${FLOORS.map(([v, l]) => `<button class="chip" data-act="watch-floor" data-artist="${esc(key)}" data-floor="${v == null ? "" : v}" aria-pressed="${(w.min_inr || null) === v}">${l}</button>`).join("")}</div>
+    <div class="btnrow" style="margin-top:16px"><button class="btn" data-act="watch-stop" data-artist="${esc(key)}">Stop watching</button><button class="btn" data-act="watch-close">Done</button></div>
+    <div class="foot-note">Alerts arrive in the morning roundup on Telegram, and are listed under Alerts here. Saffronart hides its forthcoming catalogues, so a Saffronart lot can only be announced once it has sold.</div>
+  </div>`;
+}
+
+function upcomingRow(u) {
+  const isNew = u.new && (Date.now() - Date.parse(u.new)) < 2 * 86400e3;
+  return `<a class="rec ${u.image ? "has-pic" : ""}" href="${safeUrl(u.url) || "#"}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+    ${workThumb(u.image, u.title || "", "t-rec")}
+    <div class="rec-body">
+      <div class="rec-top">${houseTag(u.house)}<span class="row-meta tnum">${esc(fmtDate(u.date))}${u.lot ? " \u00b7 lot " + esc(u.lot) : ""}</span></div>
+      <div class="rec-work">${esc(u.title || "Untitled")}${isNew ? '<span class="up-new">new</span>' : ""}</div>
+      <div class="rec-med">${esc([u.medium, u.size, u.year ? "painted " + u.year : null].filter(Boolean).join(", "))}</div>
+      <div class="rec-foot"><div class="rec-est tnum">${u.est ? "Est. " + esc(u.est) : "Estimate not published"}</div>${nativeTag(u.native)}</div>
+    </div></a>`;
+}
+
+function alertRow(i) {
+  const est = i.est_low && i.est_high ? `${inrShort(i.est_low)}\u2013${inrShort(i.est_high)}` : null;
+  const line = i.kind === "upcoming"
+    ? `${esc(i.house)}, ${esc(fmtDate(i.date))}${i.lot ? ", lot " + esc(i.lot) : ""}${est ? " \u00b7 est. " + esc(est) : ""}`
+    : `${i.sold && i.price ? "Sold " + esc(inrShort(i.price)) : "Unsold"} at ${esc(i.house)}, ${esc(fmtDate(i.date))}${est ? " \u00b7 est. " + esc(est) : ""}`;
+  return `<a class="rec ${i.image ? "has-pic" : ""}" href="${safeUrl(i.url) || "#"}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+    ${workThumb(i.image, i.title || "", "t-rec")}
+    <div class="rec-body">
+      <div class="rec-top"><span class="al-kind">${i.kind === "upcoming" ? "Coming to auction" : "Result"}</span><span class="row-meta tnum">${esc(fmtDate((i.at || "").slice(0, 10)))}</span></div>
+      <div class="rec-work">${esc(i.artist)} \u2014 ${esc(i.title || "Untitled")}</div>
+      <div class="rec-med">${line}</div>
+    </div></a>`;
+}
+
+function viewAlerts() {
+  const watches = CRM.live ? (CRM.watches || []) : ((REAL.alerts || {}).watches || []);
+  const items = ((REAL.alerts || {}).items || []);
+  const wrows = watches.slice().sort((a, b) => a.artist_name.localeCompare(b.artist_name)).map(w => `
+    <button class="row" data-open-artist="${esc(w.artist_key)}">
+      <div class="row-top"><span class="row-name">${esc(w.artist_name)}</span>${I(ICON.chev, 16)}</div>
+      <div class="row-sub">${[w.upcoming ? "coming to auction" : null, w.results ? "results" : null].filter(Boolean).join(" \u00b7 ") || "nothing switched on"}${w.min_inr ? " \u00b7 above " + esc(inrShort(w.min_inr)) : ""}</div>
+    </button>`).join("");
+  return `<div class="view-head"><h1>Alerts</h1>
+      <p>Artists you watch, and what came up for them</p></div>
+    <div class="view-body">
+      <div class="sec">${sectionHead("Watching", watches.length ? `${watches.length} ${watches.length === 1 ? "artist" : "artists"}` : "")}
+        <div class="rows">${wrows || `<div class="empty">${CRM.live ? "Nobody yet. Open an artist and tap Watch." : "Sign in to the desk to watch artists."}</div>`}</div>
+        <div class="foot-note">Each morning the roundup on Telegram opens with whatever fired: a lot by a watched artist appearing in a forthcoming catalogue, or a result landing. The floor, when set, is the estimate or the price.</div>
+      </div>
+      <div class="sec">${sectionHead("Fired", items.length ? "last 14 days" : "")}
+        <div class="rows">${items.map(alertRow).join("") || `<div class="empty">Nothing yet. Alerts appear here the morning after they fire.</div>`}</div>
+      </div>
+    </div>`;
+}
+
 const VAL_MIN = 6;
 let LOTS = null, LOTS_STATE = "idle";
 
@@ -4681,7 +4808,8 @@ function viewMore() {
     { nav: "news", icon: "news", t: "News", s: "Ranked for you, everything pulled, and what you saved" },
     { nav: "calendar", icon: "calendar", t: "Calendar", s: "Sales, previews and fairs · Sep–Nov" },
     { nav: "knowledge", icon: "knowledge", t: "Knowledge", s: "Objection scripts and the pitch generator" },
-    { nav: "value", icon: "value", t: "Value a work", s: "What comparable works have sold for, with the sales that say so" }
+    { nav: "value", icon: "value", t: "Value a work", s: "What comparable works have sold for, with the sales that say so" },
+    { nav: "alerts", icon: "bell", t: "Alerts", s: "Artists you watch, and what came up for them" }
   ];
   return `<div class="view-head"><h1>More</h1></div>
     <div class="view-body">
@@ -4754,6 +4882,7 @@ function view() {
     case "knowledge": return viewKnowledge();
     case "ask": return viewAsk();
     case "value": return viewValue();
+    case "alerts": return viewAlerts();
     default: return viewMore();
   }
 }
@@ -5255,6 +5384,32 @@ document.addEventListener("click", e => {
     return focusSearch();
   }
   if (act === "clear-search") { S.query = ""; renderSearchResults(); return focusSearch(); }
+  if (act === "bell") {
+    const key = attr("data-artist");
+    if (!CRM.live) { S.watchSheet = S.watchSheet === key ? null : key; return render(true); }
+    if (watchFor(key)) { S.watchSheet = S.watchSheet === key ? null : key; return render(true); }
+    t.disabled = true;
+    saveWatch(key, {}).then(() => { S.watchSheet = key; render(true); })
+      .catch(() => { t.disabled = false; alert("Could not save the watch. Are you signed in to the desk?"); });
+    return;
+  }
+  if (act === "watch-toggle") {
+    const key = attr("data-artist"), f = attr("data-field"), w = watchFor(key);
+    if (!w) return;
+    saveWatch(key, { [f]: w[f] ? 0 : 1 }).then(() => render(true)).catch(() => alert("Could not save."));
+    return;
+  }
+  if (act === "watch-floor") {
+    const key = attr("data-artist"), v = attr("data-floor");
+    saveWatch(key, { min_inr: v ? +v : null }).then(() => render(true)).catch(() => alert("Could not save."));
+    return;
+  }
+  if (act === "watch-stop") {
+    const key = attr("data-artist");
+    dropWatch(key).then(() => { S.watchSheet = null; render(true); }).catch(() => alert("Could not remove the watch."));
+    return;
+  }
+  if (act === "watch-close") { S.watchSheet = null; return render(true); }
   if (act === "value-medium") { S.val.medium = attr("data-m"); render(true); return renderValueResults(); }
   if (act === "value-unit") { S.val.unit = attr("data-u"); render(true); return renderValueResults(); }
   if (act === "value-for") {
