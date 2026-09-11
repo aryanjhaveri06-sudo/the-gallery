@@ -155,6 +155,18 @@ export function verifyKey(request, env) {
 }
 
 /**
+ * The nightly job's own door. It may only READ the watch list — the route is
+ * limited on the other side — and it carries a token that is not the desk
+ * key, so a GitHub secret leaking never opens the client book.
+ */
+export function verifyAlertToken(request, env) {
+  const expected = env.ALERT_TOKEN;
+  if (!expected) return false;
+  const presented = request.headers.get("X-Alert-Token") || "";
+  return !!presented && safeEqual(presented, expected);
+}
+
+/**
  * Whichever guard is configured. Access wins when it is set up, so moving to it
  * later is a matter of filling in the variables — no code change.
  */

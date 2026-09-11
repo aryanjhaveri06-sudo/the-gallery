@@ -92,10 +92,14 @@ jobs:
           cd ingest && python3 enrich_saffronart.py --limit 250 || true
 
       - name: Refresh the diary
+        env:
+          ALERT_TOKEN: ${{ secrets.ALERT_TOKEN }}
         run: |
           # Forthcoming sales, and the .ics feed her Calendar app subscribes to.
           cd ingest
           python3 upcoming.py || true
+          python3 upcoming_lots.py || true
+          python3 alerts.py || true
           python3 build_calendar.py
 
       - name: Pull market headlines
@@ -120,12 +124,15 @@ jobs:
         run: |
           git config user.name  "art-desk-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/app_data.json data/lots.json data/saffronart_sales.json data/news.json index.html calendar.ics
+          git add data/app_data.json data/lots.json data/alerts.json data/saffronart_sales.json data/news.json index.html calendar.ics
           if git diff --staged --quiet; then
             echo "nothing changed"
           else
             git commit -m "Refresh auction data ($(date -u +%Y-%m-%d))"
-            git push
+            # A code push during the 40-minute rebuild makes main move under us;
+            # the data files never conflict with code, so rebase and try again.
+            git pull --rebase --autostash -q || true
+            git push || { git pull --rebase --autostash -q && git push; }
           fi
 
       # Cloudflare is not git-connected, so the nightly commit would otherwise

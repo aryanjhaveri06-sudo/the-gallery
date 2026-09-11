@@ -84,3 +84,18 @@ CREATE TABLE IF NOT EXISTS audit (
   detail     TEXT                       -- JSON of the row before it changed
 );
 CREATE INDEX IF NOT EXISTS idx_audit_at ON audit(at DESC);
+
+-- Alerts. One row per artist she is watching, with what should fire: a lot
+-- coming to auction, a result landing, and an optional floor so a ₹40,000
+-- drawing does not wake her for a Raza. The nightly job reads this list (with
+-- its own token, never the desk key) and matches it against the catalogues.
+CREATE TABLE IF NOT EXISTS watch (
+  artist_key   TEXT PRIMARY KEY,        -- joins to the public artist data
+  artist_name  TEXT NOT NULL,
+  upcoming     INTEGER NOT NULL DEFAULT 1,
+  results      INTEGER NOT NULL DEFAULT 1,
+  min_inr      INTEGER,                 -- NULL = any price
+  note         TEXT,
+  created_at   TEXT NOT NULL,
+  updated_at   TEXT NOT NULL
+);

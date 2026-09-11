@@ -289,6 +289,22 @@ def _above_rate(sold):
                  / len(graded) * 100)
 
 
+def upcoming_by_artist(con):
+    """Forthcoming lots (upcoming_lots.py), newest sale last — {artist_key: [lot]}."""
+    if not con.execute("SELECT name FROM sqlite_master WHERE name='upcoming_lot'").fetchone():
+        return {}
+    out = defaultdict(list)
+    for r in con.execute("SELECT * FROM upcoming_lot WHERE artist_key IS NOT NULL ORDER BY sale_date, lot_no"):
+        out[r["artist_key"]].append({
+            "sale_id": r["sale_id"], "house": r["house"], "sale": r["sale_title"], "date": r["sale_date"],
+            "lot": r["lot_no"], "title": r["title"], "medium": r["medium"], "size": r["size"], "year": r["year"],
+            "est_low": r["est_low_inr"], "est_high": r["est_high_inr"],
+            "currency": r["currency"], "est_low_native": r["est_low_native"], "est_high_native": r["est_high_native"],
+            "url": r["url"], "image": r["image_url"], "first_seen": r["first_seen"],
+        })
+    return out
+
+
 def repeat_chains(con, lots):
     """Works sold more than once, from repeats.py — {artist_key: [chain, ...]}.
 
@@ -354,6 +370,8 @@ def main():
     names = {r["key"]: r["display"] for r in con.execute("SELECT key, display FROM artist")}
 
     repeats = repeat_chains(con, lots)
+    upcoming = upcoming_by_artist(con)
+    print(f"{sum(len(v) for v in upcoming.values())} forthcoming lots across {len(upcoming)} artists")
     print(f"{sum(len(v) for v in repeats.values())} works sold more than once, "
           f"across {len(repeats)} artists")
 
@@ -390,6 +408,7 @@ def main():
                 "url": r["url"], "image": r["image_url"],
             } for r in rows[:60]],
             "repeats": chains,
+            "upcoming": upcoming.get(key, []),
         }
 
     # trending: biggest 12-month movers among artists with real recent volume

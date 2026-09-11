@@ -141,6 +141,15 @@ def main():
             },
             # The same work sold more than once, confirmed by its picture. The
             # first sale is what she can say "last seen at" about.
+            # What is coming to auction by this artist, oldest sale first.
+            "upcoming": [{
+                "house": u["house"], "sale": u["sale"], "date": u["date"], "lot": u["lot"],
+                "title": u["title"], "medium": u["medium"], "size": u["size"], "year": u["year"],
+                "est": band(u["est_low"], u["est_high"]),
+                "native": (f"{u['currency']} {u['est_low_native']:,}\u2013{u['est_high_native']:,}"
+                           if u.get("currency") and u["currency"] != "INR" and u.get("est_low_native") and u.get("est_high_native") else None),
+                "url": u["url"], "image": u["image"], "new": u["first_seen"],
+            } for u in a.get("upcoming", [])][:30],
             "repeats": [{
                 "title": c["title"], "medium": c["medium"], "size": c["size"],
                 "image": c["image"], "multiple": c["multiple"], "years": c["years"],
@@ -202,11 +211,21 @@ def main():
     con = connect()
     try:
         events = [dict(r) for r in con.execute(
-            "SELECT house, title, starts, ends, kind, city, url, lot_count "
+            "SELECT id, house, title, starts, ends, kind, city, url, lot_count "
             "FROM event ORDER BY starts")]
     except Exception:
         events = []                      # diary not built yet
     con.close()
+    # Who is in the sale: tracked artists, most lots first, so the diary can say
+    # "112 lots · Souza, Raza, Gaitonde" rather than just a date.
+    in_sale = {}
+    for key, a in artists.items():
+        for u in a.get("upcoming", []):
+            in_sale.setdefault(u["sale_id"], {}).setdefault(a["name"], 0)
+            in_sale[u["sale_id"]][a["name"]] += 1
+    for e in events:
+        top = sorted(in_sale.get(e.pop("id"), {}).items(), key=lambda x: -x[1])
+        e["names"] = [n for n, _ in top[:4]]
 
     # Real headlines, written by publishers. See ingest/news.py — this replaced
     # four invented ones that read as though they had been reported.

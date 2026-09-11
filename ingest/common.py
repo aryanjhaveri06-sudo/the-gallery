@@ -261,7 +261,8 @@ def fx_rate(con, day, cur):
 
 
 def to_inr(amount, rate):
-    return int(round(amount * rate)) if amount else None
+    """None when either side is unknown — a Mumbai sale has no USD rate to give."""
+    return int(round(amount * rate)) if (amount and rate) else None
 
 
 # --------------------------------------------------------------------------

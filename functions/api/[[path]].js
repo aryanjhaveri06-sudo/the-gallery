@@ -10,7 +10,7 @@
  * exposed by a misconfiguration.
  */
 
-import { authenticate, unauthorised } from "../_lib/auth.js";
+import { authenticate, unauthorised, verifyAlertToken } from "../_lib/auth.js";
 import { parseIcs } from "../_lib/ics.js";
 import { liveNews } from "../_lib/news.js";
 import { chat, aiConfigured, unsupportedFigures, AiError } from "../_lib/ai.js";
@@ -291,6 +291,13 @@ export async function onRequest(context) {
     return json({ error: "The client book is not connected yet (no D1 binding)." }, 503);
   }
 
+  // The nightly matcher reads the watch list with its own token. Read only:
+  // nothing else under /api answers to it.
+  if (method === "GET" && path === "/watches" && verifyAlertToken(request, env)) {
+    const { results } = await env.DB.prepare("SELECT * FROM watch ORDER BY artist_name").all();
+    return json({ watches: results });
+  }
+
   const who = await authenticate(request, env);
   if (!who) return unauthorised();
 
@@ -533,6 +540,37 @@ export async function onRequest(context) {
              b.channel ?? null, b.note ?? null, now()).run();
       await audit(env, who.email, "create", "log", lid);
       return json({ id: lid }, 201);
+    }
+
+    /* --- alerts ---------------------------------------------------------- */
+    if (method === "GET" && path === "/watches") {
+      const { results } = await env.DB.prepare("SELECT * FROM watch ORDER BY artist_name").all();
+      return json({ watches: results });
+    }
+
+    if (method === "PUT" && path.match(/^\/watches\/[^/]+$/)) {
+      const key = decodeURIComponent(path.split("/")[2]);
+      const b = await request.json();
+      if (!b.artist_name) return json({ error: "A watch needs the artist's name." }, 400);
+      const min = Number.isFinite(+b.min_inr) && +b.min_inr > 0 ? Math.round(+b.min_inr) : null;
+      const t = now();
+      await env.DB.prepare(`
+        INSERT INTO watch (artist_key, artist_name, upcoming, results, min_inr, note, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?)
+        ON CONFLICT(artist_key) DO UPDATE SET artist_name=excluded.artist_name, upcoming=excluded.upcoming,
+          results=excluded.results, min_inr=excluded.min_inr, note=excluded.note, updated_at=excluded.updated_at`
+      ).bind(key, String(b.artist_name).slice(0, 120), b.upcoming === false ? 0 : 1, b.results === false ? 0 : 1,
+             min, b.note ? String(b.note).slice(0, 300) : null, t, t).run();
+      await audit(env, who.email, "watch", "watch", key);
+      const row = await env.DB.prepare("SELECT * FROM watch WHERE artist_key = ?").bind(key).first();
+      return json({ watch: row });
+    }
+
+    if (method === "DELETE" && path.match(/^\/watches\/[^/]+$/)) {
+      const key = decodeURIComponent(path.split("/")[2]);
+      await env.DB.prepare("DELETE FROM watch WHERE artist_key = ?").bind(key).run();
+      await audit(env, who.email, "unwatch", "watch", key);
+      return json({ ok: true });
     }
 
     if (method === "POST" && path === "/followups") {

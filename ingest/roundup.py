@@ -86,6 +86,46 @@ def ranker(artists):
     return score
 
 
+def inr(n):
+    """₹5.37 cr / ₹48 lakh, the trade's units, for a Telegram line."""
+    if not n:
+        return None
+    if n >= 1e7:
+        v = n / 1e7
+        return f"\u20b9{v:.2f} cr" if v < 10 else f"\u20b9{v:.1f} cr"
+    if n >= 1e5:
+        v = n / 1e5
+        return f"\u20b9{v:.1f} lakh" if v < 10 else f"\u20b9{v:.0f} lakh"
+    return f"\u20b9{n:,}"
+
+
+def alert_lines(since_iso):
+    """What her watches fired since the last roundup (data/alerts.json)."""
+    try:
+        d = json.loads((ROOT / "data" / "alerts.json").read_text())
+    except (OSError, ValueError):
+        return []
+    out = []
+    for it in d.get("items", []):
+        if (it.get("at") or "") < since_iso:
+            continue
+        who = esc(it["artist"])
+        what = esc(it.get("title") or "Untitled")
+        est = f"{inr(it['est_low'])}\u2013{inr(it['est_high'])}" if it.get("est_low") and it.get("est_high") else None
+        native = f" ({esc(it['currency'])} {it['est_low_native']:,}\u2013{it['est_high_native']:,})" \
+            if it.get("currency") and it["currency"] != "INR" and it.get("est_low_native") else ""
+        link = f"<a href=\"{esc(it['url'])}\">{what}</a>" if it.get("url") else what
+        when = fmt_day(it["date"]) if it.get("date") else ""
+        if it["kind"] == "upcoming":
+            out.append(f"\u2022 <b>{who}</b> \u2014 {link} \u00b7 {esc(it['house'])}, {when}, lot {esc(str(it.get('lot') or ''))}"
+                       + (f" \u00b7 est. {est}{native}" if est else ""))
+        else:
+            price = f"<b>sold {inr(it['price'])}</b>" if it.get("sold") and it.get("price") else "<b>unsold</b>"
+            out.append(f"\u2022 <b>{who}</b> \u2014 {link} \u00b7 {price} at {esc(it['house'])}, {when}"
+                       + (f" \u00b7 est. {est}" if est else ""))
+    return out
+
+
 def load():
     nightly = json.loads((ROOT / "data" / "news.json").read_text())
     try:
@@ -127,6 +167,11 @@ def build(market, wider, events, today, days, rank):
 
     head = f"<b>AG NEWSROOM</b>\n{today.strftime('%A %-d %B %Y')}"
     parts = [head]
+
+    alerts = alert_lines((datetime.now(timezone.utc) - timedelta(hours=26)).isoformat(timespec="seconds"))
+    if alerts:
+        more = f"\n<i>and {len(alerts) - 15} more on the desk</i>" if len(alerts) > 15 else ""
+        parts.append("<b>YOUR ALERTS</b>\n" + "\n".join(alerts[:15]) + more)
 
     if fresh:
         parts.append("<b>ON THE MARKET</b>\n" + "\n".join(item(it) for it in fresh))
