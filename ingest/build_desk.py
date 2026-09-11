@@ -71,10 +71,11 @@ from common import ROOT, connect, get
 MIN_YEAR_LOTS = 4        # a year needs this many comparable lots to anchor an index point
 TRACKED_MIN_LOTS = 12    # an artist needs this many sold lots to get a dossier
 MIN_COMPARABLES = 10     # per window, before a % move may be quoted at all
-# Only Pundole's publishes its unsold lots (status "expired"), so it is the one
-# house whose sell-through can be computed rather than guessed. AstaGuru and
-# Saffronart show sold lots only, which is why a blanket figure would read ~100%.
-SELL_THROUGH_HOUSES = {"Pundole's"}
+# Only the houses that publish their unsold lots can have a sell-through
+# computed rather than guessed: Pundole's (status "expired"), Christie's (empty
+# price realised) and Bonhams (status "BI"). AstaGuru and Saffronart show sold
+# lots only, which is why a blanket figure would read ~100%.
+SELL_THROUGH_HOUSES = {"Pundole's", "Christie's", "Bonhams"}
 MIN_ST_LOTS = 8          # below this the rate is noise, not a rate
 MIN_BALANCE = 0.45       # smaller window must be at least this share of the larger
 
@@ -325,6 +326,7 @@ def main():
                 "size": r["size"], "year": r["year"],
                 "est_low": r["est_low_inr"], "est_high": r["est_high_inr"],
                 "price": r["price_inr"], "price_usd": r["price_usd"],
+                "currency": r["currency"], "price_native": r["price_native"],
                 "sold": bool(r["sold"]),
                 "above_high": bool(r["est_high_inr"] and r["price_inr"]
                                    and r["price_inr"] > r["est_high_inr"]),
@@ -353,6 +355,7 @@ def main():
         "date": r["sale_date"], "house": r["house"], "artist": names.get(r["artist_key"]),
         "artist_key": r["artist_key"], "title": r["title"],
         "price": r["price_inr"], "est_low": r["est_low_inr"], "est_high": r["est_high_inr"],
+        "currency": r["currency"], "price_native": r["price_native"],
         "above_high": bool(r["est_high_inr"] and r["price_inr"] and r["price_inr"] > r["est_high_inr"]),
         "url": r["url"],
         # The desk is for looking at pictures. Every lot in the database has an
@@ -380,9 +383,9 @@ def main():
         },
         "caveats": {
             "sell_through": "Computed only over houses that publish unsold lots "
-                            "(Pundole's). AstaGuru and Saffronart list sold lots "
-                            "only, so a figure spanning all three would read ~100% "
-                            "and be false. Each artist names its own basis.",
+                            "(Pundole's, Christie's, Bonhams). AstaGuru and Saffronart "
+                            "list sold lots only, so a figure spanning every house "
+                            "would read ~100% and be false. Each artist names its own basis.",
             "index_quality": "Per-square-inch holds size and medium constant but NOT "
                              "quality. A percentage move is consignment-weighted, "
                              "not quality-adjusted — always read it with the two "
@@ -392,8 +395,13 @@ def main():
                      "Only lots carrying a medium and size can contribute — see "
                      "each artist's index_houses. Median and high figures cover "
                      "every house; the index may cover fewer.",
-            "coverage": "AstaGuru, Saffronart and Pundole's. Christie's blocks "
-                        "automated access; Sotheby's not yet ingested.",
+            "coverage": "AstaGuru, Saffronart, Pundole's, Christie's (South Asian "
+                        "Modern + Contemporary, from 2006) and Bonhams (Modern & "
+                        "Contemporary South Asian Art, from 2006). Overseas prices "
+                        "are converted to rupees at the ECB rate on the sale date; "
+                        "the figure as printed by the house is kept beside it. "
+                        "Sotheby's gates its results behind a login and is not "
+                        "ingested.",
         },
         "fx": fx,
         "artists": artists,

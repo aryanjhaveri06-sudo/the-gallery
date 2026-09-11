@@ -33,6 +33,15 @@ def _q(n, divisor, places):
 from common import ROOT, connect
 
 
+def native(cur, n):
+    """The figure as the house printed it — "USD 2,349,000" — for an overseas
+    sale. The rupee price beside it is a sale-date conversion, and the trade
+    quotes the record in the currency it was set in."""
+    if not cur or cur == "INR" or not n:
+        return None
+    return f"{cur} {n:,}"
+
+
 def inr(n):
     """The trade's own units — crore above 1 cr, lakh below.
 
@@ -138,6 +147,7 @@ def main():
                 "title": r["title"], "medium": r["medium"], "size": r["size"],
                 "est": band(r["est_low"], r["est_high"]),
                 "price": inr(r["price"]),
+                "native": native(r.get("currency"), r.get("price_native")),
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
                 "url": r["url"],
@@ -164,6 +174,7 @@ def main():
         "date": f["date"], "house": f["house"], "artist": f["artist"],
         "artist_key": f["artist_key"] if f["artist_key"] in out_artists else None,
         "title": f["title"], "price": inr(f["price"]),
+        "native": native(f.get("currency"), f.get("price_native")),
         "est": band(f["est_low"], f["est_high"]), "above": f["above_high"],
         "vs_est": vs_estimate(f["price"], f["est_low"], f["est_high"]),
         "image": f.get("image"), "medium": f.get("medium"), "size": f.get("size"),

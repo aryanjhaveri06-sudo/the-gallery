@@ -22,14 +22,14 @@ Usage:  python3 ingest/pundoles.py [--limit N] [--art-only]
 """
 
 import argparse
-import html as htmllib
 import json
 import re
 import sys
 import time
 from datetime import datetime, timezone
 
-from common import connect, get, normalise_artist, upsert_artist
+from common import (connect, get, normalise_artist, upsert_artist,
+                    split_artist, parse_description)
 
 BASE = "https://auctions.pundoles.com"
 HOUSE = "Pundole's"
@@ -41,78 +41,12 @@ CATALOG = BASE + "{path}?n=500"
 CRAWL_DELAY = 10          # from their robots.txt; not negotiable
 PREMIUM_PCT = 15.0        # flat, per their conditions of sale
 
-# "JAMINI ROY (1887-1972)" / "SUBODH GUPTA (B. 1964)"
-_ARTIST = re.compile(r"^(.*?)\s*\((?:b\.?\s*)?(\d{4})\s*[-–]?\s*(\d{4})?\)\s*$", re.I)
-# Dimensions read "56 1/2 x 20 1/2 in. (144.2 x 52.1 cm.)". The fractional inches
-# are a trap: a naive \d+ matches the "2" of "1/2" and yields "2 x 58 in". The cm
-# pair is always plain decimal, so parse that and convert.
-_DIM_CM = re.compile(r"\((\d+(?:\.\d+)?)\s*[x\u00d7]\s*(\d+(?:\.\d+)?)\s*cm")
-_FRAC = r"\d+(?:\s+\d+/\d+)?(?:\.\d+)?"
-_DIM_IN = re.compile("(%s)\\s*[x\\u00d7]\\s*(%s)\\s*in\\b" % (_FRAC, _FRAC))
-
-
-def _num(t):
-    """'7 7/8' -> 7.875, '24' -> 24.0"""
-    t = t.strip()
-    m = re.match(r"^(\d+)\s+(\d+)/(\d+)$", t)
-    if m:
-        return float(m.group(1)) + float(m.group(2)) / float(m.group(3))
-    try:
-        return float(t)
-    except ValueError:
-        return None
-
-
-_MEDIUM_HINT = re.compile(
-    r"\b(oil|acrylic|watercolour|watercolor|gouache|tempera|ink|pencil|charcoal|pastel|"
-    r"mixed media|serigraph|lithograph|etching|photograph|bronze|terracotta|marble|"
-    r"wood|steel|gelatin|silver|collage)\b", re.I)
-
-
 def _money(v):
     try:
         n = float(v)
         return int(round(n)) if n > 0 else None
     except (TypeError, ValueError):
         return None
-
-
-def split_artist(raw):
-    """'JAMINI ROY (1887-1972)' -> ('Jamini Roy', '1887–1972')."""
-    if not raw:
-        return None, None
-    s = re.sub(r"\s+", " ", htmllib.unescape(str(raw))).strip()
-    m = _ARTIST.match(s)
-    if not m:
-        return s.title() if s.isupper() else s, None
-    name = m.group(1).strip()
-    name = name.title() if name.isupper() else name
-    years = f"{m.group(2)}–{m.group(3)}" if m.group(3) else f"b. {m.group(2)}"
-    return name, years
-
-
-def parse_description(desc):
-    """Pull medium and inch dimensions out of the catalogue blurb."""
-    if not desc:
-        return None, None
-    text = re.sub(r"<br\s*/?>", "\n", htmllib.unescape(desc))
-    text = re.sub(r"<[^>]+>", " ", text)
-    lines = [re.sub(r"\s+", " ", l).strip() for l in text.split("\n")]
-    lines = [l for l in lines if l]
-
-    medium = next((l for l in lines if _MEDIUM_HINT.search(l) and len(l) < 90), None)
-    size = None
-    cm = _DIM_CM.search(text)
-    if cm:
-        a, b = float(cm.group(1)) / 2.54, float(cm.group(2)) / 2.54
-        size = "%.1f x %.1f in" % (a, b)
-    else:
-        d = _DIM_IN.search(text)
-        if d:
-            a, b = _num(d.group(1)), _num(d.group(2))
-            if a and b:
-                size = "%.1f x %.1f in" % (a, b)
-    return medium, size
 
 
 def extract_inline(page, key):

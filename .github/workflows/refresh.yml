@@ -72,6 +72,8 @@ jobs:
             python3 astaguru.py
             python3 saffronart.py --discover 6
             python3 pundoles.py
+            python3 christies.py
+            python3 bonhams.py
           else
             # Newest sales sit at the top of each house's list, so a shallow
             # pull catches anything that closed since the last run. Re-ingesting
@@ -79,6 +81,8 @@ jobs:
             python3 astaguru.py   --limit 4
             python3 saffronart.py --discover 6 --limit 4
             python3 pundoles.py   --limit 4
+            python3 christies.py  --limit 2
+            python3 bonhams.py    --limit 2
           fi
 
       - name: Fill Saffronart medium and size
@@ -147,6 +151,19 @@ jobs:
         with:
           path: data/artdesk.db
           key: artdesk-db-${{ github.run_id }}
+
+      # A red run nobody looks at is a stale desk nobody notices. Secrets come
+      # from the Swing Desk bot; both empty means the step just logs and exits.
+      - name: Alert on failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TG_TOKEN" ] && { echo "no TELEGRAM_BOT_TOKEN; not alerting"; exit 0; }
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: nightly refresh FAILED ($GITHUB_RUN_ID). $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"
 
       - name: Summary
         if: always()

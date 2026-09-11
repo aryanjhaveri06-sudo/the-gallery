@@ -4,16 +4,19 @@ Stdlib only, on purpose: this has to run unattended on whatever host we end up
 using, and every dependency is one more thing that breaks a scheduled refresh.
 """
 
+import html as htmllib
 import json
+import os
 import re
 import sqlite3
 import time
+from datetime import date
 import urllib.error
 import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT / "data" / "artdesk.db"
+DB_PATH = Path(os.environ.get("ARTDESK_DB") or ROOT / "data" / "artdesk.db")
 
 UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -179,6 +182,10 @@ CREATE TABLE IF NOT EXISTS lot (
   hammer_inr       INTEGER,          -- fall of hammer, before premium
   price_inr        INTEGER,          -- inclusive of buyer's premium ("sold for")
   price_usd        INTEGER,
+  currency         TEXT,             -- sale currency; NULL means INR
+  est_low_native   INTEGER,          -- the figures as the house printed them,
+  est_high_native  INTEGER,          -- in `currency`; *_inr are converted at
+  price_native     INTEGER,          -- the sale-date rate (see fx_rate)
   sold             INTEGER,          -- 1 sold, 0 bought in
   bid_count        INTEGER,
   non_exportable   INTEGER,          -- National Art Treasure
@@ -218,7 +225,130 @@ def connect():
     cols = {r[1] for r in con.execute("PRAGMA table_info(sale)")}
     if "sold_count" not in cols:
         con.execute("ALTER TABLE sale ADD COLUMN sold_count INTEGER")
+    cols = {r[1] for r in con.execute("PRAGMA table_info(lot)")}
+    for c, t in (("currency", "TEXT"), ("est_low_native", "INTEGER"),
+                 ("est_high_native", "INTEGER"), ("price_native", "INTEGER")):
+        if c not in cols:
+            con.execute(f"ALTER TABLE lot ADD COLUMN {c} {t}")
     return con
+
+
+# --------------------------------------------------------------------------
+# FX — the overseas houses sell in USD and GBP
+# --------------------------------------------------------------------------
+
+FX_HIST = "https://api.frankfurter.app/{day}?from={cur}&to=INR,USD"
+
+
+def fx_rate(con, day, cur):
+    """INR and USD per one unit of `cur` on `day`, cached in the fx table.
+
+    Frankfurter is ECB reference data, keyless, back to 1999. A weekend or
+    holiday answers with the previous business day's fix, which is what a
+    saleroom would have used too; it is stored under the day asked for.
+    """
+    if cur == "INR":
+        return 1.0, None
+    rows = {r["pair"]: r["rate"] for r in con.execute(
+        "SELECT pair, rate FROM fx WHERE day=? AND pair IN (?,?)",
+        (day, f"{cur}/INR", f"{cur}/USD"))}
+    if f"{cur}/INR" not in rows:
+        d = get(FX_HIST.format(day=day, cur=cur), pause=0.2)
+        rows = {f"{cur}/INR": d["rates"]["INR"], f"{cur}/USD": d["rates"].get("USD", 1.0)}
+        con.executemany("INSERT OR REPLACE INTO fx (day, pair, rate) VALUES (?,?,?)",
+                        [(day, k, v) for k, v in rows.items()])
+    return rows[f"{cur}/INR"], rows.get(f"{cur}/USD")
+
+
+def to_inr(amount, rate):
+    return int(round(amount * rate)) if amount else None
+
+
+# --------------------------------------------------------------------------
+# Catalogue text — shared by the houses that print a blurb, not fields
+# --------------------------------------------------------------------------
+
+# "JAMINI ROY (1887-1972)" / "SUBODH GUPTA (B. 1964)" / "Ahmad X (Iran, born 1973)"
+_ARTIST = re.compile(
+    r"^(.*?)\s*\((?:[A-Za-z ]+,\s*)?(?:b(?:orn)?\.?\s*)?(\d{4})\s*[-–]?\s*(\d{4})?\)\s*$", re.I)
+# Dimensions read "56 1/2 x 20 1/2 in. (144.2 x 52.1 cm.)". The fractional inches
+# are a trap: a naive \d+ matches the "2" of "1/2" and yields "2 x 58 in". The cm
+# pair is always plain decimal, so parse that and convert.
+_DIM_CM = re.compile(r"(\d+(?:\.\d+)?)\s*[x\u00d7]\s*(\d+(?:\.\d+)?)\s*cm")
+_FRAC = r"\d+(?:\s+\d+/\d+)?(?:\.\d+)?"
+_DIM_IN = re.compile("(%s)\\s*[x\\u00d7]\\s*(%s)\\s*in\\b" % (_FRAC, _FRAC))
+_MEDIUM_HINT = re.compile(
+    r"\b(oil|acrylic|watercolours?|watercolors?|gouache|tempera|ink|pencil|charcoal|pastels?|"
+    r"mixed media|serigraph|lithograph|etching|photograph|bronze|terracotta|marble|"
+    r"wood|steel|gelatin|silver|collage|casein|enamel|fibreglass|fiberglass|graphite|"
+    r"crayon|woodcut|linocut|screenprint|print|ballpoint|dye|paper|canvas|board)\b", re.I)
+# "Executed in 1953" / "Painted circa 1882" / "signed and dated 'Sabavala '66'" /
+# "signed 'Qadri 07'". A two-digit year must follow an apostrophe, or the
+# dimensions two lines down ("72.9 x 91.7cm") would read as 1972.
+_YEAR = re.compile(r"\b(?:painted|executed|dated|circa|c\.)\b[^\d]{0,60}?(?:\b((?:1[89]|20)\d\d)\b|'(\d\d)\b)", re.I)
+
+
+def _num(t):
+    """'7 7/8' -> 7.875, '24' -> 24.0"""
+    t = t.strip()
+    m = re.match(r"^(\d+)\s+(\d+)/(\d+)$", t)
+    if m:
+        return float(m.group(1)) + float(m.group(2)) / float(m.group(3))
+    try:
+        return float(t)
+    except ValueError:
+        return None
+
+
+def split_artist(raw):
+    """'JAMINI ROY (1887-1972)' -> ('Jamini Roy', '1887–1972')."""
+    if not raw:
+        return None, None
+    s = re.sub(r"\s+", " ", htmllib.unescape(str(raw))).strip()
+    m = _ARTIST.match(s)
+    if not m:
+        return s.title() if s.isupper() else s, None
+    name = m.group(1).strip()
+    name = name.title() if name.isupper() else name
+    years = f"{m.group(2)}–{m.group(3)}" if m.group(3) else f"b. {m.group(2)}"
+    return name, years
+
+
+def parse_description(desc):
+    """Pull medium and inch dimensions out of the catalogue blurb."""
+    if not desc:
+        return None, None
+    text = re.sub(r"<br\s*/?>|</(?:div|p|li)>", "\n", htmllib.unescape(desc))
+    text = re.sub(r"<[^>]+>", " ", text)
+    lines = [re.sub(r"\s+", " ", l).strip() for l in text.split("\n")]
+    lines = [l for l in lines if l]
+
+    medium = next((l for l in lines if _MEDIUM_HINT.search(l) and len(l) < 90), None)
+    size = None
+    cm = _DIM_CM.search(text)
+    if cm:
+        a, b = float(cm.group(1)) / 2.54, float(cm.group(2)) / 2.54
+        size = "%.1f x %.1f in" % (a, b)
+    else:
+        d = _DIM_IN.search(text)
+        if d:
+            a, b = _num(d.group(1)), _num(d.group(2))
+            if a and b:
+                size = "%.1f x %.1f in" % (a, b)
+    return medium, size
+
+
+def year_from(text):
+    """'Executed in 1953' / 'Painted circa 1882' / "dated '53" -> '1953'. None if unsaid."""
+    if not text:
+        return None
+    m = _YEAR.search(text)
+    if not m:
+        return None
+    if m.group(1):
+        return m.group(1)
+    yy = int(m.group(2))
+    return str((2000 if yy <= date.today().year % 100 else 1900) + yy)
 
 
 def upsert_artist(con, key, display, house, house_id=None):

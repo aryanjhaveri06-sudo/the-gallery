@@ -1,0 +1,46 @@
+name: Freshness check
+
+# The refresh workflow can be green and the desk still stale: GitHub disables
+# cron on a quiet repo, a queued run can wedge for ever, a deploy can silently
+# ship an old tree. None of those are visible from inside that workflow. So this
+# one asks the LIVE site what it is serving, six hours after the refresh should
+# have landed, and shouts if the data is older than 36 hours.
+on:
+  schedule:
+    - cron: "30 2 * * *"      # 08:00 IST
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Age of the live data
+        id: age
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, datetime as dt
+          req = urllib.request.Request(
+              "https://the-gallery-ct1.pages.dev/data/app_data.json",
+              headers={"User-Agent": "Mozilla/5.0"})
+          d = json.load(urllib.request.urlopen(req, timeout=60))
+          gen = dt.datetime.fromisoformat(d["generated_at"])
+          age = dt.datetime.now(dt.timezone.utc) - gen
+          hours = age.total_seconds() / 3600
+          print(f"live data generated {d['generated_at']} — {hours:.1f}h ago")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"hours={hours:.0f}\n")
+          if hours > 36:
+              raise SystemExit(f"STALE: {hours:.0f}h old")
+          PY
+
+      - name: Alert
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+          HOURS:    ${{ steps.age.outputs.hours }}
+        run: |
+          [ -z "$TG_TOKEN" ] && { echo "no TELEGRAM_BOT_TOKEN; not alerting"; exit 0; }
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: live data is STALE (${HOURS:-?}h old, or unreachable). $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"

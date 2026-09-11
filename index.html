@@ -527,6 +527,7 @@ button.row:active{background:var(--gold-tint)}
 .rec-est{font-size:12.6px;color:var(--ink-50)}
 .rec-price{font-family:var(--font-heading);font-weight:600;font-size:22.1px;text-align:right;line-height:1.1}
 .rec-price.up{color:var(--gold-ink)}
+.native{font-size:11px;letter-spacing:.06em;color:var(--ink-60);text-align:right;margin-top:3px;white-space:nowrap}
 .foot-note{font-size:12.1px;font-style:italic;color:var(--ink-50);margin-top:16px;line-height:1.5}
 
 .talk{display:grid;grid-template-columns:16px 1fr;gap:12px;padding:13px 0;font-size:14.7px;line-height:1.62}
@@ -1751,7 +1752,7 @@ function buildArtists() {
         medium: [r.medium, r.size].filter(Boolean).join(", ") || "—",
         sale: r.lot ? "Lot " + r.lot : "",
         est: r.est || "Estimate not published",
-        price: r.price || "—",
+        price: r.price || "—", native: r.native || null,
         up: !!r.above, nat: !!r.nat, url: r.url
       }))
     };
@@ -2262,6 +2263,9 @@ const normName = n => String(n || "").toLowerCase().replace(/[.'`,]/g, "").repla
 let _byName = {};
 const artistKeyByName = name => _byName[normName(name)] || null;
 const houseTag = h => `<span class="house" data-h="${esc(h)}">${esc(h)}</span>`;
+/* An overseas result is quoted by the trade in the currency it was set in;
+   the rupee figure above it is the ECB rate on the sale day. */
+const nativeTag = n => n ? `<div class="native tnum">${esc(n)}</div>` : "";
 const dueCount = () => (CRM.live && CRM.followups) ? CRM.followups.length : 0;
 
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
@@ -2921,7 +2925,7 @@ function viewDossier(embedded) {
         <div class="rec-foot">
           <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
             ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}</div>
-          <div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>
+          <div><div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>${nativeTag(r.native)}</div>
         </div>
       </div>
     </div>`;
@@ -3032,12 +3036,22 @@ function lotThumbFail(img) {
    Where there is no picture this renders NOTHING, not a frame saying so, except
    in the results feed where the card's grid reserves the column and an empty
    cell would read as a broken image. */
+/* The houses that can serve a small picture, and how to ask for one. A URL
+   that matches nothing is returned as it came. */
+function thumbUrl(u) {
+  if (u.includes("_aucres.")) return u.replace("_aucres.", "_thumb.");
+  if (u.startsWith("https://www.christies.com/img/lotimages/")) return u + (u.includes("?") ? "&" : "?") + "w=400";
+  if (u.startsWith("https://images1.bonhams.com/image?")) return u + "&width=400";
+  return u;
+}
+
 function workThumb(image, alt, cls, placeholder) {
   const orig = safeUrl(image);
   if (!orig) return placeholder ? `<div class="thumb ${cls} ph">no image</div>` : "";
-  const shown = orig.replace("_aucres.", "_thumb.");
-  /* Only Saffronart publishes a thumbnail (_thumb, 159px, ~15 KB). AstaGuru and
-     Pundole's serve the print scan and nothing else — measured: ~195 KB and
+  const shown = thumbUrl(orig);
+  /* Saffronart publishes a thumbnail (_thumb, 159px, ~15 KB) and Christie's and
+     Bonhams resize on request (measured 2026-09-11: 400px for ~14 KB). AstaGuru
+     and Pundole's serve the print scan and nothing else — measured: ~195 KB and
      ~1.1 MB a picture, no size variant, no resize parameter, no WebP
      negotiation. So these must never compete with the page: lazy keeps them off
      the wire until she scrolls to them, async keeps the decode off the main
@@ -3102,7 +3116,7 @@ function marketResults() {
         <div class="lot-foot">
           <div class="lot-est">${f.est ? `Est. <span class="tnum">${esc(f.est)}</span>` : ""}</div>
           <div>
-            <div class="lot-price tnum">${esc(f.price || "\u2014")}</div>
+            <div class="lot-price tnum">${esc(f.price || "\u2014")}</div>${nativeTag(f.native)}
             ${v ? `<div class="lot-vs ${v.dir} tnum">${v.dir === "above" ? "\u2191" : "\u2193"} ${v.pct}% ${v.dir === "above" ? "above high est." : "below low est."}</div>` : ""}
           </div>
         </div>
