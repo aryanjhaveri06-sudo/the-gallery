@@ -1,0 +1,34 @@
+name: Morning roundup
+
+# Aashna's art news on Telegram, 08:00 IST daily (ingest/roundup.py). Runs
+# after the nightly refresh has committed fresh news.json, and reads the live
+# publisher layer too. Sends to every chat id in TELEGRAM_ROUNDUP_CHAT_IDS.
+on:
+  schedule:
+    - cron: "30 2 * * *"      # 08:00 IST
+  workflow_dispatch:
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build and send
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_ROUNDUP_CHAT_IDS: ${{ secrets.TELEGRAM_ROUNDUP_CHAT_IDS }}
+        run: cd ingest && python3 roundup.py
+
+      - name: Alert on failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TG_TOKEN" ] && exit 0
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: this morning's roundup did NOT go out. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"
