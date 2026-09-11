@@ -532,6 +532,17 @@ button.row:active{background:var(--gold-tint)}
 .rp-arrow{color:var(--ink-50)}
 .rp-move{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--ink-60)}
 .rp-move.up{color:var(--gold-ink)}
+/* ---- Value a work ---- */
+.val-form{margin-top:4px}
+.val-form .fld{margin-top:16px}
+.val-form .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);margin-bottom:8px}
+.val-form input[type=text],.val-form input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--divider);border-radius:var(--r-md);background:var(--raised);color:var(--ink);font-size:15px}
+.val-size{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center}
+.val-size .x{color:var(--ink-50);text-align:center}
+.val-size .unit{display:flex;gap:4px}
+.val-head{margin-top:22px}
+.val-range{font-family:var(--font-heading);font-weight:700;font-size:30px;line-height:1.1;color:var(--gold-ink)}
+.val-sub{font-size:13.5px;color:var(--ink-60);margin-top:6px;line-height:1.5}
 .native{font-size:11px;letter-spacing:.06em;color:var(--ink-60);text-align:right;margin-top:3px;white-space:nowrap}
 .foot-note{font-size:12.1px;font-style:italic;color:var(--ink-50);margin-top:16px;line-height:1.5}
 
@@ -1296,6 +1307,7 @@ const ICON = {
   back:   `<path d="M15 18l-6-6 6-6"/>`,
   chev:   '<path d="m9 18 6-6-6-6"/>',
   search: `<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>`,
+  value: `<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>`,
   news:   `<path d="M4 5h11a1 1 0 0 1 1 1v13H5a1 1 0 0 1-1-1z"/><path d="M16 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3"/><path d="M7 9h5M7 12h5M7 15h5"/>`
 };
 
@@ -2182,6 +2194,7 @@ const SAVED_KEY = "artdesk.v1";
 const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || {}; } catch (e) { return {}; } })();
 
 const S = {
+  val: { artist: "", medium: "c", w: "", h: "", unit: "in", year: "" },
   screen: "today",
   artist: "v s gaitonde",
   /* These used to hold ids from the old sample book ("nanda", "sethi"). Nothing
@@ -2326,6 +2339,7 @@ const NAV = [
   { id: "clients",   label: "Clients",  icon: "clients",   badge: () => CRM.live ? `${CRM.clients.length}` : "\u2014" },
   { id: "calendar",  label: "Calendar", icon: "calendar",  badge: () => "Sep–Nov" },
   { id: "knowledge", label: "Knowledge",icon: "knowledge", badge: () => "scripts" },
+  { id: "value",     label: "Value a work", icon: "value", badge: () => "" },
   { id: "ask",       label: "Ask AG Newsroom", icon: "ask", badge: () => "" }
 ];
 /* Six tabs do not fit a 375px bar, so Ask lives in the More hub on a phone and
@@ -2353,14 +2367,14 @@ const tabForScreen = s => {
     }
     return isPad ? "today" : "more";
   }
-  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "more")) return "more";
+  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "value" || s === "more")) return "more";
   return s;
 };
 
 const TITLES = {
   today: "Start my day", artists: "Artists", dossier: "", market: "Market",
   clients: "Clients", client: "", calendar: "Calendar", knowledge: "Knowledge",
-  more: "More", news: "News", article: "", search: "Search"
+  more: "More", news: "News", article: "", search: "Search", value: "Value a work"
 };
 
 /* which screen a back chevron returns to, or null when nothing is pushed */
@@ -2371,7 +2385,7 @@ function backTarget() {
   if (PUSHED.includes(S.screen)) return S.back || (S.screen === "article" ? "news" : "today");
   if (!isSplit && S.screen === "dossier") return "artists";
   if (!isSplit && S.screen === "client") return "clients";
-  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask")) return "more";
+  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask" || S.screen === "value")) return "more";
   return null;
 }
 
@@ -3014,7 +3028,7 @@ function viewDossier(embedded) {
       </div>
 
       <div class="sec">${sectionHead("Look up elsewhere")}
-        <div class="btnrow" style="margin-top:16px">${elsewhere}</div>
+        <div class="btnrow" style="margin-top:16px"><button class="btn btn-primary" data-act="value-for" data-artist="${esc(S.artist)}">${I(ICON.value, 15)} Value a ${esc(a.name.split(" ").pop())}</button>${elsewhere}</div>
         <div class="foot-note">Opens in your own subscription. Their results stay on their site \u2014 this desk holds only what the houses publish.</div>
       </div>
 
@@ -4492,6 +4506,154 @@ function renderSearchResults() {
   guard("sparks", drawSparks);
 }
 
+/* ============================================================
+   VALUE A WORK — comparables from the desk's own record
+
+   The question is "what would a work like this fetch": the answer is the
+   middle half of what comparable works actually fetched, and the sales
+   themselves underneath so anyone can check. Comparable means the same artist,
+   the same market (canvas / paper / sculpture never mix), between half and
+   twice the area, and as recent as the record allows: three years if there
+   are enough, else five, else ten, else everything. Fewer than VAL_MIN
+   comparables and no figure is quoted — the sales are still listed, and the
+   page says which loosening would help. A decade, when given, is preferred
+   but never required: only AstaGuru and the overseas houses print a year.
+
+   The record lives in data/lots.json (every sold lot with a size and a
+   medium, ~500 KB compressed), fetched the first time this screen opens.
+   The form is painted once and results render into #value-results, so the
+   field she is typing in is never redrawn under her.
+   ============================================================ */
+const VAL_MIN = 6;
+let LOTS = null, LOTS_STATE = "idle";
+
+async function ensureLots() {
+  if (LOTS || LOTS_STATE === "loading") return;
+  LOTS_STATE = "loading";
+  try {
+    const r = await fetch("data/lots.json", { cache: "no-cache" });
+    LOTS = r.ok ? await r.json() : [];
+    LOTS_STATE = r.ok ? "ready" : "failed";
+  } catch (e) { LOTS = []; LOTS_STATE = "failed"; }
+  if (S.screen === "value") renderValueResults();
+}
+
+const pct = (xs, p) => xs.length ? xs[Math.min(xs.length - 1, Math.floor((xs.length - 1) * p))] : null;
+
+function comparables(q) {
+  const today = todayIso();
+  const pool = (LOTS || []).filter(l => l.a === q.artist && l.m === q.medium && l.q && l.p);
+  const inBand = l => l.q >= q.sqin / 2 && l.q <= q.sqin * 2;
+  const inDecade = l => l.y && Math.abs(parseInt(l.y, 10) - q.year) <= 10;
+  const tries = [];
+  for (const yrs of [3, 5, 10, 0]) {
+    const since = yrs ? (parseInt(today.slice(0, 4), 10) - yrs) + today.slice(4) : "";
+    if (q.year) tries.push({ yrs, band: true, decade: true, f: l => l.d >= since && inBand(l) && inDecade(l) });
+    tries.push({ yrs, band: true, decade: false, f: l => l.d >= since && inBand(l) });
+  }
+  tries.push({ yrs: 0, band: false, decade: false, f: () => true });
+  for (const t of tries) {
+    const rows = pool.filter(t.f);
+    if (rows.length >= VAL_MIN) return { ...t, rows, pool: pool.length, enough: true };
+  }
+  const rows = pool.filter(l => inBand(l));
+  return { yrs: 0, band: true, decade: false, rows: rows.length ? rows : pool, pool: pool.length, enough: false };
+}
+
+function viewValue() {
+  ensureLots();
+  const v = S.val;
+  const names = Object.values(ARTISTS).map(a => a.name).sort();
+  return `<div class="view-head"><h1>Value a work</h1>
+      <p>What comparable works have sold for, and the sales that say so</p></div>
+    <div class="view-body">
+      <div class="val-form">
+        <div class="fld"><div class="label">Artist</div>
+          <input type="text" data-val="artist" list="val-artists" autocomplete="off" placeholder="Start typing a name" value="${esc(v.artist)}">
+          <datalist id="val-artists">${names.map(n => `<option value="${esc(n)}">`).join("")}</datalist>
+        </div>
+        <div class="fld"><div class="label">Medium</div>
+          <div class="chiprow">${[["c", "Canvas / board"], ["p", "Paper"], ["s", "Sculpture"]].map(([k, l]) =>
+            `<button class="chip" data-act="value-medium" data-m="${k}" aria-pressed="${v.medium === k}">${l}</button>`).join("")}</div>
+        </div>
+        <div class="fld"><div class="label">Size</div>
+          <div class="val-size">
+            <input type="number" inputmode="decimal" data-val="w" placeholder="width" value="${esc(v.w)}">
+            <span class="x">×</span>
+            <input type="number" inputmode="decimal" data-val="h" placeholder="height" value="${esc(v.h)}">
+            <span class="unit">${["in", "cm"].map(u => `<button class="chip" data-act="value-unit" data-u="${u}" aria-pressed="${v.unit === u}">${u}</button>`).join("")}</span>
+          </div>
+        </div>
+        <div class="fld"><div class="label">Year painted <span style="text-transform:none;letter-spacing:0">(optional)</span></div>
+          <input type="number" inputmode="numeric" data-val="year" placeholder="e.g. 1975" value="${esc(v.year)}" style="max-width:160px">
+        </div>
+      </div>
+      <div id="value-results"></div>
+    </div>`;
+}
+
+function valueQuery() {
+  const v = S.val;
+  const name = (v.artist || "").trim().toLowerCase();
+  const hit = Object.values(ARTISTS).find(a => a.name.toLowerCase() === name)
+    || Object.values(ARTISTS).find(a => name.length >= 4 && a.name.toLowerCase().includes(name));
+  const w = parseFloat(v.w), h = parseFloat(v.h);
+  const k = v.unit === "cm" ? 1 / 2.54 : 1;
+  const sqin = (w > 0 && h > 0) ? w * k * h * k : null;
+  const year = parseInt(v.year, 10);
+  return { artist: hit ? hit.key : null, name: hit ? hit.name : null, medium: v.medium,
+           sqin, year: (year >= 1800 && year <= 2100) ? year : null, w, h };
+}
+
+function renderValueResults() {
+  const el = document.getElementById("value-results");
+  if (!el) return;
+  const q = valueQuery();
+  if (!q.artist || !q.medium || !q.sqin) {
+    el.innerHTML = `<div class="empty">${!q.artist && (S.val.artist || "").length >= 3 ? "No artist by that name on the desk." : "Name the artist, pick the medium and give the size."}</div>`;
+    return;
+  }
+  if (LOTS_STATE !== "ready") {
+    el.innerHTML = `<div class="empty">${LOTS_STATE === "failed" ? "The record could not be loaded." : "Reading the record\u2026"}</div>`;
+    return;
+  }
+  const c = comparables(q);
+  const prices = c.rows.map(l => l.p).sort((a, b) => a - b);
+  const psi = c.rows.filter(l => l.q).map(l => l.p / l.q).sort((a, b) => a - b);
+  const sized = c.band && psi.length ? Math.round(pct(psi, 0.5) * q.sqin) : null;
+  const window = c.yrs ? `since ${parseInt(todayIso().slice(0, 4), 10) - c.yrs}` : "across the whole record";
+  const what = q.medium === "s" ? `${q.name} in sculpture` : `${q.name} on ${q.medium === "c" ? "canvas or board" : "paper"}`;
+  const sizeTxt = c.band ? `between ${Math.round(q.sqin / 2)} and ${Math.round(q.sqin * 2)} sq in (yours is ${Math.round(q.sqin)})` : "of any size";
+  const decTxt = c.decade ? `, painted within ten years of ${q.year}` : "";
+
+  const head = c.enough ? `
+    <div class="val-head">
+      <div class="val-range tnum">${inrShort(pct(prices, 0.25))} \u2013 ${inrShort(pct(prices, 0.75))}</div>
+      <div class="val-sub">The middle half of <b>${c.rows.length} sales</b> of ${esc(what)}, ${sizeTxt}${decTxt}, ${window}. Median <b class="tnum">${inrShort(pct(prices, 0.5))}</b>; the lowest ${inrShort(prices[0])}, the highest ${inrShort(prices[prices.length - 1])}.${sized ? ` Scaled to your size by the median price per square inch: <b class="tnum">${inrShort(sized)}</b>.` : ""}</div>
+      <div class="foot-note">A range from what comparable works fetched, premium included, as the houses published it. It holds artist, medium and size constant — not quality, condition, provenance or period. A significant work sits above this band and a weak one below it; the sales underneath are the evidence, and the picture of each is a tap away.</div>
+    </div>` : `
+    <div class="val-head">
+      <div class="val-range" style="font-size:22px;color:var(--ink)">Not enough comparable sales to quote a range</div>
+      <div class="val-sub">${c.rows.length} ${c.rows.length === 1 ? "sale" : "sales"} of ${esc(what)} ${sizeTxt} on the record; ${VAL_MIN} are needed. ${c.pool > c.rows.length ? `There are ${c.pool} in this medium at other sizes.` : "There are no others in this medium."} The desk does not guess.</div>
+    </div>`;
+
+  const rows = c.rows.slice().sort((a, b) => (b.d > a.d ? 1 : -1)).map(l => {
+    const v = l.e ? (l.p > l.e[1] ? "above" : l.p < l.e[0] ? "below" : null) : null;
+    return `<a class="rec ${l.i ? "has-pic" : ""}" href="${safeUrl(l.u) || "#"}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">
+      ${workThumb(l.i, l.t || "", "t-rec")}
+      <div class="rec-body">
+        <div class="rec-top">${houseTag(l.h)}<span class="row-meta tnum">${esc(fmtDate(l.d))}</span></div>
+        <div class="rec-work">${esc(l.t || "Untitled")}</div>
+        <div class="rec-med">${esc([l.s, l.y ? "painted " + l.y : null].filter(Boolean).join(" \u00b7 "))}</div>
+        <div class="rec-foot">
+          <div class="rec-est tnum">${l.e ? "Est. " + esc(inrShort(l.e[0]) + "\u2013" + inrShort(l.e[1])) : "Estimate not published"}${v ? ` \u00b7 ${v} estimate` : ""}</div>
+          <div class="rec-price tnum ${v === "above" ? "up" : ""}">${esc(inrShort(l.p))}</div>
+        </div>
+      </div></a>`;
+  }).join("");
+  el.innerHTML = head + `<div class="sec">${sectionHead("The sales", c.rows.length + " of " + c.pool + " in this medium")}<div class="rows">${rows}</div></div>`;
+}
+
 function viewSearch() {
   return `<div class="view-head"><h1>Search</h1>
       <p>Everything the desk holds, at once</p></div>
@@ -4518,7 +4680,8 @@ function viewMore() {
     { act: "open-search", icon: "search", t: "Search the desk", s: "Artists, headlines, results, sales, the book and your diary" },
     { nav: "news", icon: "news", t: "News", s: "Ranked for you, everything pulled, and what you saved" },
     { nav: "calendar", icon: "calendar", t: "Calendar", s: "Sales, previews and fairs · Sep–Nov" },
-    { nav: "knowledge", icon: "knowledge", t: "Knowledge", s: "Objection scripts and the pitch generator" }
+    { nav: "knowledge", icon: "knowledge", t: "Knowledge", s: "Objection scripts and the pitch generator" },
+    { nav: "value", icon: "value", t: "Value a work", s: "What comparable works have sold for, with the sales that say so" }
   ];
   return `<div class="view-head"><h1>More</h1></div>
     <div class="view-body">
@@ -4590,6 +4753,7 @@ function view() {
     case "calendar": return viewCalendar();
     case "knowledge": return viewKnowledge();
     case "ask": return viewAsk();
+    case "value": return viewValue();
     default: return viewMore();
   }
 }
@@ -4654,6 +4818,7 @@ function render(keepScroll) {
   // never by it. Anything that changes what search would match \u2014 the book
   // loading, a news refresh \u2014 lands here without touching the input.
   if (S.screen === "search") guard("search", renderSearchResults);
+  if (S.screen === "value") guard("value", renderValueResults);
   guard("rail", renderRail);
   guard("topbar", renderTopbar);
   guard("tabbar", renderTabbar);
@@ -5090,6 +5255,13 @@ document.addEventListener("click", e => {
     return focusSearch();
   }
   if (act === "clear-search") { S.query = ""; renderSearchResults(); return focusSearch(); }
+  if (act === "value-medium") { S.val.medium = attr("data-m"); render(true); return renderValueResults(); }
+  if (act === "value-unit") { S.val.unit = attr("data-u"); render(true); return renderValueResults(); }
+  if (act === "value-for") {
+    const a = ARTISTS[attr("data-artist")];
+    S.val = { ...S.val, artist: a ? a.name : "" };
+    return go("value", { back: S.screen });
+  }
   if (act === "toggle-bio") { S.bioOpen = !S.bioOpen; return render(true); }
   if (act === "pitch-for") {
     const cid = attr("data-client");
@@ -5157,6 +5329,8 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => {
   const q = e.target.closest("[data-q]");
   if (q) { S.query = q.value; renderSearchResults(); return; }   // never redraws the field
+  const vf = e.target.closest("[data-val]");
+  if (vf) { S.val = { ...S.val, [vf.getAttribute("data-val")]: vf.value }; renderValueResults(); return; }
   const nc = e.target.closest("[data-nc]");
   if (nc) { S.newClient = { ...S.newClient, [nc.getAttribute("data-nc")]: nc.value }; return; }
   const ed = e.target.closest("[data-ed]");

@@ -112,7 +112,7 @@ jobs:
           # embedding all of them would double the page for no one.
           cd ingest
           python3 build_desk.py
-          python3 export_app.py --artists 300
+          python3 export_app.py --artists 300 --lots ../data/lots.json
           python3 export_app.py --out ../data/app_embed.json
           python3 embed_app.py --data ../data/app_embed.json
 
@@ -120,7 +120,7 @@ jobs:
         run: |
           git config user.name  "art-desk-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/app_data.json data/saffronart_sales.json data/news.json index.html calendar.ics
+          git add data/app_data.json data/lots.json data/saffronart_sales.json data/news.json index.html calendar.ics
           if git diff --staged --quiet; then
             echo "nothing changed"
           else

@@ -97,6 +97,8 @@ def main():
     ap.add_argument("--artists", type=int, default=40)
     ap.add_argument("--records", type=int, default=24)
     ap.add_argument("--out", default=str(ROOT / "data" / "app_data.json"))
+    ap.add_argument("--lots", default=None,
+                    help="also write the comparables record (every sold lot with a size and a medium) here")
     args = ap.parse_args()
 
     desk = json.loads((ROOT / "data" / "desk.json").read_text())
@@ -234,6 +236,42 @@ def main():
           f"{len(events)} forthcoming events, "
           f"{len(news.get('on_market', []))} headlines -> {args.out}")
     print(f"{len(blob) / 1024:.0f} KB")
+
+    if args.lots:
+        write_lots(args.lots)
+
+
+def write_lots(path):
+    """The record behind 'Value a work': one short row per sold lot that has a
+    size and a medium, for every artist. Field names are one letter because
+    there are twelve thousand rows and this is fetched on an iPad:
+    a artist key, d date, h house, m medium class (c/p/s), q square inches,
+    p price (INR, premium included), e [est low, est high], y year painted,
+    t title, s size as printed, u lot url, i image."""
+    from build_desk import sq_inches, medium_class
+    con = connect()
+    rows = []
+    for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr,
+                                   est_low_inr, est_high_inr, year, title, url, image_url
+                            FROM lot WHERE sold=1 AND price_inr IS NOT NULL
+                              AND artist_key IS NOT NULL AND sale_date IS NOT NULL"""):
+        q, m = sq_inches(r["size"]), medium_class(r["medium"])
+        if not q or not m:
+            continue
+        row = {"a": r["artist_key"], "d": r["sale_date"], "h": r["house"], "m": m[0],
+               "q": int(q), "p": r["price_inr"]}
+        if r["est_low_inr"] and r["est_high_inr"]:
+            row["e"] = [r["est_low_inr"], r["est_high_inr"]]
+        for k, v in (("y", r["year"]), ("t", (r["title"] or "")[:80]), ("s", r["size"]),
+                     ("u", r["url"]), ("i", r["image_url"])):
+            if v:
+                row[k] = v
+        rows.append(row)
+    con.close()
+    blob = json.dumps(rows, ensure_ascii=False, separators=(",", ":"))
+    with open(path, "w") as f:
+        f.write(blob)
+    print(f"{len(rows)} comparable lots -> {path} ({len(blob) / 1024:.0f} KB)")
 
 
 if __name__ == "__main__":
