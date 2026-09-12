@@ -19,6 +19,8 @@ secrets.json
 .env.*
 credentials*
 *token*
+# Narrow exception: a vendored Apple HIG reference page, not a credential.
+!.claude/skills/apple-design-skill/references/hig/token-fields.md
 *.key
 *.pem
 
