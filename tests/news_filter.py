@@ -18,6 +18,9 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "ingest"
 from news import is_hers
 
 REJECT = [
+    ("Economic Times",    "She quit her engineering job at Infosys to pursue poetry. Later, she "
+                          "made history as India's first spoken-word artist to headline a "
+                          "sold-out stadium show. Who is Nayab Midha?"),
     ("theutahreview.com", "Nitya Nritya set to celebrate 10th anniversary with an extensive "
                           "weekend of Indian classical and contemporary dance and music at "
                           "Mid-Valley Performing Arts Center, Kingsbury Hall"),
@@ -54,6 +57,10 @@ TOLERATED = [
 ]
 
 KEEP = [
+    ("The Hindu",         "The poetry of Gaitonde's canvases: a new show of the Indian "
+                          "modernist's paintings opens in Mumbai"),
+    ("Mint",              "Rabindranath Tagore, poet and painter: 12 works by the Indian "
+                          "master at Sotheby's"),
     # real, from the same day
     ("CNBC TV18",       "Mahatma Gandhi's handwritten manuscript sets world record at "
                         "\u00a31.34 million Saffronart auction"),

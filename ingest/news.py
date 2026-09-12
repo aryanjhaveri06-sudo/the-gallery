@@ -374,6 +374,11 @@ NOT_HER_ART = [
     "pooja room", "interior design", "showroom", "franchise", "franchisee",
     "retailer", "tattoo", "martial arts", "culinary", "rangoli",
     "handicraft", "handicrafts", "home decor",
+    # Performance, not pictures. "spoken-word artist" reached the desk on the
+    # word "artist"; "poet" and "poetry" stay OFF this list — critics write
+    # "the poetry of Gaitonde's canvases" and Tagore is a poet-painter.
+    "spoken word", "spoken-word", "slam poetry", "open mic", "stadium show",
+    "rapper", "hip-hop", "hip hop", "concert", "comedian", "playwright",
 ]
 
 # ...and it has to be about art at all. Word-boundary matched, so "art" does not

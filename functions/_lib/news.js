@@ -78,6 +78,11 @@ const NOT_HER_ART = [
   "pooja room", "interior design", "showroom", "franchise", "franchisee",
   "retailer", "tattoo", "martial arts", "culinary", "rangoli",
   "handicraft", "handicrafts", "home decor",
+  // Performance, not pictures. "spoken-word artist" reached the desk on the
+  // word "artist"; "poet" and "poetry" stay OFF this list — critics write
+  // "the poetry of Gaitonde's canvases" and Tagore is a poet-painter.
+  "spoken word", "spoken-word", "slam poetry", "open mic", "stadium show",
+  "rapper", "hip-hop", "hip hop", "concert", "comedian", "playwright",
 ];
 
 const ART_TERMS = [
@@ -197,7 +202,7 @@ const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 // and the endpoint reported cached=true while looking simply broken.
 // Bumped when the filter changed: the edge holds a payload for 15 minutes and
 // would keep serving the unfiltered set while reporting cached=true.
-const CACHE_KEY = "https://gallery.internal/news-v5-no-bond-auctions";
+const CACHE_KEY = "https://gallery.internal/news-v6-no-spoken-word";
 const TTL_SECONDS = 900;   // 15 minutes at the edge
 
 export async function liveNews(ctx) {
