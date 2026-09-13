@@ -30,9 +30,9 @@ jobs:
     timeout-minutes: 90
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
       # No pip install step on purpose: the ingesters are stdlib-only, so there
@@ -43,7 +43,7 @@ jobs:
       # commit would add roughly 4 GB of git history a year.
       - name: Restore database
         id: db
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: data/artdesk.db
           key: artdesk-db-${{ github.run_id }}
@@ -156,12 +156,15 @@ jobs:
             echo "  gh secret set CLOUDFLARE_API_TOKEN -R $GITHUB_REPOSITORY"
             exit 1
           fi
-          npx --yes wrangler@3 pages deploy . \
+          # The security headers name the page's script by hash, so they are
+          # written from the exact index.html about to ship — never committed.
+          (cd ingest && python3 csp_headers.py && python3 csp_headers.py --check)
+          npx --yes wrangler@3.114.17 pages deploy . \
             --project-name the-gallery --commit-dirty=true
 
       - name: Save database
         if: always()
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: data/artdesk.db
           key: artdesk-db-${{ github.run_id }}

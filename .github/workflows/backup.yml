@@ -1,0 +1,50 @@
+name: Back up the client book
+
+# A copy of the client book (D1) every night, encrypted before it leaves
+# Cloudflare's account, kept 90 days as a private run artifact. The passphrase
+# is BACKUP_PASSPHRASE (a GitHub secret nobody but the owner holds); without
+# it the copy cannot be read, which is the point of storing it at all.
+#
+# Restore:  openssl enc -d -aes-256-cbc -pbkdf2 -in book.sql.enc -out book.sql
+#           -pass pass:'<passphrase>'   then   wrangler d1 execute gallery-crm
+#           --remote --file=book.sql   (D1 also keeps 30 days of point-in-time
+#           history on its own — Time Travel — which is the first thing to try.)
+on:
+  schedule:
+    - cron: "0 21 * * *"      # 02:30 IST, after the refresh has started (different group; harmless)
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Export and encrypt
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::error::BACKUP_PASSPHRASE is not set — no backup was taken. Set it with: openssl rand -base64 32 | gh secret set BACKUP_PASSPHRASE (and keep the value somewhere safe)."
+            exit 1
+          fi
+          npx --yes wrangler@3.114.17 d1 export gallery-crm --remote --output=book.sql
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in book.sql -out book.sql.enc -pass env:BACKUP_PASSPHRASE
+          rm -f book.sql
+          ls -la book.sql.enc
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: client-book-${{ github.run_id }}
+          path: book.sql.enc
+          retention-days: 90
+      - name: Alert on failure
+        if: failure()
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TG_TOKEN" ] && exit 0
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: last night's client-book backup FAILED. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"

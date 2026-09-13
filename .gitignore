@@ -60,3 +60,4 @@ __pycache__/
 .venv/
 venv/
 data/app_embed.json
+_headers

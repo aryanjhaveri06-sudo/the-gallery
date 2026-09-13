@@ -2288,7 +2288,10 @@ const S = {
   askBusy: false,
   askError: null,
   askInput: "",
-  askBook: saved.askBook !== false,   // send the client book with the question
+  // Off unless she switches it on: the book names thirty collectors and the
+  // model on the other end is a third party. A question about the market
+  // does not need it; a question about her clients can have it for a session.
+  askBook: saved.askBook === true,
   openObjection: 0,
   newClient: {},
   newClientError: null,

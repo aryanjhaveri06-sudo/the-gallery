@@ -15,6 +15,7 @@ import { parseIcs } from "../_lib/ics.js";
 import { liveNews } from "../_lib/news.js";
 import { chat, aiConfigured, unsupportedFigures, AiError } from "../_lib/ai.js";
 import { buildFacts, bookFacts, ASK_SYSTEM } from "../_lib/ask.js";
+import { readJson, clean, isLocked, noteFailure, BadRequest } from "../_lib/guard.js";
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -298,8 +299,17 @@ export async function onRequest(context) {
     return json({ watches: results });
   }
 
+  // Ten wrong keys in fifteen minutes and the address waits an hour. The
+  // check happens before the key is even looked at, so a locked address
+  // cannot keep guessing. A wrong key is noted; a right one is not.
+  if (await isLocked(request, env)) {
+    return json({ error: "Too many wrong keys from this address. Try again in an hour." }, 429);
+  }
   const who = await authenticate(request, env);
-  if (!who) return unauthorised();
+  if (!who) {
+    if (request.headers.get("Authorization")) context.waitUntil(noteFailure(context, env));
+    return unauthorised();
+  }
 
   try {
     /* --- read ------------------------------------------------------------ */
@@ -313,7 +323,7 @@ export async function onRequest(context) {
     }
 
     if (method === "POST" && path === "/ai/ask") {
-      const b = await request.json().catch(() => ({}));
+      const b = await readJson(request);
       const question = String(b.question || "").trim().slice(0, 1000);
       if (!question) return json({ error: "Ask something first." }, 400);
 
@@ -429,7 +439,7 @@ export async function onRequest(context) {
     }
 
     if (method === "POST" && path === "/ai/pitch") {
-      const b = await request.json().catch(() => ({}));
+      const b = await readJson(request);
       if (!b.client_id) return json({ error: "A pitch needs a collector." }, 400);
 
       const client = await getClient(env, b.client_id);
@@ -500,7 +510,7 @@ export async function onRequest(context) {
 
     /* --- write ----------------------------------------------------------- */
     if (method === "POST" && path === "/clients") {
-      const b = await request.json();
+      const b = clean("client", await readJson(request));
       if (!b.name) return json({ error: "A client needs a name." }, 400);
       const cid = b.id || id();
       await env.DB.prepare(
@@ -517,7 +527,8 @@ export async function onRequest(context) {
 
     if (method === "PATCH" && path.startsWith("/clients/")) {
       const cid = path.slice("/clients/".length);
-      const b = await request.json();
+      const b = clean("client", await readJson(request));
+      if ("name" in b && !b.name) return json({ error: "A client needs a name." }, 400);
       const allowed = ["name", "title", "city", "tier", "since", "lifetime_inr",
                        "focus", "brief", "next_when", "next_what"];
       const sets = [], vals = [];
@@ -531,7 +542,7 @@ export async function onRequest(context) {
     }
 
     if (method === "POST" && path === "/log") {
-      const b = await request.json();
+      const b = clean("log", await readJson(request));
       if (!b.client_id) return json({ error: "A note needs a client." }, 400);
       const lid = id();
       await env.DB.prepare(
@@ -550,9 +561,10 @@ export async function onRequest(context) {
 
     if (method === "PUT" && path.match(/^\/watches\/[^/]+$/)) {
       const key = decodeURIComponent(path.split("/")[2]);
-      const b = await request.json();
+      if (!/^[a-z0-9 .'-]{1,120}$/.test(key)) return json({ error: "Not an artist key." }, 400);
+      const b = clean("watch", await readJson(request));
       if (!b.artist_name) return json({ error: "A watch needs the artist's name." }, 400);
-      const min = Number.isFinite(+b.min_inr) && +b.min_inr > 0 ? Math.round(+b.min_inr) : null;
+      const min = b.min_inr || null;
       const t = now();
       await env.DB.prepare(`
         INSERT INTO watch (artist_key, artist_name, upcoming, results, min_inr, note, created_at, updated_at)
@@ -574,7 +586,7 @@ export async function onRequest(context) {
     }
 
     if (method === "POST" && path === "/followups") {
-      const b = await request.json();
+      const b = clean("followup", await readJson(request));
       if (!b.client_id || !b.due) return json({ error: "A follow-up needs a client and a date." }, 400);
       const fid = id();
       await env.DB.prepare(
@@ -586,7 +598,7 @@ export async function onRequest(context) {
 
     if (method === "POST" && path.match(/^\/followups\/[^/]+\/done$/)) {
       const fid = path.split("/")[2];
-      const b = await request.json().catch(() => ({}));
+      const b = await readJson(request);
       const done = b.done === false ? 0 : 1;
       await env.DB.prepare("UPDATE followup SET done = ?, done_at = ? WHERE id = ?")
         .bind(done, done ? now() : null, fid).run();
@@ -595,7 +607,7 @@ export async function onRequest(context) {
     }
 
     if (method === "POST" && path === "/holdings") {
-      const b = await request.json();
+      const b = clean("holding", await readJson(request));
       if (!b.client_id || !b.artist_name) return json({ error: "A holding needs a client and an artist." }, 400);
       const hid = id();
       await env.DB.prepare(
@@ -625,20 +637,19 @@ export async function onRequest(context) {
         return json({ ok: true, deleted: rowId });
       }
 
-      const b = await request.json().catch(() => null);
-      if (!b || typeof b !== "object") return json({ error: "Expected a JSON body." }, 400);
+      const b = await readJson(request);
 
       // Refuse to blank a NOT NULL column rather than letting SQLite throw.
       for (const [field, message] of Object.entries(spec.required)) {
         if (field in b && !String(b[field] ?? "").trim()) return json({ error: message }, 400);
       }
 
+      const shaped = clean(spec.table, b);
       const sets = [], vals = [];
       for (const k of spec.editable) {
         if (!(k in b)) continue;                      // absent means "leave alone"
         sets.push(`${k} = ?`);
-        vals.push(spec.numeric.includes(k) ? numOrNull(b[k])
-                : (b[k] === "" ? null : b[k]));       // blank means cleared
+        vals.push(k in shaped ? shaped[k] : (b[k] === "" ? null : b[k]));  // blank means cleared
       }
       // done and done_at move together, so the timestamp can never disagree
       // with the flag. POST /followups/:id/done stays as the one-tap route.
@@ -658,6 +669,7 @@ export async function onRequest(context) {
 
     return json({ error: `No route for ${method} /api${path}` }, 404);
   } catch (err) {
+    if (err instanceof BadRequest) return json({ error: err.message }, 400);
     // Never echo an exception to the client — it can carry schema detail.
     console.error("api error", path, err && err.message);
     return json({ error: "Something went wrong handling that." }, 500);

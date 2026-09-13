@@ -20,7 +20,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       # A run is pinned to the commit that created it. On 2026-08-26 a dispatched
       # run sat queued for hours while newer commits shipped; had it then started,
@@ -53,5 +53,8 @@ jobs:
             echo "Until then the private site only updates via a manual deploy."
             exit 1
           fi
-          npx --yes wrangler@3 pages deploy . \
+          # The security headers name the page's script by hash, so they are
+          # written from the exact index.html about to ship — never committed.
+          (cd ingest && python3 csp_headers.py && python3 csp_headers.py --check)
+          npx --yes wrangler@3.114.17 pages deploy . \
             --project-name the-gallery --commit-dirty=true
