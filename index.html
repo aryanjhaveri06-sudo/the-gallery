@@ -391,7 +391,7 @@ button.row:active{background:var(--gold-tint)}
    article now. A button does not fill its parent the way a block anchor does. */
 .hero-link{display:block;width:100%;color:inherit;text-decoration:none}
 .hero-media{position:relative;border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
-.hero-media img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.hero-media img{width:100%;aspect-ratio:16/9;object-fit:cover;object-position:50% 25%;display:block}
 .rank{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:var(--r-sm);
   background:var(--gold);color:#fff;font-family:var(--font-heading);font-weight:600;
   font-size:13.1px;display:flex;align-items:center;justify-content:center}
@@ -416,8 +416,8 @@ button.row:active{background:var(--gold-tint)}
 .scrow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
 .sc{display:block;width:100%;color:inherit;text-decoration:none}
 .sc-media{position:relative;border-radius:var(--r-sm);overflow:hidden;background:var(--surface);
-  aspect-ratio:4/3}
-.sc-media img{width:100%;height:100%;object-fit:cover;display:block}
+  aspect-ratio:16/9}
+.sc-media img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;display:block}
 .sc-media .rank{width:20px;height:20px;font-size:11.6px;top:8px;left:8px}
 .sc-media .hero-tag{font-size:8px;padding:3px 6px;top:8px;right:8px}
 .sc-meta{display:flex;align-items:center;gap:8px}
@@ -1309,10 +1309,12 @@ a.auc:hover .auc-name{color:var(--gold-ink)}
   .topblock > .hero{min-width:0;padding-top:0}
   .topblock > .scrow{grid-template-columns:1fr;gap:22px;margin-top:0;min-width:0}
   .topblock .hero-media img{aspect-ratio:16/9}
-  /* A fixed height rather than a ratio: the side column has to come out level
-     with the hero, and two ratio-driven cards in a 550px column always ran
-     taller. object-fit still keeps the picture uncropped in the frame. */
-  .topblock .sc-media{aspect-ratio:auto;height:196px}
+  /* The side cards go horizontal: the picture at a fixed 16:9 size on the
+     left, the words on the right. Two stacked 16:9 pictures in the side
+     column always outran the hero; a fixed-height cover crop cut the sides
+     off every photo. This keeps the whole picture and comes out level. */
+  .topblock .sc{display:grid;grid-template-columns:232px 1fr;gap:14px;align-items:start}
+  .topblock .sc-media{width:232px;aspect-ratio:16/9;height:auto}
   .topblock .sc-media img{height:100%}
   .topblock .hero-head{font-size:23px}
 }
