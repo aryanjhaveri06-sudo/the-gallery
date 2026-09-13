@@ -1,0 +1,38 @@
+name: Mirror Saffronart pictures
+
+# Small copies of the Saffronart pictures the desk shows (ingest/mirror.py):
+# 800 a run, one every 1.5 s, into data/img, committed. Weekly, and clear of
+# the nightly refresh and the Saturday repeats job.
+on:
+  schedule:
+    - cron: "30 6 * * 0"      # Sunday 12:00 IST
+  workflow_dispatch:
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install --quiet Pillow
+      - name: Copy and shrink
+        run: cd ingest && python3 mirror.py --limit 800 --budget-minutes 150
+      - name: Commit the copies
+        run: |
+          git config user.name  "art-desk-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/img data/mirror.json
+          if git diff --staged --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "Mirror Saffronart pictures ($(date -u +%Y-%m-%d))"
+          git pull --rebase --autostash -q || true
+          git push || { git pull --rebase --autostash -q && git push; }

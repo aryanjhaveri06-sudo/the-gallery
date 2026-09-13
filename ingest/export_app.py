@@ -33,6 +33,19 @@ def _q(n, divisor, places):
 from common import ROOT, connect
 
 
+# Saffronart pictures the desk has made small copies of (ingest/mirror.py).
+# Absolute, so the same bundle works on both sites and passes safeUrl().
+try:
+    with open(ROOT / "data" / "mirror.json") as _f:
+        MIRROR = {k: "https://the-gallery-ct1.pages.dev/" + v for k, v in json.load(_f).items()}
+except (OSError, ValueError):
+    MIRROR = {}
+
+
+def pic(u):
+    return MIRROR.get(u, u) if u else u
+
+
 def native(cur, n):
     """The figure as the house printed it — "USD 2,349,000" — for an overseas
     sale. The rupee price beside it is a sale-date conversion, and the trade
@@ -148,14 +161,14 @@ def main():
                 "est": band(u["est_low"], u["est_high"]),
                 "native": (f"{u['currency']} {u['est_low_native']:,}\u2013{u['est_high_native']:,}"
                            if u.get("currency") and u["currency"] != "INR" and u.get("est_low_native") and u.get("est_high_native") else None),
-                "url": u["url"], "image": u["image"], "new": u["first_seen"],
+                "url": u["url"], "image": pic(u["image"]), "new": u["first_seen"],
             } for u in a.get("upcoming", [])][:30],
             # Where the work has been shown, as the catalogues printed it.
             "exhibitions": [{"text": e["text"], "year": e["year"], "venue": e["venue"], "lots": e["lots"]}
                             for e in a.get("exhibitions", [])][:30],
             "repeats": [{
                 "title": c["title"], "medium": c["medium"], "size": c["size"],
-                "image": c["image"], "multiple": c["multiple"], "years": c["years"],
+                "image": pic(c["image"]), "multiple": c["multiple"], "years": c["years"],
                 "annualised": c["annualised_pct"],
                 "sales": [{"date": x["date"], "house": x["house"], "price": inr(x["price"]),
                            "sold": x["sold"], "url": x["url"]} for x in c["sales"]],
@@ -181,7 +194,7 @@ def main():
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
                 "url": r["url"],
-                "image": r.get("image"),
+                "image": pic(r.get("image")),
             } for r in recs],
         }
 
@@ -207,7 +220,7 @@ def main():
         "native": native(f.get("currency"), f.get("price_native")),
         "est": band(f["est_low"], f["est_high"]), "above": f["above_high"],
         "vs_est": vs_estimate(f["price"], f["est_low"], f["est_high"]),
-        "image": f.get("image"), "medium": f.get("medium"), "size": f.get("size"),
+        "image": pic(f.get("image")), "medium": f.get("medium"), "size": f.get("size"),
         "url": f.get("url"),
     } for f in desk["feed"][:40]]
 
@@ -306,7 +319,7 @@ def write_lots(path):
         if r["est_low_inr"] and r["est_high_inr"]:
             row["e"] = [r["est_low_inr"], r["est_high_inr"]]
         for k, v in (("y", r["year"]), ("t", (r["title"] or "")[:80]), ("s", r["size"]),
-                     ("u", r["url"]), ("i", r["image_url"]), ("v", (r["provenance"] or "")[:300])):
+                     ("u", r["url"]), ("i", pic(r["image_url"])), ("v", (r["provenance"] or "")[:300])):
             if v:
                 row[k] = v
         rows.append(row)
