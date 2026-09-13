@@ -17,6 +17,20 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+      # GitHub occasionally marks a run "in progress" and never starts it
+      # (2026-08-26, 2026-09-13); anything queued behind it in the same lane
+      # waits for ever. No job here is allowed more than five hours, so a run
+      # older than six is wedged: cancel it and let the queue move.
+      - name: Free any wedged run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list -R "$GITHUB_REPOSITORY" --status in_progress --json databaseId,createdAt,name \
+            -q '.[] | select((now - (.createdAt | fromdateiso8601)) > 21600) | "\(.databaseId) \(.name)"' \
+          | while read -r id name; do
+              [ -n "$id" ] && echo "cancelling wedged run $id ($name)" && gh run cancel "$id" -R "$GITHUB_REPOSITORY" || true
+            done
+
       - name: Age of the live data
         id: age
         run: |
