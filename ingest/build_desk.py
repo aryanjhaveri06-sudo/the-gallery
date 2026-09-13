@@ -66,7 +66,7 @@ def _q(n, divisor, places):
     return str(v.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP))
 
 
-from common import ROOT, connect, get
+from common import ROOT, connect, get, tidy_display
 
 MIN_YEAR_LOTS = 4        # a year needs this many comparable lots to anchor an index point
 TRACKED_MIN_LOTS = 12    # an artist needs this many sold lots to get a dossier
@@ -404,7 +404,7 @@ def main():
     for r in lots:
         by_artist[r["artist_key"]].append(r)
 
-    names = {r["key"]: r["display"] for r in con.execute("SELECT key, display FROM artist")}
+    names = {r["key"]: tidy_display(r["display"], r["key"]) for r in con.execute("SELECT key, display FROM artist")}
 
     repeats = repeat_chains(con, lots)
     upcoming = upcoming_by_artist(con)

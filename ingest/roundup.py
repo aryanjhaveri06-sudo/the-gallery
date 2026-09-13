@@ -152,6 +152,16 @@ def fmt_day(iso):
     return datetime.fromisoformat(iso).strftime("%a %-d %b")
 
 
+def span(a, b):
+    """'Wed 16 Sep' for a day; '10–11 Sep' across days; '30 Sep–1 Oct' across months."""
+    if not b or b == a:
+        return fmt_day(a)
+    da, db = datetime.fromisoformat(a), datetime.fromisoformat(b)
+    if da.month == db.month:
+        return f"{da.day}\u2013{db.day} {da.strftime('%b')}"
+    return f"{da.strftime('%-d %b')}\u2013{db.strftime('%-d %b')}"
+
+
 def build(market, wider, events, today, days, rank):
     since = (today - timedelta(days=days)).isoformat()
     fresh = [it for it in market if (it.get("date") or "") >= since]
@@ -179,7 +189,7 @@ def build(market, wider, events, today, days, rank):
     if this_week:
         rows = []
         for e in this_week:
-            when = fmt_day(e["starts"]) + (f"–{fmt_day(e['ends'])}" if e.get("ends") and e["ends"] != e["starts"] else "")
+            when = span(e["starts"], e.get("ends"))
             title = esc(e.get("title") or "")
             if e.get("url"):
                 title = f"<a href=\"{esc(e['url'])}\">{title}</a>"

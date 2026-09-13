@@ -30,7 +30,7 @@ def _q(n, divisor, places):
     return str(v.quantize(Decimal(1).scaleb(-places), rounding=ROUND_HALF_UP))
 
 
-from common import ROOT, connect
+from common import ROOT, connect, tidy_display
 
 
 # Saffronart pictures the desk has made small copies of (ingest/mirror.py).
@@ -300,7 +300,7 @@ def write_lots(path):
     from build_desk import sq_inches, medium_class
     con = connect()
     rows = []
-    names = {r["key"]: r["display"] for r in con.execute("SELECT key, display FROM artist")}
+    names = {r["key"]: tidy_display(r["display"], r["key"]) for r in con.execute("SELECT key, display FROM artist")}
     for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr, hammer_inr,
                                    est_low_inr, est_high_inr, year, title, url, image_url, provenance
                             FROM lot WHERE sold=1 AND price_inr IS NOT NULL

@@ -352,6 +352,18 @@ def year_from(text):
     return str((2000 if yy <= date.today().year % 100 else 1900) + yy)
 
 
+def tidy_display(display, key):
+    """The trade writes "F N Souza"; Christie's writes "F. N. Souza". When a
+    display name is the initials form of its own key, drop the dots so one
+    artist does not appear under two spellings depending on which house sold
+    last. Full names ("Francis Newton Souza") are left alone."""
+    if not display or "." not in display:
+        return display
+    if normalise_artist(display)[0] == key:
+        return _SPACE.sub(" ", display.replace(".", " ")).strip()
+    return display
+
+
 def upsert_artist(con, key, display, house, house_id=None):
     if not key:
         return
@@ -365,7 +377,7 @@ def upsert_artist(con, key, display, house, house_id=None):
         # the full name in must not drag the display name along with it.
         def _n(x):
             return _SPACE.sub(" ", _PUNCT.sub("", x.lower())).strip()
-        cur, incoming = row["display"], display
+        cur, incoming = tidy_display(row["display"], key), tidy_display(display, key)
         if _n(cur) == key and _n(incoming) != key:
             best = cur
         elif _n(incoming) == key and _n(cur) != key:
@@ -376,4 +388,4 @@ def upsert_artist(con, key, display, house, house_id=None):
                     (best, json.dumps(ids), key))
     else:
         con.execute("INSERT INTO artist (key, display, house_ids) VALUES (?,?,?)",
-                    (key, display, json.dumps(ids)))
+                    (key, tidy_display(display, key), json.dumps(ids)))
