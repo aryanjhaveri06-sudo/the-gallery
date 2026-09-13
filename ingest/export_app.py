@@ -301,7 +301,12 @@ def write_lots(path):
     con = connect()
     rows = []
     names = {r["key"]: tidy_display(r["display"], r["key"]) for r in con.execute("SELECT key, display FROM artist")}
-    for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr, hammer_inr,
+    # The same physical work sold more than once (repeats.py): `c` names the
+    # chain so the grid shows one tile per painting, not one per sale.
+    chain = {}
+    if con.execute("SELECT name FROM sqlite_master WHERE name='repeat'").fetchone():
+        chain = {r["lot_id"]: r["chain_id"] for r in con.execute("SELECT lot_id, chain_id FROM repeat")}
+    for r in con.execute("""SELECT id, artist_key, sale_date, house, medium, size, price_inr, hammer_inr,
                                    est_low_inr, est_high_inr, year, title, url, image_url, provenance
                             FROM lot WHERE sold=1 AND price_inr IS NOT NULL
                               AND artist_key IS NOT NULL AND sale_date IS NOT NULL"""):
@@ -310,6 +315,8 @@ def write_lots(path):
             continue
         row = {"a": r["artist_key"], "n": names.get(r["artist_key"], r["artist_key"]),
                "d": r["sale_date"], "h": r["house"], "p": r["price_inr"]}
+        if r["id"] in chain:
+            row["c"] = chain[r["id"]]
         if m:
             row["m"] = m[0]
         if q:

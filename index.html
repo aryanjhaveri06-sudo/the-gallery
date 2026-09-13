@@ -2255,7 +2255,7 @@ const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) 
 
 const S = {
   val: { artist: "", medium: "c", w: "", h: "", unit: "in", year: "" },
-  works: { q: "", medium: "", house: "", sort: "new", shown: 60, heavy: false },
+  works: { q: "", medium: "", house: "", sort: "new", shown: 40, heavy: false },
   lb: null,
   screen: "today",
   artist: "v s gaitonde",
@@ -4746,24 +4746,45 @@ function viewAlerts() {
    only the 1.5 MB print scan, so its pictures stay out of the grid until
    she asks for them — sixty of those is ninety megabytes on an iPad.
    ============================================================ */
-const WORKS_PAGE = 60;
+/* Weight: a Pundole's lot without a small copy of its own (ingest/mirror.py)
+   stays out until she asks — sixty 1.5 MB scans is ninety megabytes on an
+   iPad; lots with a copy are light and always in. Forty tiles a page, lazy,
+   and everything past the first dozen marked low priority so the visible row
+   paints first. One tile per painting: a work sold more than once is one
+   chain (repeats.py) and shows once, at its latest sale, with the count; a
+   house re-using one photograph across two lots shows once too. */
+const WORKS_PAGE = 40;
 const HEAVY_HOUSES = new Set(["Pundole's"]);
+const isCopy = u => typeof u === "string" && u.includes("/data/img/");
+const isHeavy = l => HEAVY_HOUSES.has(l.h) && !isCopy(l.i);
 
 function worksList() {
   const w = S.works;
   const q = (w.q || "").trim().toLowerCase();
-  let rows = (LOTS || []).filter(l => l.i && (w.heavy || !HEAVY_HOUSES.has(l.h)));
+  let rows = (LOTS || []).filter(l => l.i && (w.heavy || !isHeavy(l)));
   if (q) rows = rows.filter(l => (l.n || "").toLowerCase().includes(q) || (l.t || "").toLowerCase().includes(q));
   if (w.medium) rows = rows.filter(l => l.m === w.medium);
   if (w.house) rows = rows.filter(l => l.h === w.house);
   const by = { new: (a, b) => (b.d > a.d ? 1 : -1), high: (a, b) => b.p - a.p, low: (a, b) => a.p - b.p };
-  return rows.sort(by[w.sort] || by.new);
+  rows.sort(by[w.sort] || by.new);
+  // Sorted first, so the survivor of each painting is the one the sort would
+  // have shown first (newest, or dearest); it carries how many sales it stands for.
+  const seen = new Map(), out = [];
+  for (const l of rows) {
+    const k = l.c ? "c:" + l.c : "i:" + l.i;
+    const first = seen.get(k);
+    if (first) { first.sales = (first.sales || 1) + 1; continue; }
+    l.sales = 1;
+    seen.set(k, l);
+    out.push(l);
+  }
+  return out;
 }
 
 function workCard(l, idx) {
   return `<a class="w" data-lb="${idx}" href="${safeUrl(l.u) || "#"}" target="_blank" rel="noopener noreferrer">
-    <img src="${esc(thumbUrl(safeUrl(l.i)))}" alt="${esc(l.t || "")}" loading="lazy" decoding="async" onerror="this.parentNode.remove()">
-    <div class="wc"><b>${esc(l.n || l.a)}</b> \u00b7 ${esc(inrShort(l.p))}<br>${esc(l.t || "Untitled")}${l.y ? ", " + esc(l.y) : ""} \u00b7 ${esc(l.h)}</div>
+    <img src="${esc(thumbUrl(safeUrl(l.i)))}" alt="${esc(l.t || "")}" loading="lazy" decoding="async"${idx >= 12 ? ' fetchpriority="low"' : ""} onerror="this.parentNode.remove()">
+    <div class="wc"><b>${esc(l.n || l.a)}</b> \u00b7 ${esc(inrShort(l.p))}${l.sales > 1 ? ` \u00b7 sold ${l.sales}\u00d7` : ""}<br>${esc(l.t || "Untitled")}${l.y ? ", " + esc(l.y) : ""} \u00b7 ${esc(l.h)}</div>
   </a>`;
 }
 

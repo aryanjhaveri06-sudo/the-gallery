@@ -1,11 +1,11 @@
-name: Mirror Saffronart pictures
+name: Mirror pictures
 
-# Small copies of the Saffronart pictures the desk shows (ingest/mirror.py):
-# 800 a run, one every 1.5 s, into data/img, committed. Weekly, and clear of
-# the nightly refresh and the Saturday repeats job.
+# Small copies of the heavy-house pictures the desk shows (ingest/mirror.py):
+# 800 a run, one every 1.5 s, into data/img, committed. Daily at 14:00 IST —
+# clear of the 02:00 refresh and the Saturday-noon repeats job.
 on:
   schedule:
-    - cron: "30 6 * * 0"      # Sunday 12:00 IST
+    - cron: "30 8 * * *"      # 14:00 IST
   workflow_dispatch:
 
 concurrency:

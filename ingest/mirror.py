@@ -1,13 +1,15 @@
-"""Small copies of the Saffronart pictures the desk actually shows.
+"""Small copies of the heavy pictures the desk actually shows.
 
-Saffronart publishes each work at 159px (soft in anything bigger than a
-thumbnail) and at ~2800px (about a megabyte). Nothing between. The other
-houses resize on request; Saffronart cannot, so a 480px copy is made here for
-the works that appear on the desk — the records on artist pages, the strips,
-the feed, the repeat chains, the forthcoming lots — and only those. Not the
-archive: a 12,000-picture sweep looks like copying the archive, and a block
-on that would take the nightly results feed with it (same client, same
-address). This is a few thousand, at one every 1.5 seconds, capped per run.
+Three houses cannot serve a picture at a sensible size. Saffronart publishes
+159px (soft) or ~2800px (a megabyte) and nothing between; AstaGuru only the
+~200 KB scan; Pundole's only the 1.5 MB scan. Christie's and Bonhams resize on
+request and need nothing here. So a 480px copy is made for the works that
+appear on the desk — the records on artist pages, the strips, the feed, the
+repeat chains, the forthcoming lots — and only those. Not the archives: a
+12,000-picture sweep looks like copying the archive, and a block on that
+would take the nightly results feed with it (same client, same address).
+This is a few thousand, at one every 1.5 seconds, capped per run, and the
+run stops itself if ten fetches fail before one succeeds.
 
 Copies live in data/img/<md5 of the original url>.jpg, committed, and served
 as static files by both sites; data/mirror.json maps original → copy and
@@ -37,11 +39,14 @@ EDGE = 480
 PAUSE = 1.5
 
 
+HEAVY = ("mediacloud.saffronart.com", "assets.astaguru.com", "images-cdn.auctionmobility.com")
+
+
 def wanted(app):
-    """Every Saffronart picture the bundle shows, most-seen first."""
+    """Every heavy-house picture the bundle shows, most-seen first."""
     seen = {}
     def add(u, w):
-        if u and "mediacloud.saffronart.com" in u and "_aucres." in u:
+        if u and any(h in u for h in HEAVY) and "/data/img/" not in u:
             seen[u] = seen.get(u, 0) + w
     for a in app.get("artists", {}).values():
         for r in a.get("records", []):
@@ -56,8 +61,8 @@ def wanted(app):
 
 
 def fetch_small(url):
-    full = url.replace("_aucres.", ".")
-    req = urllib.request.Request(full, headers={"User-Agent": UA, "Referer": "https://www.saffronart.com/"})
+    full = url.replace("_aucres.", ".")          # Saffronart's full scan; the others are already full
+    req = urllib.request.Request(full, headers={"User-Agent": UA, "Referer": "https://the-gallery-ct1.pages.dev/"})
     with urllib.request.urlopen(req, timeout=60) as r:
         data = r.read()
     im = Image.open(io.BytesIO(data)).convert("RGB")
