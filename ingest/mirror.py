@@ -26,6 +26,7 @@ import io
 import json
 import sys
 import time
+import urllib.error
 import urllib.request
 
 from PIL import Image
@@ -89,7 +90,11 @@ def main():
     todo = [u for u in wanted(app) if u not in mapping][:args.limit]
     print(f"{len(mapping)} already copied, {len(todo)} to do", flush=True)
 
-    done = failed = 0
+    # Saffronart keeps no full-size scan for many older lots — the thumbnail is
+    # all there is (404). Those are recorded as null so they are never asked
+    # for again, and a 404 is not a sign of being blocked, so it does not
+    # count toward the stop rule; only other failures do.
+    done = gone = failed = 0
     for i, u in enumerate(todo, 1):
         if time.time() - started > args.budget_minutes * 60:
             print("  budget reached", flush=True)
@@ -99,20 +104,29 @@ def main():
             (DIR / key).write_bytes(fetch_small(u))
             mapping[u] = f"data/img/{key}"
             done += 1
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                mapping[u] = None
+                gone += 1
+            else:
+                failed += 1
+                print(f"  failed {u[-40:]}: {e}", flush=True)
         except Exception as e:
             failed += 1
             print(f"  failed {u[-40:]}: {e}", flush=True)
-            if failed >= 10 and done == 0:
-                print("  ten failures and nothing copied — stopping rather than keep knocking", flush=True)
-                break
+        if failed >= 10 and done == 0:
+            print("  ten failures and nothing copied — stopping rather than keep knocking", flush=True)
+            break
         time.sleep(PAUSE)
         if i % 50 == 0:
             MAP.write_text(json.dumps(mapping, indent=0, sort_keys=True))
-            print(f"  [{i:>4}/{len(todo)}] {done} copied, {failed} failed", flush=True)
+            print(f"  [{i:>4}/{len(todo)}] {done} copied, {gone} not kept by the house, {failed} failed", flush=True)
 
     MAP.write_text(json.dumps(mapping, indent=0, sort_keys=True))
+    copies = sum(1 for v in mapping.values() if v)
     total = sum(p.stat().st_size for p in DIR.glob("*.jpg")) / 1e6
-    print(f"\nDone. {done} copied this run, {failed} failed; {len(mapping)} copies, {total:.0f} MB in data/img.")
+    print(f"\nDone. {done} copied this run, {gone} not kept by the house, {failed} failed; "
+          f"{copies} copies, {total:.0f} MB in data/img.")
 
 
 if __name__ == "__main__":

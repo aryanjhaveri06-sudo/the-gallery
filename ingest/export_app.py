@@ -37,7 +37,7 @@ from common import ROOT, connect, tidy_display
 # Absolute, so the same bundle works on both sites and passes safeUrl().
 try:
     with open(ROOT / "data" / "mirror.json") as _f:
-        MIRROR = {k: "https://the-gallery-ct1.pages.dev/" + v for k, v in json.load(_f).items()}
+        MIRROR = {k: "https://the-gallery-ct1.pages.dev/" + v for k, v in json.load(_f).items() if v}
 except (OSError, ValueError):
     MIRROR = {}
 
