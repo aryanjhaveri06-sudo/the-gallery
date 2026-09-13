@@ -305,6 +305,43 @@ def upcoming_by_artist(con):
     return out
 
 
+# Christie's: "Exhibited: A · B | Literature: …". AstaGuru: "Exhibited: A<br>B<br>
+# Published: …". Both end where the next heading starts.
+_EXH = re.compile(r"Exhibited:\s*(.*?)(?:\s*(?:\||<br\s*/?>)?\s*(?:Literature|Published|Provenance|Reference)s?:|$)", re.S | re.I)
+_EXH_YEAR = re.compile(r"\b(1[89]\d\d|20\d\d)\b")
+
+
+def exhibitions_of(rows):
+    """Where the artist's works have been shown, from the catalogue entries.
+
+    Christie's prints an Exhibited line per lot ("London, Aicon Gallery, Jamini
+    Roy: A Collector's Perspective, 2009 · Lugano, Museo delle Culture…"). One
+    show is named by several lots, so entries are deduped on their text; the
+    year is the first one in the entry. This is what the houses chose to print,
+    not a CV — the dossier says so.
+    """
+    seen = {}
+    for r in rows:
+        m = _EXH.search(r["notes"] or "")
+        if not m:
+            continue
+        block = re.sub(r"<br\s*/?>", "\n", m.group(1))
+        block = re.sub(r"<[^>]+>", " ", block)
+        for entry in re.split(r" \u00b7 |\n", block):
+            e = re.sub(r"\s+", " ", entry).strip(" .;")
+            if len(e) < 12:
+                continue
+            k = re.sub(r"[^a-z0-9]", "", e.lower())[:80]
+            if k in seen:
+                seen[k]["lots"] += 1
+                continue
+            y = _EXH_YEAR.findall(e)
+            seen[k] = {"text": e[:220], "year": max(y) if y else None, "lots": 1,
+                       "venue": ", ".join(e.split(", ")[:2])[:90]}
+    out = sorted(seen.values(), key=lambda x: (x["year"] or "0000", x["text"]), reverse=True)
+    return out[:40]
+
+
 def repeat_chains(con, lots):
     """Works sold more than once, from repeats.py — {artist_key: [chain, ...]}.
 
@@ -402,6 +439,7 @@ def main():
                 "currency": r["currency"], "price_native": r["price_native"],
                 "chain": chain_of.get(r["id"]),
                 "provenance": r["provenance"] or None,
+                "hammer": r["hammer_inr"],
                 # What `notes` holds depends on the house: Pundole's writes the
                 # condition there, Christie's exhibitions and literature, Bonhams
                 # the condition-report link. AstaGuru's is the catalogue essay
@@ -415,6 +453,7 @@ def main():
             } for r in rows[:60]],
             "repeats": chains,
             "upcoming": upcoming.get(key, []),
+            "exhibitions": exhibitions_of(rows),
         }
 
     # trending: biggest 12-month movers among artists with real recent volume

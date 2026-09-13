@@ -150,6 +150,9 @@ def main():
                            if u.get("currency") and u["currency"] != "INR" and u.get("est_low_native") and u.get("est_high_native") else None),
                 "url": u["url"], "image": u["image"], "new": u["first_seen"],
             } for u in a.get("upcoming", [])][:30],
+            # Where the work has been shown, as the catalogues printed it.
+            "exhibitions": [{"text": e["text"], "year": e["year"], "venue": e["venue"], "lots": e["lots"]}
+                            for e in a.get("exhibitions", [])][:30],
             "repeats": [{
                 "title": c["title"], "medium": c["medium"], "size": c["size"],
                 "image": c["image"], "multiple": c["multiple"], "years": c["years"],
@@ -173,6 +176,7 @@ def main():
                 "native": native(r.get("currency"), r.get("price_native")),
                 "resold": bool(r.get("chain")),
                 "prov": (r.get("provenance") or "")[:400] or None,
+                "hammer": inr(r.get("hammer")) if r.get("hammer") and r.get("price") and r["hammer"] < r["price"] else None,
                 "more": (("Condition: " if r["house"] == "Pundole's" else "") + (r.get("notes") or ""))[:400] or None,
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
@@ -272,24 +276,33 @@ def main():
 
 
 def write_lots(path):
-    """The record behind 'Value a work': one short row per sold lot that has a
-    size and a medium, for every artist. Field names are one letter because
-    there are twelve thousand rows and this is fetched on an iPad:
-    a artist key, d date, h house, m medium class (c/p/s), q square inches,
-    p price (INR, premium included), e [est low, est high], y year painted,
-    t title, s size as printed, u lot url, i image."""
+    """The record behind 'Value a work' and the Works grid: one short row per
+    sold lot for every artist — those with a size and a medium (the
+    comparables) and those with a picture (the grid). Field names are one
+    letter because there are twenty thousand rows and this is fetched on an
+    iPad: a artist key, n artist name, d date, h house, m medium class (c/p/s),
+    q square inches, p price (INR, premium included), hm hammer, e [est low,
+    est high], y year painted, t title, s size as printed, u lot url, i image,
+    v provenance."""
     from build_desk import sq_inches, medium_class
     con = connect()
     rows = []
-    for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr,
+    names = {r["key"]: r["display"] for r in con.execute("SELECT key, display FROM artist")}
+    for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr, hammer_inr,
                                    est_low_inr, est_high_inr, year, title, url, image_url, provenance
                             FROM lot WHERE sold=1 AND price_inr IS NOT NULL
                               AND artist_key IS NOT NULL AND sale_date IS NOT NULL"""):
         q, m = sq_inches(r["size"]), medium_class(r["medium"])
-        if not q or not m:
+        if not ((q and m) or r["image_url"]):
             continue
-        row = {"a": r["artist_key"], "d": r["sale_date"], "h": r["house"], "m": m[0],
-               "q": int(q), "p": r["price_inr"]}
+        row = {"a": r["artist_key"], "n": names.get(r["artist_key"], r["artist_key"]),
+               "d": r["sale_date"], "h": r["house"], "p": r["price_inr"]}
+        if m:
+            row["m"] = m[0]
+        if q:
+            row["q"] = int(q)
+        if r["hammer_inr"] and r["hammer_inr"] < r["price_inr"]:
+            row["hm"] = r["hammer_inr"]
         if r["est_low_inr"] and r["est_high_inr"]:
             row["e"] = [r["est_low_inr"], r["est_high_inr"]]
         for k, v in (("y", r["year"]), ("t", (r["title"] or "")[:80]), ("s", r["size"]),

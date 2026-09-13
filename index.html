@@ -544,6 +544,33 @@ button.row:active{background:var(--gold-tint)}
 .arow .av img,.prof .pav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .rec-prov{font-size:12.4px;color:var(--ink-60);margin-top:7px;line-height:1.5}
 .rec-prov b{font-weight:600;color:var(--ink-50);letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;margin-right:4px}
+/* ---- Works: browse the record as pictures ---- */
+.works-bar{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-top:14px}
+.works-bar input[type=text]{flex:1 1 220px;padding:10px 12px;border:1px solid var(--divider);border-radius:var(--r-md);background:var(--raised);color:var(--ink);font-size:14px}
+.works-grid{columns:3 200px;column-gap:12px;margin-top:18px}
+.works-grid .w{break-inside:avoid;margin:0 0 12px;display:block;text-decoration:none;color:inherit;cursor:pointer}
+.works-grid .w img{display:block;width:100%;height:auto;border-radius:4px;background:var(--surface);min-height:60px}
+.works-grid .w .wc{font-size:11.5px;color:var(--ink-60);margin-top:6px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.works-grid .w .wc b{color:var(--ink);font-weight:600}
+.works-more{margin-top:18px;text-align:center}
+/* lightbox: one work, big, with its record — closes on the backdrop, Esc, or the × */
+.lb{position:fixed;inset:0;z-index:60;background:rgba(20,18,14,.92);display:flex;align-items:center;justify-content:center;padding:24px}
+.lb-in{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:24px;max-width:1200px;width:100%;max-height:100%;color:#fbf9f6}
+.lb-in img{width:100%;max-height:calc(100vh - 48px);object-fit:contain;display:block}
+.lb-side{overflow:auto;max-height:calc(100vh - 48px);font-size:14px;line-height:1.55}
+.lb-side h2{font-family:var(--font-heading);font-weight:700;font-size:26px;margin:0 0 2px;color:#fff}
+.lb-side .lb-artist{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#c9b27a;margin-bottom:14px}
+.lb-side .lb-k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(251,249,246,.55);margin-top:14px}
+.lb-side .lb-price{font-family:var(--font-heading);font-weight:700;font-size:24px;color:#e2c877}
+.lb-side a{color:#fff}
+.lb-x{position:absolute;top:14px;right:18px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center}
+.lb-nav.prev{left:14px}.lb-nav.next{right:14px}
+@media (max-width:767px){.lb{padding:12px}.lb-in{grid-template-columns:1fr;overflow:auto;max-height:100%}.lb-in img{max-height:55vh}.lb-side{max-height:none}.lb-nav{display:none}}
+.rec-hammer{font-size:11px;color:var(--ink-50);text-align:right;margin-top:3px;white-space:nowrap}
+.exh{padding:12px 0;border-bottom:1px solid var(--divider-soft);font-size:13.5px;line-height:1.5}
+.exh .ey{font-family:var(--font-heading);font-weight:700;color:var(--ink-60);margin-right:10px;font-size:13px}
+.exh .en{color:var(--ink-60);font-size:12px;margin-left:8px}
 /* ---- alerts ---- */
 .bell-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--divider);border-radius:var(--r-md);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);background:transparent;white-space:nowrap}
 .bell-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
@@ -1333,6 +1360,7 @@ const ICON = {
   chev:   '<path d="m9 18 6-6-6-6"/>',
   search: `<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>`,
   value: `<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>`,
+  works: `<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>`,
   news:   `<path d="M4 5h11a1 1 0 0 1 1 1v13H5a1 1 0 0 1-1-1z"/><path d="M16 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-3"/><path d="M7 9h5M7 12h5M7 15h5"/>`
 };
 
@@ -1797,11 +1825,12 @@ function buildArtists() {
         sale: r.lot ? "Lot " + r.lot : "",
         est: r.est || "Estimate not published",
         price: r.price || "—", native: r.native || null, resold: !!r.resold,
-        prov: r.prov || null, more: r.more || null,
+        prov: r.prov || null, more: r.more || null, hammer: r.hammer || null,
         up: !!r.above, nat: !!r.nat, url: r.url
       })),
       repeats: a.repeats || [],
-      upcoming: a.upcoming || []
+      upcoming: a.upcoming || [],
+      exhibitions: a.exhibitions || []
     };
   }
   return out;
@@ -2224,6 +2253,8 @@ const saved = (() => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) 
 
 const S = {
   val: { artist: "", medium: "c", w: "", h: "", unit: "in", year: "" },
+  works: { q: "", medium: "", house: "", sort: "new", shown: 60, heavy: false },
+  lb: null,
   screen: "today",
   artist: "v s gaitonde",
   /* These used to hold ids from the old sample book ("nanda", "sethi"). Nothing
@@ -2401,6 +2432,7 @@ const NAV = [
   { id: "clients",   label: "Clients",  icon: "clients",   badge: () => CRM.live ? `${CRM.clients.length}` : "\u2014" },
   { id: "calendar",  label: "Calendar", icon: "calendar",  badge: () => "Sep–Nov" },
   { id: "knowledge", label: "Knowledge",icon: "knowledge", badge: () => "scripts" },
+  { id: "works",     label: "Works",    icon: "works",     badge: () => LOTS ? `${LOTS.filter(l => l.i).length.toLocaleString("en-IN")}` : "" },
   { id: "value",     label: "Value a work", icon: "value", badge: () => "" },
   { id: "alerts",    label: "Alerts",   icon: "bell",      badge: () => alertsToday() ? `${alertsToday()} new` : `${(CRM.watches || (REAL.alerts || {}).watches || []).length}` },
   { id: "ask",       label: "Ask AG Newsroom", icon: "ask", badge: () => "" }
@@ -2430,14 +2462,14 @@ const tabForScreen = s => {
     }
     return isPad ? "today" : "more";
   }
-  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "value" || s === "alerts" || s === "more")) return "more";
+  if (!isPad && (s === "calendar" || s === "knowledge" || s === "ask" || s === "value" || s === "alerts" || s === "works" || s === "more")) return "more";
   return s;
 };
 
 const TITLES = {
   today: "Start my day", artists: "Artists", dossier: "", market: "Market",
   clients: "Clients", client: "", calendar: "Calendar", knowledge: "Knowledge",
-  more: "More", news: "News", article: "", search: "Search", value: "Value a work", alerts: "Alerts"
+  more: "More", news: "News", article: "", search: "Search", value: "Value a work", alerts: "Alerts", works: "Works"
 };
 
 /* which screen a back chevron returns to, or null when nothing is pushed */
@@ -2448,7 +2480,7 @@ function backTarget() {
   if (PUSHED.includes(S.screen)) return S.back || (S.screen === "article" ? "news" : "today");
   if (!isSplit && S.screen === "dossier") return "artists";
   if (!isSplit && S.screen === "client") return "clients";
-  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask" || S.screen === "value" || S.screen === "alerts")) return "more";
+  if (!isPad && (S.screen === "calendar" || S.screen === "knowledge" || S.screen === "ask" || S.screen === "value" || S.screen === "alerts" || S.screen === "works")) return "more";
   return null;
 }
 
@@ -3023,7 +3055,7 @@ function viewDossier(embedded) {
         <div class="rec-foot">
           <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
             ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}${r.resold ? '<div class="pill" style="margin-top:7px"><span class="dot"></span>sold more than once</div>' : ""}</div>
-          <div><div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>${nativeTag(r.native)}</div>
+          <div><div class="rec-price tnum ${r.up ? "up" : ""}">${esc(r.price)}</div>${nativeTag(r.native)}${r.hammer ? `<div class="rec-hammer tnum">hammer ${esc(r.hammer)}</div>` : ""}</div>
         </div>
       </div>
     </div>`;
@@ -3088,6 +3120,11 @@ function viewDossier(embedded) {
         <div class="foot-note">Forthcoming catalogues at Christie's, Bonhams, Pundole's and AstaGuru, refreshed nightly. Saffronart does not publish its catalogues before a sale.</div>
       </div>` : ""}
 
+      ${a.exhibitions.length ? `<div class="sec">${sectionHead("Exhibited", a.exhibitions.length + (a.exhibitions.length === 1 ? " show" : " shows"))}
+        <div>${exhibitionRows(a)}</div>
+        <div class="foot-note">Exhibition history as the auction catalogues printed it against lots sold — Christie's and AstaGuru publish it, the others do not. It is what the houses chose to cite, not a full CV.</div>
+      </div>` : ""}
+
       ${a.repeats.length ? `<div class="sec">${sectionHead("Sold more than once", st.repeatAnnualised != null ? `${st.repeatAnnualised >= 0 ? "+" : ""}${st.repeatAnnualised}% a year, median of ${st.repeatBasis}` : a.repeats.length + (a.repeats.length === 1 ? " work" : " works"))}
         <div class="rows">${a.repeats.map(repeatRow).join("")}</div>
         <div class="foot-note">The same physical work, matched by its picture across sales — never on title and size alone. Prices as published, premium included. ${st.repeatAnnualised == null ? "No annualised figure is quoted from fewer than three resales." : "The annualised figure is the median across these resales; each one is a single work and a single pair of dates."}</div>
@@ -3096,7 +3133,7 @@ function viewDossier(embedded) {
       <div class="sec">${sectionHead("Auction record", rows.length + " of " + a.records.length)}
         <div class="chiprow">${houses.map(h => `<button class="chip" data-house="${esc(h)}" aria-pressed="${S.houseFilter === h}">${esc(h)}</button>`).join("")}</div>
         <div class="rows">${recs}</div>
-        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them. Source: ${esc(listOf(REAL.coverage.houses))} public results. Unsold lots are not published, so no sell-through figure is quoted anywhere on this desk.</div>
+        <div class="foot-note">Realised prices include buyer\u2019s premium, as the houses publish them; where a house also publishes the hammer (AstaGuru, Bonhams, Pundole\u2019s) it is shown beneath. Source: ${esc(listOf(REAL.coverage.houses))} public results. Unsold lots are not published, so no sell-through figure is quoted anywhere on this desk.</div>
       </div>
 
       <div class="sec">${sectionHead("Look up elsewhere")}
@@ -4699,6 +4736,99 @@ function viewAlerts() {
     </div>`;
 }
 
+/* ============================================================
+   WORKS — the record as pictures
+
+   Every sold lot with a picture (data/lots.json, the same file Value a work
+   reads), as a masonry of images; tap one for the record. Pundole's serves
+   only the 1.5 MB print scan, so its pictures stay out of the grid until
+   she asks for them — sixty of those is ninety megabytes on an iPad.
+   ============================================================ */
+const WORKS_PAGE = 60;
+const HEAVY_HOUSES = new Set(["Pundole's"]);
+
+function worksList() {
+  const w = S.works;
+  const q = (w.q || "").trim().toLowerCase();
+  let rows = (LOTS || []).filter(l => l.i && (w.heavy || !HEAVY_HOUSES.has(l.h)));
+  if (q) rows = rows.filter(l => (l.n || "").toLowerCase().includes(q) || (l.t || "").toLowerCase().includes(q));
+  if (w.medium) rows = rows.filter(l => l.m === w.medium);
+  if (w.house) rows = rows.filter(l => l.h === w.house);
+  const by = { new: (a, b) => (b.d > a.d ? 1 : -1), high: (a, b) => b.p - a.p, low: (a, b) => a.p - b.p };
+  return rows.sort(by[w.sort] || by.new);
+}
+
+function workCard(l, idx) {
+  return `<a class="w" data-lb="${idx}" href="${safeUrl(l.u) || "#"}" target="_blank" rel="noopener noreferrer">
+    <img src="${esc(thumbUrl(safeUrl(l.i)))}" alt="${esc(l.t || "")}" loading="lazy" decoding="async" onerror="this.parentNode.remove()">
+    <div class="wc"><b>${esc(l.n || l.a)}</b> \u00b7 ${esc(inrShort(l.p))}<br>${esc(l.t || "Untitled")}${l.y ? ", " + esc(l.y) : ""} \u00b7 ${esc(l.h)}</div>
+  </a>`;
+}
+
+function viewWorks() {
+  ensureLots();
+  const w = S.works;
+  const houses = (REAL.coverage && REAL.coverage.houses) || [];
+  const chip = (attr, val, label, on) => `<button class="chip" data-act="works-set" data-k="${attr}" data-v="${esc(val)}" aria-pressed="${on}">${label}</button>`;
+  return `<div class="view-head"><h1>Works</h1>
+      <p>Every sold work on the record, as pictures</p></div>
+    <div class="view-body">
+      <div class="works-bar">
+        <input type="text" data-works-q="1" autocomplete="off" placeholder="Artist or title" value="${esc(w.q)}">
+        ${[["", "All media"], ["c", "Canvas"], ["p", "Paper"], ["s", "Sculpture"]].map(([v, l]) => chip("medium", v, l, w.medium === v)).join("")}
+      </div>
+      <div class="works-bar">
+        ${chip("house", "", "All houses", w.house === "")}${houses.map(h => chip("house", h, h, w.house === h)).join("")}
+        <span style="flex:1 1 auto"></span>
+        ${[["new", "Newest"], ["high", "Price \u2193"], ["low", "Price \u2191"]].map(([v, l]) => chip("sort", v, l, w.sort === v)).join("")}
+        ${chip("heavy", w.heavy ? "" : "1", "Include Pundole\u2019s (large images)", w.heavy)}
+      </div>
+      <div id="works-results"></div>
+    </div>`;
+}
+
+function renderWorksResults() {
+  const el = document.getElementById("works-results");
+  if (!el) return;
+  if (LOTS_STATE !== "ready") { el.innerHTML = `<div class="empty">${LOTS_STATE === "failed" ? "The record could not be loaded." : "Reading the record\u2026"}</div>`; return; }
+  const rows = worksList();
+  S.worksRows = rows;
+  const shown = rows.slice(0, S.works.shown);
+  el.innerHTML = `<div class="foot-note" style="margin-top:12px">${rows.length.toLocaleString("en-IN")} works${S.works.heavy ? "" : " \u00b7 Pundole\u2019s pictures are print scans of a megabyte each and are left out until asked for"}</div>
+    <div class="works-grid">${shown.map((l, i) => workCard(l, i)).join("")}</div>
+    ${rows.length > shown.length ? `<div class="works-more"><button class="btn" data-act="works-more">Show ${Math.min(WORKS_PAGE, rows.length - shown.length)} more</button></div>` : ""}`;
+}
+
+function lightbox() {
+  const i = S.lb;
+  if (i == null || !S.worksRows || !S.worksRows[i]) return "";
+  const l = S.worksRows[i];
+  const est = l.e ? `${inrShort(l.e[0])}\u2013${inrShort(l.e[1])}` : null;
+  return `<div class="lb" data-act="lb-close">
+    <div class="lb-in" onclick="event.stopPropagation()">
+      <img src="${esc(heroUrl(safeUrl(l.i)))}" alt="${esc(l.t || "")}">
+      <div class="lb-side">
+        <div class="lb-artist"><a href="#" data-open-artist="${esc(l.a)}" style="text-decoration:none">${esc(l.n || l.a)}</a></div>
+        <h2>${esc(l.t || "Untitled")}</h2>
+        <div>${esc([l.s, l.y ? "painted " + l.y : null].filter(Boolean).join(" \u00b7 "))}</div>
+        <div class="lb-k">Sold</div>
+        <div class="lb-price tnum">${esc(inrShort(l.p))}</div>
+        <div>${esc(l.h)}, ${esc(fmtDate(l.d))}${l.hm ? ` \u00b7 hammer ${esc(inrShort(l.hm))}` : ""}${est ? ` \u00b7 est. ${esc(est)}` : ""}</div>
+        ${l.v ? `<div class="lb-k">Provenance</div><div>${esc(l.v)}</div>` : ""}
+        <div class="lb-k">At the house</div>
+        <div><a href="${safeUrl(l.u) || "#"}" target="_blank" rel="noopener noreferrer">Open the lot \u2192</a></div>
+      </div>
+    </div>
+    <button class="lb-x" data-act="lb-close" aria-label="Close">\u00d7</button>
+    ${i > 0 ? `<button class="lb-nav prev" data-act="lb-step" data-d="-1" aria-label="Previous">\u2039</button>` : ""}
+    ${i < S.worksRows.length - 1 ? `<button class="lb-nav next" data-act="lb-step" data-d="1" aria-label="Next">\u203a</button>` : ""}
+  </div>`;
+}
+
+function exhibitionRows(a) {
+  return a.exhibitions.map(e => `<div class="exh">${e.year ? `<span class="ey tnum">${esc(e.year)}</span>` : ""}${esc(e.text)}${e.lots > 1 ? `<span class="en">${e.lots} lots</span>` : ""}</div>`).join("");
+}
+
 const VAL_MIN = 6;
 let LOTS = null, LOTS_STATE = "idle";
 
@@ -4711,6 +4841,7 @@ async function ensureLots() {
     LOTS_STATE = r.ok ? "ready" : "failed";
   } catch (e) { LOTS = []; LOTS_STATE = "failed"; }
   if (S.screen === "value") renderValueResults();
+  if (S.screen === "works") { renderWorksResults(); renderRail(); }
 }
 
 const pct = (xs, p) => xs.length ? xs[Math.min(xs.length - 1, Math.floor((xs.length - 1) * p))] : null;
@@ -4823,7 +4954,7 @@ function renderValueResults() {
         ${l.v ? `<div class="rec-prov"><b>Provenance</b>${esc(l.v)}</div>` : ""}
         <div class="rec-foot">
           <div class="rec-est tnum">${l.e ? "Est. " + esc(inrShort(l.e[0]) + "\u2013" + inrShort(l.e[1])) : "Estimate not published"}${v ? ` \u00b7 ${v} estimate` : ""}</div>
-          <div class="rec-price tnum ${v === "above" ? "up" : ""}">${esc(inrShort(l.p))}</div>
+          <div><div class="rec-price tnum ${v === "above" ? "up" : ""}">${esc(inrShort(l.p))}</div>${l.hm ? `<div class="rec-hammer tnum">hammer ${esc(inrShort(l.hm))}</div>` : ""}</div>
         </div>
       </div></a>`;
   }).join("");
@@ -4857,6 +4988,7 @@ function viewMore() {
     { nav: "news", icon: "news", t: "News", s: "Ranked for you, everything pulled, and what you saved" },
     { nav: "calendar", icon: "calendar", t: "Calendar", s: "Sales, previews and fairs · Sep–Nov" },
     { nav: "knowledge", icon: "knowledge", t: "Knowledge", s: "Objection scripts and the pitch generator" },
+    { nav: "works", icon: "works", t: "Works", s: "Every sold work as a picture — browse by artist, medium, house or price" },
     { nav: "value", icon: "value", t: "Value a work", s: "What comparable works have sold for, with the sales that say so" },
     { nav: "alerts", icon: "bell", t: "Alerts", s: "Artists you watch, and what came up for them" }
   ];
@@ -4931,6 +5063,7 @@ function view() {
     case "knowledge": return viewKnowledge();
     case "ask": return viewAsk();
     case "value": return viewValue();
+    case "works": return viewWorks();
     case "alerts": return viewAlerts();
     default: return viewMore();
   }
@@ -4997,6 +5130,12 @@ function render(keepScroll) {
   // loading, a news refresh \u2014 lands here without touching the input.
   if (S.screen === "search") guard("search", renderSearchResults);
   if (S.screen === "value") guard("value", renderValueResults);
+  if (S.screen === "works") guard("works", renderWorksResults);
+  guard("lightbox", () => {
+    const old = document.getElementById("lb-root");
+    if (old) old.remove();
+    if (S.lb != null) { const d = document.createElement("div"); d.id = "lb-root"; d.innerHTML = lightbox(); document.body.appendChild(d); }
+  });
   guard("rail", renderRail);
   guard("topbar", renderTopbar);
   guard("tabbar", renderTabbar);
@@ -5103,7 +5242,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev],[data-open-story],[data-news],[data-client-tab]");
+  const t = e.target.closest("[data-lb],[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev],[data-open-story],[data-news],[data-client-tab]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -5459,6 +5598,11 @@ document.addEventListener("click", e => {
     return;
   }
   if (act === "watch-close") { S.watchSheet = null; return render(true); }
+  if (act === "works-set") { S.works[attr("data-k")] = attr("data-k") === "heavy" ? !!attr("data-v") : attr("data-v"); S.works.shown = WORKS_PAGE; render(true); return renderWorksResults(); }
+  if (act === "works-more") { S.works.shown += WORKS_PAGE; return renderWorksResults(); }
+  if (attr("data-lb") != null && S.screen === "works") { e.preventDefault(); S.lb = +attr("data-lb"); return render(true); }
+  if (act === "lb-close") { S.lb = null; return render(true); }
+  if (act === "lb-step") { S.lb = Math.max(0, Math.min((S.worksRows || []).length - 1, S.lb + (+attr("data-d")))); return render(true); }
   if (act === "value-medium") { S.val.medium = attr("data-m"); render(true); return renderValueResults(); }
   if (act === "value-unit") { S.val.unit = attr("data-u"); render(true); return renderValueResults(); }
   if (act === "value-for") {
@@ -5533,6 +5677,8 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => {
   const q = e.target.closest("[data-q]");
   if (q) { S.query = q.value; renderSearchResults(); return; }   // never redraws the field
+  const wq = e.target.closest("[data-works-q]");
+  if (wq) { S.works.q = wq.value; S.works.shown = WORKS_PAGE; renderWorksResults(); return; }
   const vf = e.target.closest("[data-val]");
   if (vf) { S.val = { ...S.val, [vf.getAttribute("data-val")]: vf.value }; renderValueResults(); return; }
   const nc = e.target.closest("[data-nc]");
@@ -5552,6 +5698,8 @@ document.addEventListener("submit", e => {
 });
 
 document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && S.lb != null) { S.lb = null; return render(true); }
+  if (S.lb != null && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { S.lb = Math.max(0, Math.min((S.worksRows || []).length - 1, S.lb + (e.key === "ArrowRight" ? 1 : -1))); return render(true); }
   if (e.key === "Escape" && S.screen === "search") { go(S.back || "today", { query: "" }); }
   // Enter sends, shift-Enter breaks the line — what every other chat box does.
   if (e.key === "Enter" && !e.shiftKey && e.target.closest(".ask-input")) {
