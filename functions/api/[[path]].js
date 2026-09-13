@@ -140,12 +140,18 @@ async function dueFollowups(env) {
       ORDER BY f.due`
   ).all();
   const today = now().slice(0, 10);
-  return results.map(f => ({
-    ...f,
-    overdue: f.due < today,
-    age: f.due < today ? `overdue ${daysBetween(f.due, today)}d`
-       : f.due === today ? "due today" : `due ${f.due}`,
-  }));
+  // Past a fortnight a follow-up has usually missed its moment — the sale it
+  // was for is over — and it wants a decision, not another day on the list.
+  return results.map(f => {
+    const over = f.due < today ? daysBetween(f.due, today) : 0;
+    return {
+      ...f,
+      overdue: over > 0,
+      days_over: over,
+      stale: over > 14,
+      age: over > 0 ? `overdue ${over}d` : f.due === today ? "due today" : `due ${f.due}`,
+    };
+  });
 }
 
 function daysBetween(a, b) {
@@ -602,7 +608,10 @@ export async function onRequest(context) {
       const done = b.done === false ? 0 : 1;
       await env.DB.prepare("UPDATE followup SET done = ?, done_at = ? WHERE id = ?")
         .bind(done, done ? now() : null, fid).run();
-      await audit(env, who.email, done ? "clear" : "reopen", "followup", fid);
+      // "Let go" is a closed follow-up that was never acted on. It closes the
+      // same way; the audit trail keeps the distinction, so a later look at
+      // a collector can tell a conversation from a lapse.
+      await audit(env, who.email, b.letgo ? "letgo" : done ? "clear" : "reopen", "followup", fid);
       return json({ ok: true, done: !!done });
     }
 

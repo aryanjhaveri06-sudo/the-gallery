@@ -581,6 +581,9 @@ button.row:active{background:var(--gold-tint)}
 .exh{padding:12px 0;border-bottom:1px solid var(--divider-soft);font-size:13.5px;line-height:1.5}
 .exh .ey{font-family:var(--font-heading);font-weight:700;color:var(--ink-60);margin-right:10px;font-size:13px}
 .exh .en{color:var(--ink-60);font-size:12px;margin-left:8px}
+/* ---- follow-ups that have gone quiet ---- */
+.stale-head{margin:22px 0 6px;padding:12px 14px;border-left:3px solid var(--gold);background:var(--gold-tint);font-size:13.5px;line-height:1.5;color:var(--ink)}
+.fu.stale .fu-age{color:var(--ink-50)}
 /* ---- alerts ---- */
 .bell-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--divider);border-radius:var(--r-md);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);background:transparent;white-space:nowrap}
 .bell-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
@@ -2407,7 +2410,8 @@ function repeatRow(c) {
       ${move}
     </div></div>`;
 }
-const dueCount = () => (CRM.live && CRM.followups) ? CRM.followups.length : 0;
+const dueCount = () => (CRM.live && CRM.followups) ? CRM.followups.filter(f => !f.stale).length : 0;
+const staleAge = f => f.days_over >= 60 ? `${Math.round(f.days_over / 30)} months overdue` : `${Math.round(f.days_over / 7)} weeks overdue`;
 
 const MON = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
 const stamp = d => { const p = d.split(" "); return new Date(2000 + (+p[2]), MON[p[1]], +p[0]).getTime(); };
@@ -2579,22 +2583,28 @@ function viewToday() {
               </div>`).join("") + `</div>`
           : '<div class="oneline">Nothing in the diary today.</div>');
 
-  const fups = !CRM.live
-    ? `<div class="oneline">Follow-ups live with the client book.</div>`
-    : (CRM.followups.length
-        ? `<div class="rows">` + CRM.followups.map(f => `
-            <div class="fu">
+  const fuRow = f => `
+            <div class="fu ${f.stale ? "stale" : ""}">
               <div class="row-top">
                 <button class="fu-name" data-open-client="${esc(f.client_id)}">${esc(f.client_name)}</button>
-                <span class="fu-age ${f.overdue ? "over" : ""}">${esc(f.age)}</span>
+                <span class="fu-age ${f.overdue ? "over" : ""}">${esc(f.stale ? staleAge(f) : f.age)}</span>
               </div>
               <div class="fu-why">${esc(f.reason || "")}</div>
-              <div class="btnrow">
+              ${f.stale ? `<div class="btnrow">
+                <button class="chip" data-clear-followup="${esc(f.id)}">Done \u2014 I did follow up</button>
+                <button class="chip" data-fu-next="${esc(f.id)}">Next week</button>
+                <button class="chip" data-fu-letgo="${esc(f.id)}">Let it go</button>
+                <button class="btn" data-open-client="${esc(f.client_id)}">Open card</button>
+              </div>` : `<div class="btnrow">
                 <button class="chip" data-clear-followup="${esc(f.id)}">Mark done</button>
                 <button class="btn" data-open-client="${esc(f.client_id)}">Open card</button>
-              </div>
-            </div>`).join("") + `</div>`
-        : '<div class="oneline">Nothing owed. Rare.</div>');
+              </div>`}
+            </div>`;
+  const liveF = (CRM.followups || []).filter(f => !f.stale), staleF = (CRM.followups || []).filter(f => f.stale);
+  const fups = !CRM.live
+    ? `<div class="oneline">Follow-ups live with the client book.</div>`
+    : (liveF.length ? `<div class="rows">${liveF.map(fuRow).join("")}</div>` : '<div class="oneline">Nothing owed. Rare.</div>')
+      + (staleF.length ? `<div class="stale-head">${staleF.length === 1 ? "One follow-up has" : staleF.length + " follow-ups have"} gone quiet \u2014 more than a fortnight overdue, the moment has probably passed. Decide, rather than carry them.</div><div class="rows">${staleF.map(fuRow).join("")}</div>` : "");
 
   /* ---- Today, to the mockup (spec §3) ----------------------------------- */
   const ranked = allStories().filter(n => n.scope === "India")
@@ -3592,7 +3602,7 @@ function clientsBrief(compact) {
     : `<div class="oneline">Nothing logged yet. A conversation logged on a card appears here.</div>`;
 
   return `
-    <div class="sec" style="margin-top:0">${sectionHead("Follow-ups due", fups.length ? String(fups.length) : "")}${due}</div>
+    <div class="sec" style="margin-top:0">${sectionHead("Follow-ups due", fups.length ? `${fups.filter(f => !f.stale).length} due${fups.some(f => f.stale) ? " \u00b7 " + fups.filter(f => f.stale).length + " gone quiet" : ""}` : "")}${due}</div>
     <div class="sec">${sectionHead("Sales ahead", (REAL.events || []).length + " in the diary")}
       ${compact ? "" : sales}
       <button class="more-link" data-nav="calendar">The whole diary →</button></div>
@@ -5279,7 +5289,7 @@ function go(screen, opts) {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-lb],[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev],[data-open-story],[data-news],[data-client-tab]");
+  const t = e.target.closest("[data-fu-next],[data-fu-letgo],[data-lb],[data-nav],[data-act],[data-open-artist],[data-open-client],[data-house],[data-market],[data-know],[data-cal],[data-toggle-done],[data-tpl],[data-obj],[data-pitch],[data-nc-tier],[data-clear-followup],[data-panel],[data-ed-tier],[data-ed-channel],[data-card-followup],[data-edit-row],[data-del-row],[data-cal-nav],[data-cal-day],[data-mark],[data-res],[data-feed],[data-ask-sugg],[data-cal-ev],[data-open-story],[data-news],[data-client-tab]");
   if (!t) return;
 
   const attr = n => t.getAttribute(n);
@@ -5342,6 +5352,24 @@ document.addEventListener("click", e => {
     render(true);
     api(`/followups/${encodeURIComponent(fid)}/done`, { method: "POST", body: "{}" })
       .catch(() => { loadCRM().then(() => render(true)); });   // put it back if the write failed
+    return;
+  }
+  if (attr("data-fu-next")) {
+    const fid = attr("data-fu-next");
+    const due = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+    const f = (CRM.followups || []).find(x => x.id === fid);
+    if (f) Object.assign(f, { due, overdue: false, stale: false, days_over: 0, age: "due " + due });
+    render(true);
+    api(`/followups/${encodeURIComponent(fid)}`, { method: "PATCH", body: JSON.stringify({ due }) })
+      .catch(() => { loadCRM().then(() => render(true)); });
+    return;
+  }
+  if (attr("data-fu-letgo")) {
+    const fid = attr("data-fu-letgo");
+    CRM.followups = CRM.followups.filter(f => f.id !== fid);
+    render(true);
+    api(`/followups/${encodeURIComponent(fid)}/done`, { method: "POST", body: JSON.stringify({ letgo: true }) })
+      .catch(() => { loadCRM().then(() => render(true)); });
     return;
   }
   if (attr("data-toggle-done")) { const k = attr("data-toggle-done"); S.done[k] = !S.done[k]; persist(); return render(true); }
