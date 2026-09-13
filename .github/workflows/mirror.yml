@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: refresh
+  group: mirror             # touches no database; must never queue behind or cancel a refresh
   cancel-in-progress: false
 
 permissions:

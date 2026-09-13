@@ -3,12 +3,15 @@ name: Refresh auction data
 # Auction results only change when a sale closes, so nightly is ample.
 # 20:30 UTC = 02:00 IST, well clear of Indian saleroom hours.
 #
-# GitHub's scheduler is best-effort: runs can be delayed under load, and cron is
-# disabled entirely on a repo with no activity for 60 days. This workflow commits
-# on most runs, which keeps it alive.
+# GitHub's scheduler is best-effort: runs can be delayed under load or dropped
+# outright (2026-09-13 was), and cron is disabled entirely on a repo with no
+# activity for 60 days. So there are two slots a night — the second stops at
+# once if the first already published — and freshness.yml starts a run itself
+# if neither did. One house failing is a warning, not a failed night.
 on:
   schedule:
-    - cron: "30 20 * * *"
+    - cron: "30 20 * * *"     # 02:00 IST
+    - cron: "30 23 * * *"     # 05:00 IST, the backstop
   workflow_dispatch:
     inputs:
       mode:
@@ -32,7 +35,23 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
+      # The backstop slot: if a run already published in the last twelve hours
+      # there is nothing to do. A dispatched run always runs.
+      - name: Already fresh?
+        id: fresh
+        if: github.event_name == 'schedule'
+        run: |
+          python3 - <<'PY'
+          import json, os, datetime as dt
+          d = json.load(open("data/app_data.json"))
+          age = (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(d["generated_at"])).total_seconds() / 3600
+          skip = "true" if age < 12 else "false"
+          print(f"live data is {age:.1f}h old -> {'skip' if skip == 'true' else 'refresh'}")
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"skip={skip}\n")
+          PY
+
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        if: steps.fresh.outputs.skip != 'true'
         with:
           python-version: "3.12"
       # No pip install step on purpose: the ingesters are stdlib-only, so there
@@ -42,6 +61,7 @@ jobs:
       # runs. It is cached rather than committed: at 11 MB, a nightly binary
       # commit would add roughly 4 GB of git history a year.
       - name: Restore database
+        if: steps.fresh.outputs.skip != 'true'
         id: db
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -50,6 +70,7 @@ jobs:
           restore-keys: artdesk-db-
 
       - name: Report starting point
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           if [ -f data/artdesk.db ]; then
             python3 - <<'PY'
@@ -63,29 +84,38 @@ jobs:
           fi
 
       - name: Pull auction results
+        if: steps.fresh.outputs.skip != 'true'
         env:
           MODE: ${{ inputs.mode || 'incremental' }}
         run: |
           cd ingest
+          # Each house on its own: a house that is down tonight is a warning
+          # in the summary and a line in the Telegram message, and the other
+          # four still publish. Only every house failing fails the night.
+          ok=0; failed=""
+          house() { if python3 "$@"; then ok=$((ok+1)); else echo "::warning::$1 failed tonight"; failed="$failed $1"; fi; }
           if [ "$MODE" = "full" ] || [ ! -f ../data/artdesk.db ]; then
             echo "::notice::full rebuild"
-            python3 astaguru.py
-            python3 saffronart.py --discover 6
-            python3 pundoles.py
-            python3 christies.py
-            python3 bonhams.py
+            house astaguru.py
+            house saffronart.py --discover 6
+            house pundoles.py
+            house christies.py
+            house bonhams.py
           else
             # Newest sales sit at the top of each house's list, so a shallow
             # pull catches anything that closed since the last run. Re-ingesting
             # a sale is harmless — every write is INSERT OR REPLACE.
-            python3 astaguru.py   --limit 4
-            python3 saffronart.py --discover 6 --limit 4
-            python3 pundoles.py   --limit 4
-            python3 christies.py  --limit 2
-            python3 bonhams.py    --limit 2
+            house astaguru.py   --limit 4
+            house saffronart.py --discover 6 --limit 4
+            house pundoles.py   --limit 4
+            house christies.py  --limit 2
+            house bonhams.py    --limit 2
           fi
+          echo "HOUSES_FAILED=$failed" >> $GITHUB_ENV
+          [ $ok -gt 0 ] || { echo "::error::every house failed"; exit 1; }
 
       - name: Fill Saffronart medium, size and provenance; Christie's provenance
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           # Resumable and capped, so they chip away nightly instead of running
           # for hours. A lot is visited once; '' provenance means "none published".
@@ -94,6 +124,7 @@ jobs:
           python3 enrich_christies.py --limit 250 || true
 
       - name: Refresh the diary
+        if: steps.fresh.outputs.skip != 'true'
         env:
           ALERT_TOKEN: ${{ secrets.ALERT_TOKEN }}
         run: |
@@ -105,12 +136,14 @@ jobs:
           python3 build_calendar.py
 
       - name: Pull market headlines
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           # Real trade-press and Indian business-press coverage. Never fatal:
           # a feed being down must not cost us the night's auction data.
           cd ingest && python3 news.py || true
 
       - name: Rebuild derived figures
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           # app_data.json is fetched at load and carries every artist with a
           # dossier (~2 MB, ~320 KB over the wire). The copy embedded in the
@@ -123,6 +156,7 @@ jobs:
           python3 embed_app.py --data ../data/app_embed.json
 
       - name: Commit refreshed data
+        if: steps.fresh.outputs.skip != 'true'
         run: |
           git config user.name  "art-desk-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -146,6 +180,7 @@ jobs:
       # would have gone on skipping even once the secret existed. The guard
       # belongs in the script, where it can see the variable.
       - name: Deploy to Cloudflare Pages
+        if: steps.fresh.outputs.skip != 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -159,11 +194,14 @@ jobs:
           # The security headers name the page's script by hash, so they are
           # written from the exact index.html about to ship — never committed.
           (cd ingest && python3 csp_headers.py && python3 csp_headers.py --check)
-          npx --yes wrangler@3.114.17 pages deploy . \
-            --project-name the-gallery --commit-dirty=true
+          for try in 1 2 3; do
+            npx --yes wrangler@3.114.17 pages deploy . \
+              --project-name the-gallery --commit-dirty=true && break
+            [ $try -lt 3 ] && { echo "deploy attempt $try failed; retrying in 60s"; sleep 60; } || exit 1
+          done
 
       - name: Save database
-        if: always()
+        if: always() && steps.fresh.outputs.skip != 'true' && steps.db.outcome == 'success'
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: data/artdesk.db
@@ -171,6 +209,17 @@ jobs:
 
       # A red run nobody looks at is a stale desk nobody notices. Secrets come
       # from the Swing Desk bot; both empty means the step just logs and exits.
+      - name: Say which house was skipped
+        if: success() && env.HOUSES_FAILED != ''
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT:  ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          [ -z "$TG_TOKEN" ] && exit 0
+          curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
+            --data-urlencode "text=AG Newsroom: tonight's refresh published, but could not reach:${HOUSES_FAILED}. The other houses are up to date; the missing one catches up next night." \
+            "https://api.telegram.org/bot$TG_TOKEN/sendMessage"
+
       - name: Alert on failure
         if: failure()
         env:
@@ -183,7 +232,7 @@ jobs:
             "https://api.telegram.org/bot$TG_TOKEN/sendMessage"
 
       - name: Summary
-        if: always()
+        if: always() && steps.fresh.outputs.skip != 'true'
         run: |
           python3 - <<'PY' >> $GITHUB_STEP_SUMMARY
           import sqlite3, json, pathlib

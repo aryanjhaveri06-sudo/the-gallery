@@ -10,6 +10,9 @@ on:
     - cron: "30 2 * * *"      # 08:00 IST
   workflow_dispatch:
 
+permissions:
+  actions: write            # to start the refresh itself
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -29,9 +32,17 @@ jobs:
           print(f"live data generated {d['generated_at']} — {hours:.1f}h ago")
           with open(os.environ["GITHUB_OUTPUT"], "a") as f:
               f.write(f"hours={hours:.0f}\n")
-          if hours > 36:
+          if hours > 26:
               raise SystemExit(f"STALE: {hours:.0f}h old")
           PY
+
+      # Stale means neither night slot published. Start one now rather than
+      # wait for the next; the alert below says so.
+      - name: Start a refresh
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run refresh.yml -R "$GITHUB_REPOSITORY" && echo "refresh started"
 
       - name: Alert
         if: failure()
@@ -42,5 +53,5 @@ jobs:
         run: |
           [ -z "$TG_TOKEN" ] && { echo "no TELEGRAM_BOT_TOKEN; not alerting"; exit 0; }
           curl -s -o /dev/null --data-urlencode "chat_id=$TG_CHAT" \
-            --data-urlencode "text=AG Newsroom: live data is STALE (${HOURS:-?}h old, or unreachable). $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions" \
+            --data-urlencode "text=AG Newsroom: last night's refresh did not publish (live data ${HOURS:-?}h old). A refresh has been started now; it takes about an hour. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions" \
             "https://api.telegram.org/bot$TG_TOKEN/sendMessage"
