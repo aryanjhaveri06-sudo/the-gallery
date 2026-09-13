@@ -38,7 +38,7 @@ jobs:
       - name: Match pictures across sales
         run: |
           [ -f data/artdesk.db ] || { echo "::error::no database in cache — run the refresh first"; exit 1; }
-          cd ingest && python3 repeats.py
+          cd ingest && python3 repeats.py --budget-minutes 240
 
       - name: Save database
         if: always()

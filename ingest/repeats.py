@@ -200,7 +200,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--artist", help="one artist key, e.g. 's h raza'")
     ap.add_argument("--limit", type=int, default=0, help="stop after N new images")
+    ap.add_argument("--budget-minutes", type=int, default=240,
+                    help="stop fetching new pictures after this long; still match and write what is signed")
     args = ap.parse_args()
+    started = time.time()
 
     con = connect()
     con.executescript("""
@@ -232,9 +235,18 @@ def main():
     cache, fetched = {}, 0
     u = Union()
     scores = {}
+    over_budget = False
     for i, (key, (a, b)) in enumerate(pairs):
         new = sum(1 for l in (a, b) if l["id"] in need and l["id"] not in cache)
         if args.limit and fetched + new > args.limit:
+            continue
+        # The first pass over 22k lots is longer than one CI run. Past the
+        # budget, pairs that would need a fetch are left for next week; pairs
+        # already signed are still compared, and the chains are still written.
+        if new and (over_budget or (time.time() - started) > args.budget_minutes * 60):
+            if not over_budget:
+                print(f"  budget reached after {fetched} pictures; matching what is signed", flush=True)
+            over_budget = True
             continue
         sa, sb = ensure_sig(con, a, cache), ensure_sig(con, b, cache)
         fetched += new
@@ -263,7 +275,7 @@ def main():
         cid = min(members, key=lambda x: (date_of.get(x) or "", x))
         rows_out += [(m, cid, scores[m][0], scores[m][1]) for m in members]
 
-    if not args.artist and not args.limit:
+    if not args.artist and not args.limit and not over_budget:
         con.execute("DELETE FROM repeat")
     else:
         con.executemany("DELETE FROM repeat WHERE lot_id=?", [(m,) for m, *_ in rows_out])
