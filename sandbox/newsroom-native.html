@@ -1,0 +1,716 @@
+<meta charset="utf-8">
+<title>AG Newsroom — native</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AG Newsroom">
+<meta name="color-scheme" content="light dark">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   AG NEWSROOM — NATIVE BUILD (iPhone · iPad · Mac)
+
+   This one goes the other way from the sandbox: Apple's own components
+   and colours, not the desk's paper-and-gold identity. Large-title nav
+   bar, grouped inset lists, glass tab bar on iPhone; sidebar and split
+   view on iPad; sidebar, toolbar and 13pt density on Mac.
+
+   ── On the colours ───────────────────────────────────────────────────
+   Apple's published hex values are IMAGES on developer.apple.com, so the
+   scraped color.md carries no numbers. The values below are Apple's
+   system colours from knowledge, not from the reference — flagged here
+   rather than cited as a guideline.
+
+   Measuring them turned up the real tension in this build: several of
+   Apple's own LIGHT-mode colours fail the 4.5:1 floor that Apple's own
+   accessibility.md names for text up to 17pt.
+
+       systemBlue   #007AFF on white   4.02:1   needs 4.5
+       secondaryLabel .6 on white      3.44:1   needs 4.5
+       systemGray   #8E8E93 on white   3.26:1   needs 4.5
+       systemGreen  #34C759 on white   2.22:1   needs 4.5
+
+   Dark mode passes throughout. The resolution used here: Apple's exact
+   values for FILLS and for bold or large text, where the threshold is
+   3:1 and they clear it; minimally darkened values for small text, which
+   is what Apple's own Increase Contrast variants do. The shifts are
+   imperceptible and every one is noted inline.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  color-scheme:light dark;
+
+  /* Apple system colours — light */
+  --blue:#007AFF;              /* fills and bold text: 4.02:1 as a fill, ≥3:1 ok */
+  --blue-text:#0070F5;         /* small text only: #007AFF -> 4.53:1            */
+  --blue-text-grouped:#0066EB; /* same, on grouped ground: 4.59:1               */
+  --green-text:#00891B;        /* #34C759 -> 4.57:1                             */
+  --red-text:#E72318;          /* #FF3B30 -> 4.51:1                             */
+  --red:#FF3B30;
+
+  --label:#000000;
+  --label-2:#76767A;           /* secondaryLabel #8A8A8E -> 4.52:1              */
+  --label-2-grouped:#6D6D73;   /* on #F2F2F7 -> 4.61:1                          */
+  --label-3:#8E8E93;           /* non-text only: chevrons, glyphs               */
+
+  --bg:#FFFFFF;                /* systemBackground                              */
+  --bg-grouped:#F2F2F7;        /* systemGroupedBackground                       */
+  --bg-card:#FFFFFF;           /* secondarySystemGroupedBackground              */
+  --fill-3:#767680;            /* tertiary fill base                            */
+  --separator:rgba(60,60,67,.29);
+  --separator-opaque:#C6C6C8;
+  --gray-5:#E5E5EA;
+  --gray-6:#F2F2F7;
+
+  /* Liquid Glass on the functional layer only.
+     liquid-glass.md > Cross-platform translation: regular variant,
+     blur 20–40px, saturate 1.2–1.5, translucent fill, hairline. */
+  --glass:rgba(249,249,249,.80);
+  --glass-line:rgba(0,0,0,.13);
+  --glass-blur:saturate(1.4) blur(28px);
+
+  /* SF is the system face. On Apple platforms -apple-system IS SF. */
+  --sf:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+       system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* iOS text styles, at their real sizes.
+     typography.md > Specifications, iOS Dynamic Type (Large). */
+  --largeTitle:2.125rem;  /* 34pt bold   */
+  --title2:1.375rem;      /* 22pt        */
+  --title3:1.25rem;       /* 20pt        */
+  --headline:1.0625rem;   /* 17pt semibold */
+  --body:1.0625rem;       /* 17pt        */
+  --callout:1rem;         /* 16pt        */
+  --subhead:0.9375rem;    /* 15pt        */
+  --footnote:0.8125rem;   /* 13pt        */
+  --caption:0.75rem;      /* 12pt        */
+  --caption2:0.6875rem;   /* 11pt — the floor  */
+
+  --pad:16px;             /* iOS standard margin */
+  --radius:10px;          /* grouped inset corner */
+  --nav:44px;
+  --tabbar:49px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+
+  /* One curve, two durations. The curve approximates the system's
+     spring: fast out, settles without bounce.
+     motion.md: "Aim for brevity and precision in feedback animations." */
+  --spring:cubic-bezier(.32,.72,0,1);
+  --t-press:.10s;   /* a control answering a touch — must feel instant */
+  --t-move:.30s;    /* something arriving on screen                    */
+}
+
+@media (prefers-color-scheme:dark){
+  :root{
+    --blue:#0A84FF;
+    --blue-text:#0A84FF;          /* 4.66:1 on #1C1C1E — passes as-is */
+    --blue-text-grouped:#0A84FF;
+    --green-text:#30D158;         /* 8.42:1 */
+    --red-text:#FF453A;           /* 4.99:1 */
+    --red:#FF453A;
+
+    --label:#FFFFFF;
+    --label-2:#98989F;            /* secondaryLabel .6 -> 5.94:1 */
+    --label-2-grouped:#98989F;
+    --label-3:#8E8E93;
+
+    --bg:#000000;
+    --bg-grouped:#000000;
+    --bg-card:#1C1C1E;
+    --separator:rgba(84,84,88,.60);
+    --separator-opaque:#38383A;
+    --gray-5:#2C2C2E;
+    --gray-6:#1C1C1E;
+
+    --glass:rgba(28,28,30,.78);
+    --glass-line:rgba(255,255,255,.15);
+  }
+}
+/* Increase Contrast gets stronger fills and darker labels —
+   liquid-glass.md > Review checklist 5, color.md > Best practices. */
+@media (prefers-contrast:more){
+  :root{ --label-2:#4A4A4E; --label-2-grouped:#45454A; --label-3:#5A5A5E;
+         --blue-text:#0040DD; --blue-text-grouped:#0040DD;
+         --separator:rgba(60,60,67,.6); }
+}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){
+  :root{ --label-2:#C7C7CC; --label-2-grouped:#C7C7CC; --label-3:#AEAEB2;
+         --separator:rgba(140,140,148,.8); }
+}
+@media (prefers-reduced-transparency:reduce){
+  :root{ --glass:var(--bg); --glass-blur:none; }
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;text-align:left;cursor:pointer}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sf);font-size:var(--body);line-height:1.29;
+  color:var(--label);background:var(--bg-grouped);
+  -webkit-font-smoothing:antialiased;
+  /* The system uses slightly tighter tracking on SF at body sizes. */
+  letter-spacing:-.01em;
+}
+:focus-visible{outline:3px solid var(--blue);outline-offset:1px;border-radius:5px}
+
+/* ═══ SHELL ═══════════════════════════════════════════════════════════ */
+.app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+.row{display:flex;flex:1;min-height:0}
+.pane{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.main{
+  position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;background:var(--bg-grouped);
+}
+/* Content runs the full height of the pane and the bars float over it, so
+   the glass has something to refract and the scroll edge means something.
+   liquid-glass.md: "Content scrolls and peeks through the functional
+   layer." layout.md > Best practices: "Controls and navigation components
+   like sidebars and tab bars appear on top of content rather than on the
+   same plane." The padding below keeps the first and last rows reachable. */
+.wrap{
+  padding:calc(var(--nav) + var(--safe-t)) var(--pad)
+          calc(var(--tabbar) + var(--safe-b) + 28px);
+  max-width:720px;
+}
+
+/* ═══ NAV BAR — large title that collapses on scroll ══════════════════
+   The collapse is driven by scroll position, not a timer, so it tracks
+   the gesture. motion.md: "Strive for realistic feedback motion that
+   follows people's gestures and expectations." ────────────────────── */
+.nav{
+  position:absolute;top:0;left:0;right:0;z-index:40;padding-top:var(--safe-t);
+  background:transparent;transition:background var(--t-move) var(--spring);
+}
+.nav.stuck{
+  background:var(--glass);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:0 .5px 0 var(--glass-line);
+}
+.nav-in{
+  display:grid;grid-template-columns:60px 1fr 60px;align-items:center;
+  min-height:var(--nav);padding:0 8px;
+}
+/* The inline title fades in exactly as the large title leaves. */
+.nav-title{
+  text-align:center;font-size:var(--headline);font-weight:600;
+  opacity:0;transition:opacity .18s var(--spring);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.nav.stuck .nav-title{opacity:1}
+.nav-btn{
+  min-width:44px;min-height:44px;display:inline-flex;align-items:center;gap:3px;
+  color:var(--blue-text);font-size:var(--body);border-radius:6px;
+}
+.nav-btn.trail{justify-content:flex-end}
+.nav-btn:active{opacity:.35;transition:none}   /* instant press feedback */
+.nav-btn[hidden]{display:inline-flex;visibility:hidden}
+
+.large-title{
+  font-size:var(--largeTitle);font-weight:700;letter-spacing:-.023em;
+  line-height:1.1;padding:4px 0 8px;
+}
+.large-sub{font-size:var(--footnote);color:var(--label-2-grouped);padding-bottom:10px;line-height:1.35}
+
+/* ═══ TAB BAR (iPhone) ════════════════════════════════════════════════ */
+.tabbar{
+  position:absolute;left:0;right:0;bottom:0;display:flex;z-index:40;
+  background:var(--glass);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  box-shadow:0 -.5px 0 var(--glass-line);
+  padding-bottom:var(--safe-b);
+}
+.tabbar button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;min-height:var(--tabbar);padding:6px 2px 4px;color:var(--label-3);
+}
+/* 11px: Apple's own tab label is 10pt, but accessibility.md puts the
+   floor for CUSTOM type at 11pt. Custom build, so the floor applies. */
+.tabbar .tl{font-size:var(--caption2);font-weight:500;letter-spacing:0;line-height:1.1}
+.tabbar button[aria-current="page"]{color:var(--blue-text)}
+.tabbar button:active .ic{transform:scale(.90);transition:none}
+.tabbar .ic{transition:transform var(--t-press) var(--spring)}
+.tabbar svg{width:26px;height:26px;display:block}
+
+/* ═══ SIDEBAR (iPad + Mac) ════════════════════════════════════════════ */
+.sidebar{display:none}
+.sb-h{
+  font-size:var(--footnote);font-weight:600;color:var(--label-2-grouped);
+  padding:14px 12px 5px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:11px;width:100%;
+  border-radius:8px;color:var(--label);transition:background var(--t-press) var(--spring);
+}
+.sb-item .k{margin-left:auto;color:var(--label-3);font-size:var(--footnote)}
+.sb-item svg{width:22px;height:22px;flex-shrink:0;color:var(--blue-text)}
+.sb-item[aria-current="page"] svg{color:#fff}
+
+/* ═══ GROUPED INSET LIST — the iOS list idiom ═════════════════════════
+   lists-and-tables.md. A rounded group on the grouped background, with
+   separators inset from the leading edge so they start at the text. ── */
+.group{
+  background:var(--bg-card);border-radius:var(--radius);
+  overflow:hidden;margin-bottom:22px;
+}
+.group-h{
+  font-size:var(--footnote);color:var(--label-2-grouped);
+  padding:18px var(--pad) 7px;text-transform:none;
+}
+.cell{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:11px var(--pad);min-height:44px;position:relative;
+  background:var(--bg-card);transition:background var(--t-press) var(--spring);
+}
+.cell + .cell::before{
+  content:"";position:absolute;top:0;left:var(--pad);right:0;
+  height:.5px;background:var(--separator);
+}
+button.cell:active{background:var(--gray-5);transition:none}
+.cell-main{flex:1;min-width:0}
+.cell-t{font-size:var(--body);line-height:1.28}
+.cell-s{font-size:var(--footnote);color:var(--label-2);margin-top:2px;line-height:1.3}
+.cell-v{font-size:var(--body);color:var(--label-2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chev{color:var(--label-3);flex-shrink:0;opacity:.55}
+
+/* ═══ LOT CELL + GAUGE ════════════════════════════════════════════════
+   The gauge survives from the earlier study because it fixes a real
+   defect: the shipping app signals above-vs-within estimate by hue
+   alone. Here it is drawn in system colours, and direction is carried
+   by POSITION, a GLYPH and TEXT as well as colour.
+   color.md > Inclusive color. ─────────────────────────────────────── */
+.lot{display:block;width:100%;padding:12px var(--pad) 14px;position:relative;background:var(--bg-card)}
+.lot + .lot::before{
+  content:"";position:absolute;top:0;left:var(--pad);right:0;height:.5px;background:var(--separator);
+}
+button.lot:active{background:var(--gray-5);transition:none}
+.lot-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lot-a{font-size:var(--headline);font-weight:600;line-height:1.26}
+.lot-p{font-size:var(--headline);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lot-s{font-size:var(--footnote);color:var(--label-2);margin-top:2px;line-height:1.3}
+
+.gauge{margin-top:11px;max-width:420px}
+.gauge-t{position:relative;height:20px}
+.gauge-ax{position:absolute;left:0;right:0;top:9px;height:2px;background:var(--gray-5);border-radius:1px}
+.gauge-band{position:absolute;top:5px;height:10px;background:var(--label-3);opacity:.4;border-radius:5px}
+.gauge-m{position:absolute;top:2px;width:4px;height:16px;border-radius:2px;background:var(--label)}
+.gauge-sc{
+  display:flex;justify-content:space-between;font-size:var(--caption2);
+  color:var(--label-2);font-variant-numeric:tabular-nums;margin-top:1px;
+}
+.gauge-r{font-size:var(--footnote);margin-top:7px;display:flex;align-items:center;gap:5px;line-height:1.3}
+.gauge-r .g{font-size:var(--caption2);line-height:1}
+.gauge-r.up{color:var(--green-text)}
+.gauge-r.down{color:var(--red-text)}
+.gauge-r.in{color:var(--label-2)}
+.gauge-r b{font-weight:600}
+
+/* ═══ CONTROLS ════════════════════════════════════════════════════════ */
+/* Segmented control, the system's own shape. */
+.seg{
+  display:flex;background:rgba(118,118,128,.12);border-radius:9px;padding:2px;margin:4px 0 20px;
+}
+@media (prefers-color-scheme:dark){ .seg{background:rgba(118,118,128,.24)} }
+.seg button{
+  flex:1;text-align:center;min-height:32px;padding:6px 10px;border-radius:7px;
+  font-size:var(--footnote);font-weight:500;color:var(--label);
+  transition:background var(--t-press) var(--spring);
+}
+.seg button[aria-pressed="true"]{
+  background:var(--bg-card);font-weight:600;
+  box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);
+}
+.seg button:active{opacity:.6;transition:none}
+
+/* Filled button: colour on the BACKGROUND, which is how the system
+   styles a prominent action. buttons.md, liquid-glass.md > Color. */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:44px;padding:11px 18px;border-radius:11px;
+  font-size:var(--body);font-weight:600;
+}
+.btn-prom{background:var(--blue);color:#fff}
+.btn-plain{color:var(--blue-text);background:rgba(0,122,255,.10)}
+@media (prefers-color-scheme:dark){ .btn-plain{background:rgba(10,132,255,.18)} }
+.btn:active{opacity:.55;transition:none}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 22px}
+
+.search{
+  display:flex;align-items:center;gap:6px;background:rgba(118,118,128,.12);
+  border-radius:10px;padding:0 8px;min-height:36px;margin:2px 0 18px;
+}
+@media (prefers-color-scheme:dark){ .search{background:rgba(118,118,128,.24)} }
+.search input{
+  flex:1;border:0;background:none;font:inherit;font-size:var(--body);
+  color:var(--label);min-width:0;align-self:stretch;min-height:36px;
+}
+.search input::placeholder{color:var(--label-2)}
+.search input:focus{outline:none}
+.search svg{color:var(--label-2);flex-shrink:0}
+
+.empty{padding:36px var(--pad);text-align:center;color:var(--label-2);font-size:var(--subhead);line-height:1.4}
+.empty b{display:block;color:var(--label);font-size:var(--title3);font-weight:600;margin-bottom:5px}
+.foot{
+  font-size:var(--caption);color:var(--label-2-grouped);
+  padding:4px var(--pad) 0;line-height:1.4;
+}
+
+/* ═══ iPAD ════════════════════════════════════════════════════════════
+   tab-bars.md > Tablet: a tab bar that converts to a sidebar. The
+   sidebar is the right call here — ten desk sections do not belong in
+   five tabs. ─────────────────────────────────────────────────────── */
+@media (min-width:744px){
+  .tabbar{display:none}
+  .sidebar{
+    display:flex;flex-direction:column;width:270px;flex-shrink:0;
+    padding:8px 10px calc(10px + var(--safe-b));overflow-y:auto;
+    background:var(--bg-grouped);
+    border-right:.5px solid var(--separator);
+  }
+  .sb-item{padding:9px 11px;font-size:var(--body);min-height:38px}
+  .sb-item[aria-current="page"]{background:var(--blue);color:#fff}
+  .main{background:var(--bg-grouped)}
+  .wrap{padding-left:20px;padding-right:20px}
+  .nav-in{grid-template-columns:60px 1fr 60px}
+  .wrap{padding-bottom:40px}
+  :root{ --pad:20px; }
+}
+
+/* ═══ MAC ═════════════════════════════════════════════════════════════
+   designing-for-macos.md: pointer and keyboard, denser, 13pt base.
+   Every toolbar item is reachable from the menu bar in a real build;
+   here the shortcuts are shown in the sidebar so the mapping is
+   visible. the-menu-bar.md. ───────────────────────────────────────── */
+@media (min-width:1180px) and (pointer:fine){
+  :root{
+    --body:0.8125rem;      /* 13pt is the macOS default */
+    --headline:0.8125rem;
+    --footnote:0.6875rem;
+    --subhead:0.75rem;
+    --caption2:0.6875rem;
+    --largeTitle:1.6875rem;
+    --title3:1.0625rem;
+    --nav:52px;
+    --radius:8px;
+    --pad:16px;
+  }
+  body{letter-spacing:0}
+  .sidebar{width:228px;background:transparent;-webkit-backdrop-filter:blur(40px);backdrop-filter:blur(40px)}
+  /* Room for the traffic lights. windows.md */
+  .sb-h:first-child{padding-top:30px}
+  .sb-item{min-height:28px;padding:5px 9px;border-radius:6px}   /* 28pt default */
+  .sb-item[aria-current="page"]{background:var(--blue);color:#fff}
+  .sb-item svg{width:17px;height:17px}
+  /* Pointer feedback on everything interactive. */
+  .sb-item:hover{background:rgba(120,120,128,.16)}
+  .sb-item[aria-current="page"]:hover{background:var(--blue)}
+  button.cell:hover,button.lot:hover{background:rgba(120,120,128,.08)}
+  .btn{min-height:28px;padding:5px 14px;border-radius:6px;font-weight:500}
+  .btn:hover{filter:brightness(1.08)}
+  .seg button{min-height:24px}
+  .cell{min-height:28px;padding:7px var(--pad)}
+  .lot{padding:10px var(--pad) 12px}
+  .wrap{max-width:820px;padding-left:24px;padding-right:24px}
+  .large-title{padding:2px 0 6px}
+  .tabbar{display:none}
+  .nav.stuck{box-shadow:0 .5px 0 var(--glass-line)}
+  .k{display:inline}
+}
+.k{display:none}
+
+/* ═══ LARGE TEXT ══════════════════════════════════════════════════════
+   An em width query measures the viewport against the reader's own text
+   size, so this fires when text is large relative to the screen.
+   typography.md > Supporting Dynamic Type. ────────────────────────── */
+@media (max-width:17em){
+  .tabbar .tl{display:none}
+  .tabbar svg{width:30px;height:30px}
+  .lot-top{flex-direction:column;align-items:flex-start;gap:1px}
+  .nav-title{font-size:var(--footnote)}
+}
+
+/* ═══ MOTION ══════════════════════════════════════════════════════════ */
+.screen{animation:push var(--t-move) var(--spring) both}
+@keyframes push{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* motion.md > "Make motion optional." Everything below still works. */
+@media (prefers-reduced-motion:reduce){
+  .screen{animation:none}
+  *,*::before,*::after{
+    animation-duration:.01ms !important;transition-duration:.01ms !important;
+  }
+}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+</style>
+
+<div class="app">
+  <div class="row">
+    <nav class="sidebar" id="sidebar" aria-label="Sections"></nav>
+    <div class="pane">
+      <header class="nav" id="nav">
+        <div class="nav-in">
+          <button class="nav-btn" id="back" hidden>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+                 stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m14.5 5-7 7 7 7"/></svg>
+            <span id="backlabel"></span>
+          </button>
+          <div class="nav-title" id="navtitle"></div>
+          <button class="nav-btn trail" id="ask" aria-label="Ask the desk">
+            <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor"
+                 stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-5a8.2 8.2 0 0 1-.9-3.7A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/></svg>
+          </button>
+        </div>
+      </header>
+      <main class="main" id="main" tabindex="-1">
+        <div class="wrap" id="view"></div>
+      </main>
+      <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"generated_at":"2026-09-11T12:05:58+00:00","coverage":{"lots":28083,"artists_tracked":267,"from":"2000-11-24","houses":["Saffronart","AstaGuru","Christie's","Pundole's","Bonhams"]},"events":[{"house":"Saffronart","title":"Friday Five","starts":"2026-09-11","kind":"Online sale","city":null},{"house":"Giftex","title":"Art","starts":"2026-09-16","kind":null,"city":null},{"house":"Christie's","title":"South Asian Modern + Contemporary Art","starts":"2026-09-16","kind":"Live sale","city":"New York"},{"house":"Giftex","title":"Watches & Jewellery","starts":"2026-09-21","kind":null,"city":null},{"house":"Pundole's","title":"The Fine Art Sale (M0067)","starts":"2026-09-24","kind":"Live sale","city":"Hamilton House, Mumbai"},{"house":"Saffronart","title":"Friday Five","starts":"2026-09-25","kind":"Online sale","city":null},{"house":"AstaGuru","title":"Theme auction","starts":"2026-09-25","kind":"Online sale","city":"Mumbai"},{"house":"AstaGuru","title":"ManiFest","starts":"2026-09-27","kind":"Online sale","city":"Mumbai"},{"house":"AstaGuru","title":"Masters","starts":"2026-09-29","kind":"Online sale","city":"Mumbai"},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-02","kind":"Online sale","city":null},{"house":"Saffronart","title":"Absolute Tuesdays","starts":"2026-10-06","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-09","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-16","kind":"Online sale","city":null},{"house":"Saffronart","title":"Absolute Tuesdays","starts":"2026-10-27","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-30","kind":"Online sale","city":null},{"house":"Saffronart","title":"Framing India: An Exhibition Of Modern Indian Art","starts":"2026-11-11","kind":"Online sale","city":null},{"house":"Saffronart","title":"Winter Online Auction","starts":"2026-12-09","kind":"Online sale","city":null}],"artists":{"s h raza":{"name":"S H Raza","stats":{"high":"₹51.8 cr","median_12mo":"₹1.39 cr","median_all":"₹38 lakh","lots_12mo":54,"sold_12mo":54,"lots_total":1065,"delta_12mo":125.9,"above_high_rate":62,"sell_through":96}},"jamini roy":{"name":"Jamini Roy","stats":{"high":"₹4.63 cr","median_12mo":"₹22 lakh","median_all":"₹11 lakh","lots_12mo":61,"sold_12mo":61,"lots_total":765,"delta_12mo":60.1,"above_high_rate":72,"sell_through":95}},"k h ara":{"name":"K. H. Ara","stats":{"high":"₹3.22 cr","median_12mo":"₹37 lakh","median_all":"₹14 lakh","lots_12mo":40,"sold_12mo":39,"lots_total":288,"delta_12mo":-9.2,"above_high_rate":77,"sell_through":99}},"m f husain":{"name":"M F Husain","stats":{"high":"₹118.7 cr","median_12mo":"₹1.92 cr","median_all":"₹34 lakh","lots_12mo":127,"sold_12mo":127,"lots_total":1882,"delta_12mo":54.3,"above_high_rate":64,"sell_through":94}},"k k hebbar":{"name":"K K Hebbar","stats":{"high":"₹2.90 cr","median_12mo":"₹23 lakh","median_all":"₹15 lakh","lots_12mo":27,"sold_12mo":26,"lots_total":232,"delta_12mo":95.3,"above_high_rate":62,"sell_through":98}},"satish gujral":{"name":"Satish Gujral","stats":{"high":"₹2.09 cr","median_12mo":"₹54 lakh","median_all":"₹19 lakh","lots_12mo":19,"sold_12mo":19,"lots_total":165,"delta_12mo":33.4,"above_high_rate":72,"sell_through":97}},"krishen khanna":{"name":"Krishen Khanna","stats":{"high":"₹10.2 cr","median_12mo":"₹47 lakh","median_all":"₹12 lakh","lots_12mo":52,"sold_12mo":52,"lots_total":712,"delta_12mo":74.2,"above_high_rate":56,"sell_through":98}},"sakti burman":{"name":"Sakti Burman","stats":{"high":"₹7.20 cr","median_12mo":"₹95 lakh","median_all":"₹16 lakh","lots_12mo":25,"sold_12mo":25,"lots_total":297,"delta_12mo":45.2,"above_high_rate":65,"sell_through":92}},"t vaikuntam":{"name":"T Vaikuntam","stats":{"high":"₹2.96 cr","median_12mo":"₹15 lakh","median_all":"₹12 lakh","lots_12mo":35,"sold_12mo":35,"lots_total":352,"delta_12mo":22.8,"above_high_rate":66,"sell_through":95}},"f n souza":{"name":"F. N. Souza","stats":{"high":"₹40.7 cr","median_12mo":"₹38 lakh","median_all":"₹9.2 lakh","lots_12mo":117,"sold_12mo":117,"lots_total":2214,"delta_12mo":72.3,"above_high_rate":66,"sell_through":94}},"b prabha":{"name":"B. Prabha","stats":{"high":"₹2.20 cr","median_12mo":"₹45 lakh","median_all":"₹18 lakh","lots_12mo":26,"sold_12mo":26,"lots_total":316,"delta_12mo":38.2,"above_high_rate":75,"sell_through":99}},"anjolie ela menon":{"name":"Anjolie Ela Menon","stats":{"high":"₹1.95 cr","median_12mo":"₹21 lakh","median_all":"₹15 lakh","lots_12mo":15,"sold_12mo":15,"lots_total":209,"delta_12mo":35.2,"above_high_rate":68,"sell_through":88}}},"lots":[{"artist":"Chintan Upadhyay","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":150000.0,"hi":200000.0,"price":96000.0,"cur":"₹","vs":{"dir":"below","pct":36}},{"artist":"S Harshavardhana","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":180000.0,"hi":220000.00000000003,"price":420000.0,"cur":"₹","vs":{"dir":"above","pct":91}},{"artist":"Rekha Rodwittiya","title":"Small divides can create big spaces over time","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":54000.0,"cur":"₹","vs":null},{"artist":"Amitava Das","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":30000.0,"hi":50000.0,"price":21600.0,"cur":"₹","vs":{"dir":"below","pct":28}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":78000.0,"cur":"₹","vs":{"dir":"above","pct":30}},{"artist":"T Vaikuntam","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":24000.0,"cur":"₹","vs":{"dir":"below","pct":40}},{"artist":"Jyoti Bhatt","title":"The Tree","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":60000.0,"cur":"₹","vs":null},{"artist":"Akhilesh","title":"Red Untitled Script","house":"Saffronart","medium":null,"size":null,"lo":200000.0,"hi":300000.0,"price":340000.0,"cur":"₹","vs":{"dir":"above","pct":12}},{"artist":"Shamshad Husain","title":null,"house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":24000.0,"cur":"₹","vs":{"dir":"below","pct":60}},{"artist":"M. Sivanesan","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":30000.0,"cur":"₹","vs":{"dir":"below","pct":50}},{"artist":"Lalu Prasad Shaw","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":33600.0,"cur":"₹","vs":{"dir":"below","pct":33}},{"artist":"Rabin Mondal","title":"Face IV","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":38400.0,"cur":"₹","vs":{"dir":"below","pct":23}},{"artist":"Piraji Sagara","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":300000.0,"cur":"₹","vs":{"dir":"above","pct":275}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":120000.0,"hi":150000.0,"price":96000.0,"cur":"₹","vs":{"dir":"below","pct":20}},{"artist":"K. G. Subramanyan","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":30000.0,"hi":50000.0,"price":54000.0,"cur":"₹","vs":{"dir":"above","pct":8}},{"artist":"Jogen Chowdhury","title":"Smiling Lady","house":"Saffronart","medium":null,"size":null,"lo":150000.0,"hi":200000.0,"price":120000.0,"cur":"₹","vs":{"dir":"below","pct":20}},{"artist":"Farhad Hussain","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":250000.0,"hi":350000.0,"price":72000.0,"cur":"₹","vs":{"dir":"below","pct":71}},{"artist":"K K Hebbar","title":"Untitled (Mr Manchi Krishna Rau)","house":"Bonhams","medium":"Oil on canvas, framed","size":"17.7 x 13.7 in","lo":509999.99999999994,"hi":770000.0,"price":690000.0,"cur":"₹","vs":null},{"artist":"K K Hebbar","title":"Untitled (Mr Manchi Srinivas Rau)","house":"Bonhams","medium":"Oil on canvas, framed","size":"27.6 x 21.9 in","lo":509999.99999999994,"hi":770000.0,"price":490000.00000000006,"cur":"₹","vs":{"dir":"below","pct":4}},{"artist":"Chittaprosad Bhattacharya","title":"Chittaprosad, A Lifetime in India: Linocuts and Poems","house":"Bonhams","medium":"text with a portfolio of thirty unbound linocut reproductions on paper","size":"8.3 x 8.3 in","lo":190000.0,"hi":260000.0,"price":160000.0,"cur":"₹","vs":{"dir":"below","pct":15}},{"artist":"Avinash Chandra","title":"Untitled (Musicians)","house":"Bonhams","medium":"Etching on paper","size":"22.4 x 28.0 in","lo":7708800000.0,"hi":100000.0,"price":110000.00000000001,"cur":"₹","vs":{"dir":"above","pct":4}},{"artist":"Sadequain","title":"Untitled (Portrait of a man)","house":"Bonhams","medium":"felt tip on paper","size":"18.5 x 11.4 in","lo":130000.0,"hi":190000.0,"price":150000.0,"cur":"₹","vs":null},{"artist":"M. Sivanesan","title":"Untitled (Girl)","house":"Bonhams","medium":"oil on board, framed","size":"23.0 x 11.5 in","lo":130000.0,"hi":190000.0,"price":150000.0,"cur":"₹","vs":null},{"artist":"Lalu Prasad Shaw","title":"Babu with Biwi","house":"Bonhams","medium":"tempera on board, framed","size":"19.7 x 13.9 in","lo":260000.0,"hi":390000.0,"price":310000.0,"cur":"₹","vs":null},{"artist":"K. H. Ara","title":"Untitled (Nude)","house":"Bonhams","medium":"watercolour on paper, framed","size":"29.3 x 21.3 in","lo":1500000.0,"hi":2300000.0,"price":1800000.0,"cur":"₹","vs":null},{"artist":"George Keyt","title":"Untitled (Two Women)","house":"Bonhams","medium":"oil on canavs, framed","size":"19.4 x 17.5 in","lo":1900000.0,"hi":2600000.0,"price":2100000.0,"cur":"₹","vs":null},{"artist":"Jyoti Bhatt","title":"Fortress of Shri Jyoti Bhatt","house":"Bonhams","medium":"etching","size":"20.5 x 10.2 in","lo":100000.0,"hi":150000.0,"price":120000.0,"cur":"₹","vs":null},{"artist":"Laxma Goud","title":"Untitled","house":"Bonhams","medium":"Signed and dated 'K. Laxma Goud 1972' lower right. Titled ETCHING, ZINC AP 1/6 lower left","size":"5.3 x 13.1 in","lo":130000.0,"hi":190000.0,"price":160000.0,"cur":"₹","vs":null},{"artist":"Senaka Senanayake","title":"Untitled (Woman and Bird)","house":"Bonhams","medium":"ink on paper, framed","size":"15.7 x 11.3 in","lo":130000.0,"hi":190000.0,"price":229999.99999999997,"cur":"₹","vs":{"dir":"above","pct":19}},{"artist":"Avinash Chandra","title":"Untitled (Figures)","house":"Bonhams","medium":"etching on paper","size":"8.9 x 8.6 in","lo":64240.0,"hi":89936.0,"price":82227.0,"cur":"₹","vs":null},{"artist":"S H Raza","title":"Panch Tatva","house":"Bonhams","medium":"serigraph on paper","size":"40.0 x 74.0 in","lo":320000.0,"hi":450000.0,"price":330000.0,"cur":"₹","vs":null},{"artist":"Nandalal Bose","title":"Untitled (Tree)","house":"Bonhams","medium":"ink on rice paper, framed","size":"14.1 x 19.4 in","lo":1000000.0,"hi":1500000.0,"price":2000000.0,"cur":"₹","vs":{"dir":"above","pct":28}},{"artist":"Nandalal Bose","title":"Untitled (Four Trees and a stream)","house":"Bonhams","medium":"ink on rice paper, framed","size":"14.4 x 18.4 in","lo":1000000.0,"hi":1500000.0,"price":1300000.0,"cur":"₹","vs":null},{"artist":"K. S. Radhakrishnan","title":null,"house":"Saffronart","medium":null,"size":null,"lo":300000.0,"hi":400000.0,"price":380000.0,"cur":"₹","vs":null},{"artist":"S H Raza","title":"Arbre Et Bindu","house":"Saffronart","medium":null,"size":null,"lo":220000.00000000003,"hi":280000.0,"price":140000.0,"cur":"₹","vs":{"dir":"below","pct":35}},{"artist":"F. N. Souza","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":220000.00000000003,"hi":280000.0,"price":300000.0,"cur":"₹","vs":{"dir":"above","pct":7}},{"artist":"Neeraj Goswami","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":20000.0,"hi":30000.0,"price":38400.0,"cur":"₹","vs":{"dir":"above","pct":28}},{"artist":"Prabhakar M Kolte","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":45600.0,"cur":"₹","vs":null},{"artist":"Manu Parekh","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":16800.0,"cur":"₹","vs":{"dir":"below","pct":66}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":26400.0,"cur":"₹","vs":{"dir":"below","pct":47}}]};
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* SF Symbols are a system resource, so these are weight-matched stand-ins
+   drawn on the same 24px grid. icons.md — one visual language, vector,
+   labelled. */
+const ICON = {
+  today:'<path d="M8 2v3M16 2v3"/><rect x="3" y="4.5" width="18" height="17" rx="3.5"/><path d="M3 9.5h18"/>',
+  results:'<path d="M3.5 20.5V4M3.5 20.5H21"/><path d="m7.5 16 4-4.5 3.2 2.8L20.5 8"/>',
+  artists:'<circle cx="12" cy="8" r="3.6"/><path d="M5 20.2a7 7 0 0 1 14 0"/>',
+  calendar:'<rect x="3" y="4.5" width="18" height="17" rx="3.5"/><path d="M3 9.5h18M8 2v3M16 2v3"/><circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none"/>',
+  search:'<circle cx="11" cy="11" r="7.2"/><path d="m20.4 20.4-3.9-3.9"/>',
+  chev:'<path d="m9 5 7 7-7 7"/>'
+};
+const I = (k,s) => `<svg viewBox="0 0 24 24" width="${s||26}" height="${s||26}" fill="none" stroke="currentColor"
+  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+const TABS = [
+  { id:"today",    label:"Today",    icon:"today",    key:"⌘1" },
+  { id:"results",  label:"Results",  icon:"results",  key:"⌘2" },
+  { id:"artists",  label:"Artists",  icon:"artists",  key:"⌘3" },
+  { id:"calendar", label:"Calendar", icon:"calendar", key:"⌘4" },
+  { id:"search",   label:"Search",   icon:"search",   key:"⌘5" }
+];
+const TITLE = { today:"Today", results:"Results", artists:"Artists",
+                calendar:"Calendar", search:"Search", artist:"" };
+
+let S = { screen:"today", back:null, artist:null, q:"", filter:"all" };
+
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const d0 = DATA.generated_at.slice(0,10);
+
+function money(v,cur){
+  cur = cur || "₹";
+  if (cur !== "₹") return cur + Math.round(v).toLocaleString("en-IN");
+  if (v >= 1e7) return "₹" + (v/1e7).toFixed(2) + " cr";
+  if (v >= 1e5) return "₹" + (v/1e5).toFixed(2) + " L";
+  return "₹" + Math.round(v).toLocaleString("en-IN");
+}
+const fmtDate = iso => { const d=new Date(iso+"T00:00:00");
+  return DAYS[d.getDay()]+" "+d.getDate()+" "+MONTHS[d.getMonth()]; };
+
+function gauge(lot){
+  const {lo,hi,price,cur} = lot;
+  const span=(hi-lo)||hi*0.2, d1=Math.min(lo,price)-span*0.55, d2=Math.max(hi,price)+span*0.55;
+  const pct=v=>((v-d1)/(d2-d1))*100;
+  const vs=lot.vs;
+  let cls,glyph,read;
+  if(!vs){ cls="in"; glyph="●"; read="Sold <b>within</b> estimate"; }
+  else if(vs.dir==="above"){ cls="up"; glyph="▲"; read=`<b>${vs.pct}% above</b> high estimate`; }
+  else { cls="down"; glyph="▼"; read=`<b>${vs.pct}% below</b> low estimate`; }
+  const label = `Hammer ${money(price,cur)} against an estimate of ${money(lo,cur)} to ${money(hi,cur)}. `
+    + (vs ? `${vs.pct} percent ${vs.dir} the ${vs.dir==="above"?"high":"low"} estimate.` : "Within the estimate.");
+  return `<div class="gauge">
+    <div class="gauge-t" role="img" aria-label="${esc(label)}">
+      <div class="gauge-ax"></div>
+      <div class="gauge-band" style="left:${pct(lo)}%;width:${pct(hi)-pct(lo)}%"></div>
+      <div class="gauge-m" style="left:calc(${pct(price)}% - 2px)"></div>
+    </div>
+    <div class="gauge-sc" aria-hidden="true"><span>${esc(money(lo,cur))}</span><span>${esc(money(hi,cur))}</span></div>
+    <div class="gauge-r ${cls}"><span class="g" aria-hidden="true">${glyph}</span><span>${read}</span></div>
+  </div>`;
+}
+
+const lotCell = l => `<div class="lot">
+  <div class="lot-top">
+    <span class="lot-a">${esc(l.artist||"Unattributed")}</span>
+    <span class="lot-p">${esc(money(l.price,l.cur))}</span>
+  </div>
+  <div class="lot-s">${esc(l.title||"Untitled")} · ${esc(l.house)}</div>
+  ${gauge(l)}
+</div>`;
+
+function head(title, sub){
+  return `<h1 class="large-title">${esc(title)}</h1>${sub?`<p class="large-sub">${esc(sub)}</p>`:""}`;
+}
+
+function viewToday(){
+  const lots=DATA.lots, above=lots.filter(l=>l.vs&&l.vs.dir==="above"), below=lots.filter(l=>l.vs&&l.vs.dir==="below");
+  const soon=DATA.events.filter(e=>e.starts>=d0);
+  const top=[...lots].sort((a,b)=>(b.vs?b.vs.pct:0)-(a.vs?a.vs.pct:0)).slice(0,3);
+  return `<div class="screen">
+    ${head("Today", fmtDate(d0) + " · updated " + DATA.generated_at.slice(11,16) + " UTC")}
+    <div class="group">
+      <div class="cell"><span class="cell-main"><span class="cell-t">Results overnight</span></span><span class="cell-v">${lots.length}</span></div>
+      <div class="cell"><span class="cell-main"><span class="cell-t">Above high estimate</span></span><span class="cell-v">${above.length}</span></div>
+      <div class="cell"><span class="cell-main"><span class="cell-t">Below low estimate</span></span><span class="cell-v">${below.length}</span></div>
+      <button class="cell" data-go="calendar"><span class="cell-main"><span class="cell-t">Sales ahead</span></span>
+        <span class="cell-v">${soon.length}</span><span class="chev">${I("chev",15)}</span></button>
+    </div>
+    <div class="group-h">Furthest from estimate</div>
+    <div class="group">${top.map(lotCell).join("")}</div>
+    <div class="btnrow">
+      <button class="btn btn-prom" data-go="results">See all ${lots.length} results</button>
+    </div>
+    <p class="foot">Sandbox build. Real data, ${DATA.coverage.lots.toLocaleString("en-IN")} lots behind it.</p>
+  </div>`;
+}
+
+function viewResults(){
+  const f=S.filter, all=DATA.lots;
+  const lots = f==="above" ? all.filter(l=>l.vs&&l.vs.dir==="above")
+             : f==="below" ? all.filter(l=>l.vs&&l.vs.dir==="below") : all;
+  return `<div class="screen">
+    ${head("Results", fmtDate(d0))}
+    <div class="seg" role="group" aria-label="Filter">
+      <button data-filter="all" aria-pressed="${f==="all"}">All</button>
+      <button data-filter="above" aria-pressed="${f==="above"}">Above</button>
+      <button data-filter="below" aria-pressed="${f==="below"}">Below</button>
+    </div>
+    ${lots.length?`<div class="group">${lots.map(lotCell).join("")}</div>`
+      :`<div class="empty"><b>Nothing in this band</b>Every lot landed inside its estimate. Switch to All.</div>`}
+  </div>`;
+}
+
+function viewArtists(){
+  const keys=Object.keys(DATA.artists);
+  return `<div class="screen">
+    ${head("Artists", `${keys.length} moving this week of ${DATA.coverage.artists_tracked} tracked`)}
+    <div class="group">${keys.map(k=>{
+      const a=DATA.artists[k], s=a.stats;
+      return `<button class="cell" data-artist="${esc(k)}">
+        <span class="cell-main"><span class="cell-t">${esc(a.name)}</span>
+        <span class="cell-s">${esc(s.lots_total)} lots · high ${esc(s.high||"—")}</span></span>
+        <span class="cell-v">${esc(s.median_12mo||"—")}</span>
+        <span class="chev">${I("chev",15)}</span></button>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+function viewArtist(){
+  const a=DATA.artists[S.artist]; if(!a) return viewArtists();
+  const s=a.stats;
+  const lots=DATA.lots.filter(l=>(l.artist||"").toLowerCase()===a.name.toLowerCase());
+  const cell=(k,v)=>`<div class="cell"><span class="cell-main"><span class="cell-t">${esc(k)}</span></span><span class="cell-v">${esc(v??"—")}</span></div>`;
+  return `<div class="screen">
+    ${head(a.name, `${s.lots_total} lots on record since ${DATA.coverage.from.slice(0,4)}`)}
+    <div class="group">
+      ${cell("Highest result",s.high)}
+      ${cell("Median, 12 months",s.median_12mo)}
+      ${cell("Median, all time",s.median_all)}
+      ${cell("Lots, 12 months",s.lots_12mo)}
+      ${cell("Beat high estimate",s.above_high_rate!=null?s.above_high_rate+"%":null)}
+    </div>
+    <div class="group-h">In last night's batch</div>
+    ${lots.length?`<div class="group">${lots.map(lotCell).join("")}</div>`
+      :`<div class="empty"><b>No lots last night</b>The figures above come from the full record.</div>`}
+  </div>`;
+}
+
+function viewCalendar(){
+  const up=DATA.events.filter(e=>e.starts>=d0).sort((a,b)=>a.starts.localeCompare(b.starts));
+  return `<div class="screen">
+    ${head("Calendar", `${up.length} sales ahead across ${new Set(up.map(e=>e.house)).size} houses`)}
+    <div class="group">${up.map(e=>{
+      const d=new Date(e.starts+"T00:00:00");
+      return `<div class="cell"><span class="cell-main">
+        <span class="cell-t">${esc(e.title)}</span>
+        <span class="cell-s">${esc(e.house)}${e.kind?" · "+esc(e.kind):""}</span></span>
+        <span class="cell-v">${d.getDate()} ${MONTHS[d.getMonth()]}</span></div>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+function viewSearch(){
+  const q=S.q.trim().toLowerCase();
+  const hits = q.length>1 ? DATA.lots.filter(l=>
+    (l.artist||"").toLowerCase().includes(q)||(l.title||"").toLowerCase().includes(q)||
+    (l.house||"").toLowerCase().includes(q)) : [];
+  return `<div class="screen">
+    ${head("Search")}
+    <div class="search">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+        stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7.2"/><path d="m20.4 20.4-3.9-3.9"/></svg>
+      <label class="sr" for="q">Search artists, works and houses</label>
+      <input id="q" type="search" inputmode="search" autocomplete="off" placeholder="Artists, works, houses" value="${esc(S.q)}">
+    </div>
+    ${q.length>1
+      ? (hits.length?`<div class="group-h">${hits.length} result${hits.length===1?"":"s"}</div>
+                      <div class="group">${hits.map(lotCell).join("")}</div>`
+                    :`<div class="empty"><b>No results</b>Searches last night's ${DATA.lots.length} lots. Try Raza or Saffronart.</div>`)
+      : `<div class="empty"><b>Search results</b>${DATA.lots.length} lots from ${new Set(DATA.lots.map(l=>l.house)).size} houses.</div>`}
+  </div>`;
+}
+
+const VIEWS={today:viewToday,results:viewResults,artists:viewArtists,artist:viewArtist,calendar:viewCalendar,search:viewSearch};
+const tabFor = s => s==="artist" ? "artists" : s;
+
+function render(keepFocus){
+  const cur=tabFor(S.screen);
+  document.getElementById("view").innerHTML=(VIEWS[S.screen]||viewToday)();
+
+  document.getElementById("tabbar").innerHTML=TABS.map(t=>`
+    <button data-go="${t.id}" aria-label="${t.label}" aria-current="${cur===t.id?"page":"false"}">
+      <span class="ic">${I(t.icon)}</span><span class="tl">${t.label}</span></button>`).join("");
+
+  document.getElementById("sidebar").innerHTML=
+    `<div class="sb-h">AG Newsroom</div>`+TABS.map(t=>`
+      <button class="sb-item" data-go="${t.id}" aria-current="${cur===t.id?"page":"false"}">
+        ${I(t.icon,22)}<span>${t.label}</span><span class="k">${t.key}</span></button>`).join("");
+
+  const title=S.screen==="artist"&&DATA.artists[S.artist]?DATA.artists[S.artist].name:(TITLE[S.screen]||"");
+  document.getElementById("navtitle").textContent=title;
+  const back=document.getElementById("back");
+  back.hidden=!S.back;
+  document.getElementById("backlabel").textContent=S.back?(TITLE[S.back]||"Back"):"";
+  document.title=title+" — AG Newsroom";
+  if(keepFocus){const el=document.getElementById("q");if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}}
+  onScroll();
+}
+
+/* The nav bar tracks the scroll position rather than animating on a
+   timer, so the large title hands off to the inline title exactly as it
+   leaves the screen. motion.md > feedback that follows the gesture. */
+const main=document.getElementById("main"), nav=document.getElementById("nav");
+function onScroll(){ nav.classList.toggle("stuck", main.scrollTop > 34); }
+main.addEventListener("scroll", onScroll, {passive:true});
+
+function go(id){
+  if(id===S.screen){ main.scrollTo({top:0,behavior:"smooth"}); return; }
+  S.back=null; S.screen=id; main.scrollTop=0; render();
+}
+
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-go]"); if(g) return go(g.dataset.go);
+  const a=e.target.closest("[data-artist]");
+  if(a){ S.artist=a.dataset.artist; S.back="artists"; S.screen="artist"; main.scrollTop=0; render(); return; }
+  const f=e.target.closest("[data-filter]");
+  if(f){ S.filter=f.dataset.filter; render(); return; }
+  if(e.target.closest("#back")){ const b=S.back; S.back=null; S.screen=b; render(); return; }
+});
+document.addEventListener("input",e=>{ if(e.target.id==="q"){ S.q=e.target.value; render(true); } });
+
+/* Keyboard: ⌘1–⌘5 switch sections, Esc goes back. keyboards.md —
+   standard shortcuts, few custom ones. */
+document.addEventListener("keydown",e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key>="1"&&e.key<="5"){
+    e.preventDefault(); go(TABS[+e.key-1].id); return;
+  }
+  if(e.key==="Escape"&&S.back){ const b=S.back; S.back=null; S.screen=b; render(); }
+});
+
+render();
+</script>

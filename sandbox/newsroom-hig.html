@@ -1,0 +1,794 @@
+<meta charset="utf-8">
+<title>AG Newsroom — HIG sandbox</title>
+<!-- maximum-scale is deliberately ABSENT: the shipping app pins it to 1, which
+     blocks pinch-zoom. accessibility.md > Vision asks for 200% enlargement. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AG Sandbox">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════
+   AG NEWSROOM — HIG SANDBOX
+
+   This keeps the desk's own identity — warm paper, Playfair, gold — and
+   fixes only what measurement showed to be broken. The skill's own rule:
+   "Don't flatten the personality. Guidelines exist to make apps usable,
+   not identical."
+
+   What changed is WHERE each thing is used, not what the app is made of.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ---- Colour: the desk's palette, three values corrected ----------- */
+  --paper:#FBF9F6;       /* unchanged — the warm ground is the identity   */
+  --raised:#FFFFFF;
+  --ink:#1A1A1A;         /* 16.6:1                                        */
+  --ink-2:#5A575A;       /* was #6B686B at 13px;  now 6.8:1               */
+  --ink-3:#6B686B;       /* the desk's muted, 5.2:1 — tertiary only       */
+  --gold:#B8860B;        /* unchanged — fills and rules, 3.1:1 as UI      */
+  --gold-ink:#7E6114;    /* was #8A6A16 (4.37:1 on tint, failed) -> 5.1:1 */
+  --tint:#F5F0E4;        /* callout ground                                */
+  --rule:#E3DDD1;        /* hairline                                      */
+  --rule-2:#CFC6B4;      /* heavier rule, section heads                   */
+
+  --glass:rgba(251,249,246,.72);
+  --glass-line:rgba(26,26,26,.10);
+  --glass-blur:saturate(1.35) blur(24px);
+
+  /* ---- Type ----------------------------------------------------------
+     Playfair stays. It is the desk's voice and it is earned: this is an
+     auction product and the catalogue is a printed object. What changes
+     is that it no longer sets 9–11px uppercase CONTROLS. Navigation and
+     controls go to the platform face; the serif keeps display, names and
+     figures. ------------------------------------------------------- */
+  --display:"Playfair Display", "Iowan Old Style", Georgia, serif;
+  --ui:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", sans-serif;
+
+  --t-body:1.0625rem;   /* 17px — iOS default */
+  --t-sub:0.9375rem;    /* 15px */
+  --t-small:0.8125rem;  /* 13px */
+  --t-micro:0.6875rem;  /* 11px — the floor, never below */
+  --t-h1:1.9375rem;     /* 31px */
+  --t-h2:1.3125rem;     /* 21px */
+
+  --pad:22px;
+  --r:8px; --r-sm:5px;
+  --bar:52px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+  --ease:cubic-bezier(.32,.72,0,1);
+  --fast:.16s; --slow:.32s;
+}
+
+/* The desk's dark values, kept. No in-app appearance switch —
+   dark-mode.md > Best practices. */
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#151412; --raised:#1E1D1A;
+    --ink:#F2EEE7;      /* 15.9:1 */
+    --ink-2:#B3AEA7;    /*  8.4:1 */
+    --ink-3:#A19D97;    /*  6.8:1 */
+    --gold:#D3A43C; --gold-ink:#E2BC6B;   /* 10.2:1 */
+    --tint:#2A2620; --rule:#332F29; --rule-2:#4A443B;
+    --glass:rgba(21,20,18,.70);
+    --glass-line:rgba(242,238,231,.12);
+  }
+}
+@media (prefers-contrast:more){
+  :root{ --ink-2:#3B393B; --ink-3:#464446; --gold-ink:#5F4910; --rule:#B5AC99; --rule-2:#8C8370; }
+}
+@media (prefers-contrast:more) and (prefers-color-scheme:dark){
+  :root{ --ink-2:#DDD8D1; --ink-3:#CBC6BF; --gold-ink:#F0D391; --rule:#6A6459; --rule-2:#8A8376; }
+}
+/* liquid-glass.md > Review checklist 5: Reduce Transparency gets an
+   opaque fallback. */
+@media (prefers-reduced-transparency:reduce){
+  :root{ --glass:var(--paper); --glass-blur:none; }
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+img{max-width:100%;display:block}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--ui);font-size:var(--t-body);line-height:1.45;
+  color:var(--ink);background:var(--paper);-webkit-font-smoothing:antialiased;
+}
+:focus-visible{outline:2.5px solid var(--gold-ink);outline-offset:2px;border-radius:3px}
+
+/* ── SHELL ───────────────────────────────────────────────────────────── */
+.app{display:flex;flex-direction:column;height:100dvh;overflow:hidden}
+.body-row{flex:1;display:flex;min-height:0}
+.main{flex:1;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.wrap{padding:0 var(--pad) calc(44px + var(--safe-b))}
+
+.topbar{
+  position:sticky;top:0;z-index:30;padding-top:var(--safe-t);
+  background:var(--glass);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border-bottom:1px solid var(--glass-line);
+}
+.topbar-in{
+  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;
+  padding:0 7px;min-height:var(--bar);
+}
+/* The wordmark keeps the desk's letterspaced serif — it is a masthead,
+   which is display text, not a control. */
+.wordmark{
+  text-align:center;font-family:var(--display);font-weight:700;
+  font-size:0.9375rem;letter-spacing:.2em;text-transform:uppercase;line-height:1.15;
+}
+.wordmark span{
+  display:block;font-family:var(--ui);font-size:var(--t-micro);
+  font-weight:400;letter-spacing:.02em;text-transform:none;color:var(--ink-3);margin-top:2px;
+}
+.iconbtn{
+  width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  color:var(--gold-ink);border-radius:var(--r-sm);transition:background var(--fast) var(--ease);
+}
+.iconbtn:active{background:var(--tint)}
+/* visibility, not display: the button must hold its grid cell or the
+   masthead falls into the 44px column and wraps. */
+.iconbtn[hidden]{display:flex;visibility:hidden}
+
+/* Content fades where it meets the bar instead of hitting a hard rule.
+   liquid-glass.md > Review checklist 6. */
+.edge{
+  position:sticky;top:0;height:20px;z-index:20;
+  margin:0 calc(var(--pad) * -1) -20px;
+  background:linear-gradient(to bottom,var(--paper),transparent);
+  pointer-events:none;
+}
+
+/* ── TAB BAR ─────────────────────────────────────────────────────────── */
+.tabbar{
+  display:flex;flex-shrink:0;z-index:30;
+  background:var(--glass);
+  -webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+  border-top:1px solid var(--glass-line);padding-bottom:var(--safe-b);
+}
+.tabwrap{position:relative;display:flex;flex:1}
+.tabbar button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;min-height:50px;padding:7px 4px;color:var(--ink-3);
+  transition:color var(--fast) var(--ease);
+}
+/* 11px, sentence case, platform face. Was 9px uppercase Playfair at
+   .03em — typography.md > Ensuring legibility puts the iOS floor at 11pt. */
+.tabbar .tl{font-size:var(--t-micro);font-weight:500;line-height:1;letter-spacing:0}
+.tabbar button[aria-current="page"]{color:var(--gold-ink)}
+.tabbar svg{width:23px;height:23px}
+
+/* ── SIDEBAR at regular width ───────────────────────────────────────── */
+.rail{display:none}
+@media (min-width:900px){
+  .tabbar{display:none}
+  .rail{
+    display:flex;flex-direction:column;gap:1px;width:234px;flex-shrink:0;
+    padding:16px 12px calc(16px + var(--safe-b));
+    border-right:1px solid var(--rule);overflow-y:auto;
+  }
+  .rail button{
+    display:flex;align-items:center;gap:12px;min-height:38px;padding:7px 12px;
+    border-radius:var(--r-sm);color:var(--ink-2);font-size:var(--t-sub);
+    transition:background var(--fast) var(--ease);
+  }
+  .rail button:hover{background:var(--tint)}
+  .rail button[aria-current="page"]{background:var(--tint);color:var(--gold-ink);font-weight:600}
+  .rail svg{width:20px;height:20px;flex-shrink:0}
+  .rail .rail-h{
+    font-family:var(--ui);font-size:var(--t-micro);color:var(--ink-3);
+    font-weight:600;padding:10px 12px 6px;
+  }
+  .wrap{max-width:700px}
+}
+
+/* ── VIEW HEAD ───────────────────────────────────────────────────────── */
+.vh{padding:24px 0 0}
+.vh .date{
+  font-family:var(--ui);font-size:var(--t-micro);color:var(--ink-3);
+  font-weight:600;display:block;margin-bottom:7px;
+}
+.vh h1{
+  font-family:var(--display);font-size:var(--t-h1);font-weight:700;
+  line-height:1.12;letter-spacing:-.018em;text-wrap:balance;
+}
+.vh p{margin-top:8px;font-size:var(--t-small);color:var(--ink-2);max-width:54ch;line-height:1.55}
+
+/* ── MORNING BRIEF — one gold rule, no box ──────────────────────────── */
+.brief{border-left:2px solid var(--gold);padding:2px 0 2px 15px;margin:22px 0 4px}
+.brief h2{
+  font-family:var(--ui);font-size:var(--t-micro);font-weight:700;
+  color:var(--gold-ink);letter-spacing:.05em;margin-bottom:5px;
+}
+.brief p{font-size:var(--t-sub);line-height:1.55}
+
+/* ── TILES — rules, not boxes ───────────────────────────────────────── */
+.tiles{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  margin:24px 0 0;
+}
+.tile{padding:14px 14px 15px 0}
+.tile + .tile{border-left:1px solid var(--rule);padding-left:14px}
+.tile .tv{
+  font-family:var(--display);font-weight:700;font-size:1.625rem;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+}
+.tile .tk{font-size:var(--t-micro);color:var(--ink-2);margin-top:5px;line-height:1.35}
+@media (max-width:340px){
+  .tiles{grid-template-columns:1fr 1fr}
+  .tile:nth-child(3){border-left:0;border-top:1px solid var(--rule)}
+}
+
+/* ── SECTION HEAD ───────────────────────────────────────────────────── */
+.sec{margin-top:32px}
+.sec-h{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  padding-bottom:9px;border-bottom:1px solid var(--rule-2);
+}
+.sec-h h2{font-family:var(--display);font-size:var(--t-h2);font-weight:700;letter-spacing:-.01em}
+.sec-h .n{font-family:var(--ui);font-size:var(--t-micro);color:var(--ink-3);white-space:nowrap}
+
+/* ── LOT ROW ────────────────────────────────────────────────────────── */
+.lots > li{list-style:none;border-bottom:1px solid var(--rule);padding:19px 0}
+.lot-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.lot-artist{font-family:var(--display);font-size:var(--t-h2);font-weight:600;line-height:1.22}
+/* Prices in the serif with tabular figures: the editorial voice doing
+   real work, and the one place a number should feel printed. */
+.lot-price{
+  font-family:var(--display);font-size:var(--t-h2);font-weight:600;
+  font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.01em;
+}
+.lot-sub{font-size:var(--t-small);color:var(--ink-2);margin-top:4px;line-height:1.5}
+.lot-meta{font-size:var(--t-micro);color:var(--ink-3);margin-top:3px}
+
+/* ── THE GAUGE — the signature element ──────────────────────────────────
+   Hammer price against the published estimate on a shared scale.
+   Meaning rides on POSITION, SHAPE and TEXT, never hue, so it survives
+   colour blindness, greyscale and Increase Contrast. It replaces the
+   shipping app's .pill, which signalled above-vs-within by colour alone
+   — color.md > Inclusive color.
+   It is drawn in ink only, which is also what keeps gold meaning one
+   thing: gold is what you can act on, nowhere else. ─────────────────── */
+.gauge{margin-top:14px;max-width:430px}
+.gauge-track{position:relative;height:24px}
+.gauge-axis{position:absolute;left:0;right:0;top:11px;height:1px;background:var(--rule-2)}
+.gauge-band{
+  position:absolute;top:5px;height:13px;
+  border:1px solid var(--ink-3);border-radius:1px;background:var(--tint);
+}
+.gauge-mark{position:absolute;top:0;height:22px;width:2px;background:var(--ink)}
+.gauge-mark::after{
+  content:"";position:absolute;left:50%;top:-1px;width:7px;height:7px;
+  background:var(--ink);transform:translateX(-50%) rotate(45deg);
+}
+.gauge-scale{
+  display:flex;justify-content:space-between;font-family:var(--ui);
+  font-size:var(--t-micro);color:var(--ink-3);
+  font-variant-numeric:tabular-nums;margin-top:2px;
+}
+.gauge-read{
+  font-size:var(--t-small);color:var(--ink-2);margin-top:8px;
+  display:flex;align-items:baseline;gap:7px;line-height:1.45;
+}
+/* 11px, not 10: the direction glyph is meaningful text and sits on the
+   same floor as everything else. typography.md > Ensuring legibility. */
+.gauge-read .g{font-size:var(--t-micro);color:var(--ink);flex-shrink:0;line-height:1.6}
+.gauge-read b{color:var(--ink);font-weight:600}
+
+/* ── ROWS ───────────────────────────────────────────────────────────── */
+.rows > *{border-bottom:1px solid var(--rule)}
+.row{
+  display:flex;width:100%;align-items:center;gap:14px;padding:17px 0;min-height:48px;
+  transition:background var(--fast) var(--ease);
+}
+.row:active{background:var(--tint)}
+.row-main{flex:1;min-width:0}
+.row-name{font-family:var(--display);font-size:var(--t-h2);font-weight:600;line-height:1.22}
+.row-sub{font-size:var(--t-small);color:var(--ink-2);margin-top:4px}
+.row-trail{
+  font-family:var(--display);font-size:var(--t-sub);color:var(--ink);text-align:right;
+  white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+.row-trail small{display:block;font-family:var(--ui);font-size:var(--t-micro);color:var(--ink-3);margin-top:2px}
+.chev{color:var(--ink-3);flex-shrink:0}
+
+/* ── CONTROLS — platform face, title-style caps, no uppercase ───────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:42px;padding:10px 17px;border-radius:var(--r-sm);
+  font-family:var(--ui);font-size:var(--t-sub);font-weight:500;
+  color:var(--gold-ink);border:1px solid var(--rule-2);
+  transition:background var(--fast) var(--ease);
+}
+.btn:hover{background:var(--tint)}
+/* One prominent button per view — buttons.md. Colour goes on the
+   BACKGROUND of the primary action, which is also the Liquid Glass rule
+   for emphasis. */
+.btn-prom{background:var(--gold);color:#FFFCF4;border-color:transparent;font-weight:600}
+@media (prefers-color-scheme:dark){ .btn-prom{color:#1A1508} }
+.btn-prom:hover{background:var(--gold);filter:brightness(1.07)}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+.seg{display:flex;gap:0;border-bottom:1px solid var(--rule-2);margin:20px 0 2px}
+.seg button{
+  flex:1;text-align:center;min-height:40px;padding:9px 6px;
+  font-family:var(--ui);font-size:var(--t-small);font-weight:500;color:var(--ink-2);
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.seg button[aria-pressed="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}
+
+.field{
+  display:flex;align-items:center;gap:9px;
+  border-bottom:1px solid var(--rule-2);padding:0 2px;min-height:46px;margin:20px 0 2px;
+}
+.field input{
+  flex:1;border:0;background:none;font:inherit;font-size:var(--t-body);color:var(--ink);
+  min-width:0;align-self:stretch;min-height:44px;   /* the whole bar is the target */
+}
+.field input::placeholder{color:var(--ink-3)}
+.field input:focus{outline:none}
+.field:focus-within{border-bottom-color:var(--gold)}
+.field svg{color:var(--ink-3);flex-shrink:0}
+
+/* ── EMPTY STATE — next step, no italics, no apology (writing.md) ───── */
+.empty{padding:28px 0;color:var(--ink-2);font-size:var(--t-sub);line-height:1.55}
+.empty b{
+  display:block;font-family:var(--display);color:var(--ink);font-weight:600;
+  font-size:var(--t-h2);margin-bottom:5px;
+}
+
+/* ── CALENDAR ───────────────────────────────────────────────────────── */
+.day{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.day-d{width:56px;flex-shrink:0;font-size:var(--t-micro);color:var(--ink-3)}
+.day-d b{
+  display:block;font-family:var(--display);color:var(--ink);
+  font-size:var(--t-sub);font-weight:600;font-variant-numeric:tabular-nums;
+}
+.day-t{font-size:var(--t-body);font-weight:500;line-height:1.35}
+.day-s{font-size:var(--t-small);color:var(--ink-2);margin-top:3px}
+.day.is-today .day-d b{color:var(--gold-ink)}
+.day.is-today .day-d::after{content:"Today";display:block;color:var(--gold-ink);font-weight:600}
+
+/* ── LARGE TEXT ──────────────────────────────────────────────────────
+   A width query in `em` measures the viewport against the READER'S text
+   size, so this fires when text is large relative to the screen — around
+   145% and up on a 390px phone — and never on a merely narrow one.
+   typography.md > Supporting Dynamic Type: "Consider adjusting your
+   layout at large font sizes ... consider using a stacked layout where
+   text appears above secondary items." ────────────────────────────── */
+@media (max-width:17em){
+  /* Five tabs cannot hold five labels at this size. Icons keep all five
+     sections reachable and each button keeps its aria-label, which is
+     the trade tab-bars.md asks for: never hide or disable a tab. */
+  .tabbar .tl{display:none}
+  .tabbar svg{width:27px;height:27px}
+  .tabbar button{min-height:52px}
+
+  /* Navigation chrome stops growing so it cannot crowd out content. */
+  .wordmark{font-size:13px;letter-spacing:.1em}
+  .wordmark span{display:none}
+
+  /* Price moves under the name instead of fighting it for the line. */
+  .lot-head{flex-direction:column;align-items:flex-start;gap:2px}
+  .lot-price{font-size:var(--t-h2)}
+
+  .seg button{font-size:var(--t-small)}
+  .tiles{grid-template-columns:1fr}
+  .tile + .tile{border-left:0;border-top:1px solid var(--rule);padding-left:0}
+}
+
+/* ── MOTION ─────────────────────────────────────────────────────────── */
+.screen{animation:in var(--slow) var(--ease) both}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .screen{animation:none}
+  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
+}
+
+.sr{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.note{
+  margin:30px 0 0;padding-top:16px;border-top:1px solid var(--rule);
+  font-size:var(--t-small);color:var(--ink-3);line-height:1.55;
+}
+.note b{color:var(--ink-2);font-weight:600}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-in">
+      <button class="iconbtn" id="back" hidden aria-label="Back"></button>
+      <div class="wordmark">AG Newsroom <span id="stamp"></span></div>
+      <button class="iconbtn" id="ask" aria-label="Ask the desk a question"></button>
+    </div>
+  </header>
+
+  <div class="body-row">
+    <nav class="rail" id="rail" aria-label="Sections"></nav>
+    <main class="main" id="main" tabindex="-1">
+      <div class="edge" aria-hidden="true"></div>
+      <div class="wrap" id="view"></div>
+    </main>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Sections"></nav>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════
+   DATA — a real slice of the desk, extracted from data/app_data.json.
+   Lot low/high/price are parsed from the published display strings, so
+   the marker position is accurate to the rounding in those strings; the
+   percentage shown is the app's own vs_est figure, computed upstream
+   from unrounded values. Where the two disagree the app's figure wins.
+   ═══════════════════════════════════════════════════════════════════════ */
+const DATA = {"generated_at":"2026-09-11T12:05:58+00:00","coverage":{"lots":28083,"artists_tracked":267,"from":"2000-11-24","houses":["Saffronart","AstaGuru","Christie's","Pundole's","Bonhams"]},"events":[{"house":"Saffronart","title":"Friday Five","starts":"2026-09-11","kind":"Online sale","city":null},{"house":"Giftex","title":"Art","starts":"2026-09-16","kind":null,"city":null},{"house":"Christie's","title":"South Asian Modern + Contemporary Art","starts":"2026-09-16","kind":"Live sale","city":"New York"},{"house":"Giftex","title":"Watches & Jewellery","starts":"2026-09-21","kind":null,"city":null},{"house":"Pundole's","title":"The Fine Art Sale (M0067)","starts":"2026-09-24","kind":"Live sale","city":"Hamilton House, Mumbai"},{"house":"Saffronart","title":"Friday Five","starts":"2026-09-25","kind":"Online sale","city":null},{"house":"AstaGuru","title":"Theme auction","starts":"2026-09-25","kind":"Online sale","city":"Mumbai"},{"house":"AstaGuru","title":"ManiFest","starts":"2026-09-27","kind":"Online sale","city":"Mumbai"},{"house":"AstaGuru","title":"Masters","starts":"2026-09-29","kind":"Online sale","city":"Mumbai"},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-02","kind":"Online sale","city":null},{"house":"Saffronart","title":"Absolute Tuesdays","starts":"2026-10-06","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-09","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-16","kind":"Online sale","city":null},{"house":"Saffronart","title":"Absolute Tuesdays","starts":"2026-10-27","kind":"Online sale","city":null},{"house":"Saffronart","title":"Friday Five","starts":"2026-10-30","kind":"Online sale","city":null},{"house":"Saffronart","title":"Framing India: An Exhibition Of Modern Indian Art","starts":"2026-11-11","kind":"Online sale","city":null},{"house":"Saffronart","title":"Winter Online Auction","starts":"2026-12-09","kind":"Online sale","city":null}],"artists":{"s h raza":{"name":"S H Raza","stats":{"high":"₹51.8 cr","median_12mo":"₹1.39 cr","median_all":"₹38 lakh","lots_12mo":54,"sold_12mo":54,"lots_total":1065,"delta_12mo":125.9,"above_high_rate":62,"sell_through":96}},"jamini roy":{"name":"Jamini Roy","stats":{"high":"₹4.63 cr","median_12mo":"₹22 lakh","median_all":"₹11 lakh","lots_12mo":61,"sold_12mo":61,"lots_total":765,"delta_12mo":60.1,"above_high_rate":72,"sell_through":95}},"k h ara":{"name":"K. H. Ara","stats":{"high":"₹3.22 cr","median_12mo":"₹37 lakh","median_all":"₹14 lakh","lots_12mo":40,"sold_12mo":39,"lots_total":288,"delta_12mo":-9.2,"above_high_rate":77,"sell_through":99}},"m f husain":{"name":"M F Husain","stats":{"high":"₹118.7 cr","median_12mo":"₹1.92 cr","median_all":"₹34 lakh","lots_12mo":127,"sold_12mo":127,"lots_total":1882,"delta_12mo":54.3,"above_high_rate":64,"sell_through":94}},"k k hebbar":{"name":"K K Hebbar","stats":{"high":"₹2.90 cr","median_12mo":"₹23 lakh","median_all":"₹15 lakh","lots_12mo":27,"sold_12mo":26,"lots_total":232,"delta_12mo":95.3,"above_high_rate":62,"sell_through":98}},"satish gujral":{"name":"Satish Gujral","stats":{"high":"₹2.09 cr","median_12mo":"₹54 lakh","median_all":"₹19 lakh","lots_12mo":19,"sold_12mo":19,"lots_total":165,"delta_12mo":33.4,"above_high_rate":72,"sell_through":97}},"krishen khanna":{"name":"Krishen Khanna","stats":{"high":"₹10.2 cr","median_12mo":"₹47 lakh","median_all":"₹12 lakh","lots_12mo":52,"sold_12mo":52,"lots_total":712,"delta_12mo":74.2,"above_high_rate":56,"sell_through":98}},"sakti burman":{"name":"Sakti Burman","stats":{"high":"₹7.20 cr","median_12mo":"₹95 lakh","median_all":"₹16 lakh","lots_12mo":25,"sold_12mo":25,"lots_total":297,"delta_12mo":45.2,"above_high_rate":65,"sell_through":92}},"t vaikuntam":{"name":"T Vaikuntam","stats":{"high":"₹2.96 cr","median_12mo":"₹15 lakh","median_all":"₹12 lakh","lots_12mo":35,"sold_12mo":35,"lots_total":352,"delta_12mo":22.8,"above_high_rate":66,"sell_through":95}},"f n souza":{"name":"F. N. Souza","stats":{"high":"₹40.7 cr","median_12mo":"₹38 lakh","median_all":"₹9.2 lakh","lots_12mo":117,"sold_12mo":117,"lots_total":2214,"delta_12mo":72.3,"above_high_rate":66,"sell_through":94}},"b prabha":{"name":"B. Prabha","stats":{"high":"₹2.20 cr","median_12mo":"₹45 lakh","median_all":"₹18 lakh","lots_12mo":26,"sold_12mo":26,"lots_total":316,"delta_12mo":38.2,"above_high_rate":75,"sell_through":99}},"anjolie ela menon":{"name":"Anjolie Ela Menon","stats":{"high":"₹1.95 cr","median_12mo":"₹21 lakh","median_all":"₹15 lakh","lots_12mo":15,"sold_12mo":15,"lots_total":209,"delta_12mo":35.2,"above_high_rate":68,"sell_through":88}}},"lots":[{"artist":"Chintan Upadhyay","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":150000.0,"hi":200000.0,"price":96000.0,"cur":"₹","vs":{"dir":"below","pct":36}},{"artist":"S Harshavardhana","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":180000.0,"hi":220000.00000000003,"price":420000.0,"cur":"₹","vs":{"dir":"above","pct":91}},{"artist":"Rekha Rodwittiya","title":"Small divides can create big spaces over time","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":54000.0,"cur":"₹","vs":null},{"artist":"Amitava Das","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":30000.0,"hi":50000.0,"price":21600.0,"cur":"₹","vs":{"dir":"below","pct":28}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":78000.0,"cur":"₹","vs":{"dir":"above","pct":30}},{"artist":"T Vaikuntam","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":24000.0,"cur":"₹","vs":{"dir":"below","pct":40}},{"artist":"Jyoti Bhatt","title":"The Tree","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":60000.0,"cur":"₹","vs":null},{"artist":"Akhilesh","title":"Red Untitled Script","house":"Saffronart","medium":null,"size":null,"lo":200000.0,"hi":300000.0,"price":340000.0,"cur":"₹","vs":{"dir":"above","pct":12}},{"artist":"Shamshad Husain","title":null,"house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":24000.0,"cur":"₹","vs":{"dir":"below","pct":60}},{"artist":"M. Sivanesan","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":30000.0,"cur":"₹","vs":{"dir":"below","pct":50}},{"artist":"Lalu Prasad Shaw","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":33600.0,"cur":"₹","vs":{"dir":"below","pct":33}},{"artist":"Rabin Mondal","title":"Face IV","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":38400.0,"cur":"₹","vs":{"dir":"below","pct":23}},{"artist":"Piraji Sagara","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":60000.0,"hi":80000.0,"price":300000.0,"cur":"₹","vs":{"dir":"above","pct":275}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":120000.0,"hi":150000.0,"price":96000.0,"cur":"₹","vs":{"dir":"below","pct":20}},{"artist":"K. G. Subramanyan","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":30000.0,"hi":50000.0,"price":54000.0,"cur":"₹","vs":{"dir":"above","pct":8}},{"artist":"Jogen Chowdhury","title":"Smiling Lady","house":"Saffronart","medium":null,"size":null,"lo":150000.0,"hi":200000.0,"price":120000.0,"cur":"₹","vs":{"dir":"below","pct":20}},{"artist":"Farhad Hussain","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":250000.0,"hi":350000.0,"price":72000.0,"cur":"₹","vs":{"dir":"below","pct":71}},{"artist":"K K Hebbar","title":"Untitled (Mr Manchi Krishna Rau)","house":"Bonhams","medium":"Oil on canvas, framed","size":"17.7 x 13.7 in","lo":509999.99999999994,"hi":770000.0,"price":690000.0,"cur":"₹","vs":null},{"artist":"K K Hebbar","title":"Untitled (Mr Manchi Srinivas Rau)","house":"Bonhams","medium":"Oil on canvas, framed","size":"27.6 x 21.9 in","lo":509999.99999999994,"hi":770000.0,"price":490000.00000000006,"cur":"₹","vs":{"dir":"below","pct":4}},{"artist":"Chittaprosad Bhattacharya","title":"Chittaprosad, A Lifetime in India: Linocuts and Poems","house":"Bonhams","medium":"text with a portfolio of thirty unbound linocut reproductions on paper","size":"8.3 x 8.3 in","lo":190000.0,"hi":260000.0,"price":160000.0,"cur":"₹","vs":{"dir":"below","pct":15}},{"artist":"Avinash Chandra","title":"Untitled (Musicians)","house":"Bonhams","medium":"Etching on paper","size":"22.4 x 28.0 in","lo":7708800000.0,"hi":100000.0,"price":110000.00000000001,"cur":"₹","vs":{"dir":"above","pct":4}},{"artist":"Sadequain","title":"Untitled (Portrait of a man)","house":"Bonhams","medium":"felt tip on paper","size":"18.5 x 11.4 in","lo":130000.0,"hi":190000.0,"price":150000.0,"cur":"₹","vs":null},{"artist":"M. Sivanesan","title":"Untitled (Girl)","house":"Bonhams","medium":"oil on board, framed","size":"23.0 x 11.5 in","lo":130000.0,"hi":190000.0,"price":150000.0,"cur":"₹","vs":null},{"artist":"Lalu Prasad Shaw","title":"Babu with Biwi","house":"Bonhams","medium":"tempera on board, framed","size":"19.7 x 13.9 in","lo":260000.0,"hi":390000.0,"price":310000.0,"cur":"₹","vs":null},{"artist":"K. H. Ara","title":"Untitled (Nude)","house":"Bonhams","medium":"watercolour on paper, framed","size":"29.3 x 21.3 in","lo":1500000.0,"hi":2300000.0,"price":1800000.0,"cur":"₹","vs":null},{"artist":"George Keyt","title":"Untitled (Two Women)","house":"Bonhams","medium":"oil on canavs, framed","size":"19.4 x 17.5 in","lo":1900000.0,"hi":2600000.0,"price":2100000.0,"cur":"₹","vs":null},{"artist":"Jyoti Bhatt","title":"Fortress of Shri Jyoti Bhatt","house":"Bonhams","medium":"etching","size":"20.5 x 10.2 in","lo":100000.0,"hi":150000.0,"price":120000.0,"cur":"₹","vs":null},{"artist":"Laxma Goud","title":"Untitled","house":"Bonhams","medium":"Signed and dated 'K. Laxma Goud 1972' lower right. Titled ETCHING, ZINC AP 1/6 lower left","size":"5.3 x 13.1 in","lo":130000.0,"hi":190000.0,"price":160000.0,"cur":"₹","vs":null},{"artist":"Senaka Senanayake","title":"Untitled (Woman and Bird)","house":"Bonhams","medium":"ink on paper, framed","size":"15.7 x 11.3 in","lo":130000.0,"hi":190000.0,"price":229999.99999999997,"cur":"₹","vs":{"dir":"above","pct":19}},{"artist":"Avinash Chandra","title":"Untitled (Figures)","house":"Bonhams","medium":"etching on paper","size":"8.9 x 8.6 in","lo":64240.0,"hi":89936.0,"price":82227.0,"cur":"₹","vs":null},{"artist":"S H Raza","title":"Panch Tatva","house":"Bonhams","medium":"serigraph on paper","size":"40.0 x 74.0 in","lo":320000.0,"hi":450000.0,"price":330000.0,"cur":"₹","vs":null},{"artist":"Nandalal Bose","title":"Untitled (Tree)","house":"Bonhams","medium":"ink on rice paper, framed","size":"14.1 x 19.4 in","lo":1000000.0,"hi":1500000.0,"price":2000000.0,"cur":"₹","vs":{"dir":"above","pct":28}},{"artist":"Nandalal Bose","title":"Untitled (Four Trees and a stream)","house":"Bonhams","medium":"ink on rice paper, framed","size":"14.4 x 18.4 in","lo":1000000.0,"hi":1500000.0,"price":1300000.0,"cur":"₹","vs":null},{"artist":"K. S. Radhakrishnan","title":null,"house":"Saffronart","medium":null,"size":null,"lo":300000.0,"hi":400000.0,"price":380000.0,"cur":"₹","vs":null},{"artist":"S H Raza","title":"Arbre Et Bindu","house":"Saffronart","medium":null,"size":null,"lo":220000.00000000003,"hi":280000.0,"price":140000.0,"cur":"₹","vs":{"dir":"below","pct":35}},{"artist":"F. N. Souza","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":220000.00000000003,"hi":280000.0,"price":300000.0,"cur":"₹","vs":{"dir":"above","pct":7}},{"artist":"Neeraj Goswami","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":20000.0,"hi":30000.0,"price":38400.0,"cur":"₹","vs":{"dir":"above","pct":28}},{"artist":"Prabhakar M Kolte","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":40000.0,"hi":60000.0,"price":45600.0,"cur":"₹","vs":null},{"artist":"Manu Parekh","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":16800.0,"cur":"₹","vs":{"dir":"below","pct":66}},{"artist":"Jogen Chowdhury","title":"Untitled","house":"Saffronart","medium":null,"size":null,"lo":50000.0,"hi":70000.0,"price":26400.0,"cur":"₹","vs":{"dir":"below","pct":47}}]};
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ── Icons: one set, one weight, sized to sit with the adjacent text.
+   icons.md — custom icons are vector and labelled. ─────────────────── */
+const ICON = {
+  today:'<path d="M3 10h18M7 3v4M17 3v4"/><rect x="3" y="5" width="18" height="16" rx="2"/>',
+  results:'<path d="M4 19V5M4 19h16M8 15l3.5-4 3 2.5L20 7"/>',
+  artists:'<circle cx="12" cy="8" r="3.5"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="12" cy="15" r="1.4" fill="currentColor" stroke="none"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
+  back:'<path d="m14.5 5-7 7 7 7"/>',
+  ask:'<path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-5a8.2 8.2 0 0 1-.9-3.7A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5Z"/>',
+  chev:'<path d="m9 5 7 7-7 7"/>'
+};
+const I = (k, s) => `<svg viewBox="0 0 24 24" width="${s||22}" height="${s||22}" fill="none" stroke="currentColor"
+  stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+/* ── Navigation.
+   Five top-level sections, every one a single word, no overflow "More"
+   tab. tab-bars.md > Best practices: "Avoid overflow tabs ... The More
+   tab makes it harder for people to reach and notice content."
+   Search gets a tab of its own rather than hiding behind an icon —
+   searching.md, and the trailing search tab in tab-bars.md > Phone.
+   "Ask" is an ACTION, so it lives in the toolbar, not in the tab bar:
+   "Use a tab bar to support navigation, not to provide actions." ──── */
+const TABS = [
+  { id:"today",    label:"Today",    icon:"today"    },
+  { id:"results",  label:"Results",  icon:"results"  },
+  { id:"artists",  label:"Artists",  icon:"artists"  },
+  { id:"calendar", label:"Calendar", icon:"calendar" },
+  { id:"search",   label:"Search",   icon:"search"   }
+];
+const TITLE = { today:"Start my day", results:"Overnight results", artists:"Artists",
+                calendar:"Sale calendar", search:"Search", artist:"" };
+
+let S = { screen:"today", back:null, artist:null, q:"", filter:"all" };
+
+/* ── Formatting ─────────────────────────────────────────────────────── */
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const d0 = DATA.generated_at.slice(0,10);
+
+function money(v, cur){
+  cur = cur || "₹";
+  if (cur !== "₹") return cur + Math.round(v).toLocaleString("en-IN");
+  if (v >= 1e7) return "₹" + (v/1e7).toFixed(v/1e7 >= 10 ? 1 : 2) + " cr";
+  if (v >= 1e5) return "₹" + (v/1e5).toFixed(v/1e5 >= 10 ? 1 : 2) + " L";
+  return "₹" + Math.round(v).toLocaleString("en-IN");
+}
+function fmtDate(iso){
+  const d = new Date(iso + "T00:00:00");
+  return DAYS[d.getDay()] + " " + d.getDate() + " " + MONTHS[d.getMonth()];
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE GAUGE — the signature element.
+
+   Hammer price against the published estimate band on a shared scale.
+   Meaning is carried by POSITION (marker inside, left of, or right of
+   the band), by SHAPE (the diamond head), and by TEXT. Never by hue.
+   color.md > Inclusive color: "Avoid relying solely on color to ...
+   communicate essential information."
+   It also reads correctly in greyscale, under Increase Contrast, and at
+   the largest accessibility text sizes, because nothing about it depends
+   on a font size.
+   ═══════════════════════════════════════════════════════════════════════ */
+function gauge(lot){
+  const { lo, hi, price, cur } = lot;
+  const span = (hi - lo) || hi * 0.2;
+  const d1 = Math.min(lo, price) - span * 0.55;
+  const d2 = Math.max(hi, price) + span * 0.55;
+  const pct = v => ((v - d1) / (d2 - d1)) * 100;
+
+  const bandL = pct(lo), bandW = pct(hi) - pct(lo), markL = pct(price);
+
+  /* The app's own figure is authoritative; fall back to the parsed one. */
+  const vs = lot.vs;
+  let read, glyph;
+  if (!vs) {
+    read = `Sold <b>within</b> the estimate`;
+    glyph = "●";                       /* filled circle: inside the band */
+  } else if (vs.dir === "above") {
+    read = `<b>${vs.pct}% above</b> the high estimate`;
+    glyph = "▲";                       /* triangle up */
+  } else {
+    read = `<b>${vs.pct}% below</b> the low estimate`;
+    glyph = "▼";                       /* triangle down */
+  }
+
+  const label = `Hammer ${money(price,cur)} against an estimate of ${money(lo,cur)} to ${money(hi,cur)}. `
+    + (vs ? (vs.dir === "above" ? `${vs.pct} percent above the high estimate.` : `${vs.pct} percent below the low estimate.`)
+          : "Within the estimate.");
+
+  return `<div class="gauge">
+    <div class="gauge-track" role="img" aria-label="${esc(label)}">
+      <div class="gauge-axis"></div>
+      <div class="gauge-band" style="left:${bandL}%;width:${bandW}%"></div>
+      <div class="gauge-mark" style="left:calc(${markL}% - 1.25px)"></div>
+    </div>
+    <div class="gauge-scale" aria-hidden="true">
+      <span>${esc(money(lo,cur))}</span><span>${esc(money(hi,cur))}</span>
+    </div>
+    <div class="gauge-read"><span class="g" aria-hidden="true">${glyph}</span><span>${read}</span></div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SCREENS
+   ═══════════════════════════════════════════════════════════════════════ */
+function lotRow(l){
+  return `<li>
+    <div class="lot-head">
+      <div>
+        <div class="lot-artist">${esc(l.artist || "Unattributed")}</div>
+        <div class="lot-sub">${esc(l.title || "Untitled")} · ${esc(l.house)}</div>
+        ${l.medium || l.size ? `<div class="lot-meta">${esc([l.medium,l.size].filter(Boolean).join(" · "))}</div>` : ""}
+      </div>
+      <div class="lot-price">${esc(money(l.price, l.cur))}</div>
+    </div>
+    ${gauge(l)}
+  </li>`;
+}
+
+function viewToday(){
+  const lots = DATA.lots;
+  const above = lots.filter(l => l.vs && l.vs.dir === "above");
+  const below = lots.filter(l => l.vs && l.vs.dir === "below");
+  const soon = DATA.events.filter(e => e.starts >= d0).slice(0,3);
+
+  const names = [...new Set(above.map(l => l.artist).filter(Boolean))].slice(0,3);
+  const bits = [];
+  const listOf = a => a.length < 2 ? (a[0] || "")
+    : a.slice(0,-1).join(", ") + " and " + a[a.length-1];
+  if (above.length) bits.push(`${above.length} of ${lots.length} lots cleared their high estimate`
+    + (names.length ? `, with ${listOf(names)} among them` : "") + ".");
+  if (below.length) bits.push(`${below.length} came in under the low.`);
+  if (soon.length) bits.push(soon[0].starts === d0
+    ? `${soon[0].house} opens today.`
+    : `Next sale: ${soon[0].house}, ${fmtDate(soon[0].starts)}.`);
+
+  return `<div class="screen">
+    <div class="vh">
+      <span class="date">${esc(fmtDate(d0))}</span>
+      <h1>Start my day</h1>
+      <p>Every result below is measured against the estimate it was published with.</p>
+    </div>
+
+    <div class="brief">
+      <h2>Morning brief</h2>
+      <p>${bits.join(" ")}</p>
+    </div>
+
+    <div class="tiles">
+      <div class="tile"><div class="tv">${lots.length}</div><div class="tk">Results overnight</div></div>
+      <div class="tile"><div class="tv">${above.length}</div><div class="tk">Above high estimate</div></div>
+      <div class="tile"><div class="tv">${DATA.events.filter(e=>e.starts>=d0).length}</div><div class="tk">Sales ahead</div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h">
+        <h2>Furthest from estimate</h2>
+        <span class="n">Top 3 of ${lots.length}</span>
+      </div>
+      <ul class="lots">${
+        [...lots].sort((a,b) => (b.vs?b.vs.pct:0) - (a.vs?a.vs.pct:0)).slice(0,3).map(lotRow).join("")
+      }</ul>
+      <div class="btnrow">
+        <button class="btn btn-prom" data-go="results">See all results</button>
+        <button class="btn" data-go="calendar">Open calendar</button>
+      </div>
+    </div>
+
+    <p class="note"><b>Sandbox.</b> A design study of AG Newsroom built against the
+    vendored Apple HIG skill. Real data, ${DATA.coverage.lots.toLocaleString("en-IN")} lots
+    behind it; no client book, no live refresh.</p>
+  </div>`;
+}
+
+function viewResults(){
+  const f = S.filter;
+  const all = DATA.lots;
+  const lots = f === "above" ? all.filter(l => l.vs && l.vs.dir === "above")
+             : f === "below" ? all.filter(l => l.vs && l.vs.dir === "below")
+             : all;
+  return `<div class="screen">
+    <div class="vh">
+      <span class="date">${esc(fmtDate(d0))}</span>
+      <h1>Overnight results</h1>
+    </div>
+    <div class="seg" role="group" aria-label="Filter results">
+      <button data-filter="all"   aria-pressed="${f==="all"}">All ${all.length}</button>
+      <button data-filter="above" aria-pressed="${f==="above"}">Above</button>
+      <button data-filter="below" aria-pressed="${f==="below"}">Below</button>
+    </div>
+    ${lots.length
+      ? `<ul class="lots">${lots.map(lotRow).join("")}</ul>`
+      : `<div class="empty"><b>Nothing in this band today.</b>
+         Every lot that sold landed inside its estimate. Switch to All to see them.</div>`}
+  </div>`;
+}
+
+function viewArtists(){
+  const keys = Object.keys(DATA.artists);
+  return `<div class="screen">
+    <div class="vh"><h1>Artists</h1>
+      <p>${keys.length} names moving this week, of ${DATA.coverage.artists_tracked} tracked.</p></div>
+    <div class="rows">${keys.map(k => {
+      const a = DATA.artists[k], s = a.stats;
+      return `<button class="row" data-artist="${esc(k)}">
+        <span class="row-main">
+          <span class="row-name">${esc(a.name)}</span>
+          <span class="row-sub">${esc(s.lots_total)} lots on record · high ${esc(s.high || "—")}</span>
+        </span>
+        <span class="row-trail">${esc(s.median_12mo || "—")}<small>median, 12 mo</small></span>
+        <span class="chev">${I("chev",18)}</span>
+      </button>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+function viewArtist(){
+  const a = DATA.artists[S.artist];
+  if (!a) return viewArtists();
+  const s = a.stats;
+  const lots = DATA.lots.filter(l => (l.artist||"").toLowerCase() === a.name.toLowerCase());
+  const stat = (v,k) => `<div class="tile"><div class="tv">${esc(v ?? "—")}</div><div class="tk">${esc(k)}</div></div>`;
+  return `<div class="screen">
+    <div class="vh"><h1>${esc(a.name)}</h1>
+      <p>${esc(s.lots_total)} lots on record since ${DATA.coverage.from.slice(0,4)}.</p></div>
+    <div class="tiles">
+      ${stat(s.high,"Highest result")}
+      ${stat(s.median_12mo,"Median, 12 mo")}
+      ${stat(s.lots_12mo,"Lots, 12 mo")}
+    </div>
+    <div class="tiles" style="margin-top:10px">
+      ${stat(s.sold_12mo,"Sold, 12 mo")}
+      ${stat(s.above_high_rate != null ? s.above_high_rate + "%" : null,"Beat high est.")}
+      ${stat(s.median_all,"Median, all time")}
+    </div>
+    <div class="sec">
+      <div class="sec-h"><h2>In this batch</h2><span class="n">${lots.length}</span></div>
+      ${lots.length ? `<ul class="lots">${lots.map(lotRow).join("")}</ul>`
+        : `<div class="empty"><b>No lots for ${esc(a.name)} in last night's batch.</b>
+           The figures above come from the full record.</div>`}
+    </div>
+  </div>`;
+}
+
+function viewCalendar(){
+  const up = DATA.events.filter(e => e.starts >= d0).sort((a,b) => a.starts.localeCompare(b.starts));
+  return `<div class="screen">
+    <div class="vh"><h1>Sale calendar</h1>
+      <p>${up.length} sales ahead across ${new Set(up.map(e=>e.house)).size} houses.</p></div>
+    <div class="rows">${up.map(e => {
+      const d = new Date(e.starts + "T00:00:00");
+      return `<div class="day ${e.starts === d0 ? "is-today":""}">
+        <div class="day-d"><b>${d.getDate()} ${MONTHS[d.getMonth()]}</b>${DAYS[d.getDay()]}</div>
+        <div>
+          <div class="day-t">${esc(e.title)}</div>
+          <div class="day-s">${esc(e.house)}${e.kind ? " · " + esc(e.kind) : ""}${e.city ? " · " + esc(e.city) : ""}</div>
+        </div>
+      </div>`;
+    }).join("")}</div>
+  </div>`;
+}
+
+function viewSearch(){
+  const q = S.q.trim().toLowerCase();
+  let hits = [];
+  if (q.length > 1){
+    hits = DATA.lots.filter(l =>
+      (l.artist||"").toLowerCase().includes(q) ||
+      (l.title||"").toLowerCase().includes(q) ||
+      (l.house||"").toLowerCase().includes(q));
+  }
+  return `<div class="screen">
+    <div class="vh"><h1>Search</h1></div>
+    <div class="field">
+      ${I("search",19)}
+      <label class="sr" for="q">Search artists, works and houses</label>
+      <input id="q" type="search" inputmode="search" autocomplete="off"
+             placeholder="Artist, work or house" value="${esc(S.q)}">
+    </div>
+    ${q.length > 1
+      ? (hits.length
+          ? `<div class="sec"><div class="sec-h"><h2>Results</h2><span class="n">${hits.length}</span></div>
+             <ul class="lots">${hits.map(lotRow).join("")}</ul></div>`
+          : `<div class="empty"><b>No match for &ldquo;${esc(S.q)}&rdquo;.</b>
+             This sandbox searches last night's ${DATA.lots.length} lots only — try Raza, Saffronart, or Untitled.</div>`)
+      : `<div class="empty"><b>Search last night's results.</b>
+         ${DATA.lots.length} lots from ${new Set(DATA.lots.map(l=>l.house)).size} houses. Start typing an artist or a house.</div>`}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   RENDER
+   ═══════════════════════════════════════════════════════════════════════ */
+const VIEWS = { today:viewToday, results:viewResults, artists:viewArtists,
+                artist:viewArtist, calendar:viewCalendar, search:viewSearch };
+
+function tabFor(s){ return s === "artist" ? "artists" : s; }
+
+function render(keepFocus){
+  const cur = tabFor(S.screen);
+
+  document.getElementById("view").innerHTML = (VIEWS[S.screen] || viewToday)();
+  document.getElementById("stamp").textContent = "Updated " + DATA.generated_at.slice(11,16) + " UTC";
+
+  /* Tab bar. Tabs are never hidden or disabled — tab-bars.md. */
+  document.getElementById("tabbar").innerHTML = TABS.map(t => `
+    <span class="tabwrap">
+      <button data-go="${t.id}" aria-label="${t.label}" aria-current="${cur === t.id ? "page" : "false"}">
+        ${I(t.icon)}<span class="tl">${t.label}</span>
+      </button>
+    </span>`).join("");
+
+  document.getElementById("rail").innerHTML =
+    `<div class="rail-h">Desk</div>` + TABS.map(t => `
+      <button data-go="${t.id}" aria-current="${cur === t.id ? "page" : "false"}">
+        ${I(t.icon,20)}<span>${t.label}</span>
+      </button>`).join("");
+
+  const back = document.getElementById("back");
+  back.hidden = !S.back;
+  back.innerHTML = S.back ? I("back",22) : "";
+
+  document.title = (TITLE[S.screen] || "AG Newsroom") + " — AG Newsroom sandbox";
+
+  if (keepFocus){ const el = document.getElementById("q"); if (el){ el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+}
+
+function go(id){
+  if (id === S.screen) { document.getElementById("main").scrollTo({top:0,behavior:"smooth"}); return; }
+  S.back = null; S.screen = id; render();
+  document.getElementById("main").scrollTop = 0;
+}
+
+document.addEventListener("click", e => {
+  const go_ = e.target.closest("[data-go]");
+  if (go_) return go(go_.dataset.go);
+
+  const a = e.target.closest("[data-artist]");
+  if (a){ S.artist = a.dataset.artist; S.back = "artists"; S.screen = "artist"; render();
+          document.getElementById("main").scrollTop = 0; return; }
+
+  const f = e.target.closest("[data-filter]");
+  if (f){ S.filter = f.dataset.filter; render(); return; }
+
+  if (e.target.closest("#back")){ const b = S.back; S.back = null; S.screen = b; render(); return; }
+
+  if (e.target.closest("#ask")){
+    alert("Ask lives in the toolbar, not the tab bar: tab bars navigate, they do not act "
+        + "(tab-bars.md › Best practices). In the shipping app it is both a tab and a "
+        + "floating button. Not wired up in this sandbox.");
+  }
+});
+
+document.addEventListener("input", e => {
+  if (e.target.id === "q"){ S.q = e.target.value; render(true); }
+});
+
+render();
+</script>

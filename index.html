@@ -323,7 +323,8 @@ button.row:active{background:var(--gold-tint)}
 .seg button{
   flex:1;text-align:center;padding:11px 6px;font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;font-family:var(--font-heading);font-weight:600;
-  color:var(--ink-50);border-right:1px solid var(--divider);transition:all var(--t-fast) var(--ease);
+  color:var(--ink-50);border-right:1px solid var(--divider);
+  transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease);
 }
 .seg button:last-child{border-right:0}
 .seg button[aria-pressed="true"]{background:var(--gold-tint);color:var(--gold-ink)}
@@ -341,7 +342,9 @@ button.row:active{background:var(--gold-tint)}
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   min-height:40px;padding:9px 16px;border:1px solid var(--divider);border-radius:var(--r-md);
   font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  font-family:var(--font-heading);font-weight:600;color:var(--ink-72);transition:all var(--t-fast) var(--ease);
+  font-family:var(--font-heading);font-weight:600;color:var(--ink-72);
+  transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease),
+             border-color var(--t-fast) var(--ease);
 }
 .btn:active{background:var(--gold-tint)}
 .btn-primary{border-color:var(--gold);color:var(--gold-ink)}
@@ -541,8 +544,10 @@ button.row:active{background:var(--gold-tint)}
 .watch-sheet .wrow:last-of-type{border-bottom:0}
 .watch-sheet .wl{font-size:14px}.watch-sheet .wl small{display:block;font-size:12px;color:var(--ink-60);margin-top:2px}
 .sw{width:40px;height:24px;border-radius:12px;background:var(--divider);position:relative;flex-shrink:0;border:0}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper);transition:left .15s}
-.sw[aria-checked="true"]{background:var(--gold-ink)}.sw[aria-checked="true"]::after{left:19px}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--paper);transition:transform .15s var(--ease)}
+/* translateX, not `left`: moving `left` relaid out the knob on every
+   frame. 16px = the 19px checked offset minus the 3px resting offset. */
+.sw[aria-checked="true"]{background:var(--gold-ink)}.sw[aria-checked="true"]::after{transform:translateX(16px)}
 .up-new{display:inline-block;padding:2px 7px;border-radius:10px;background:var(--gold-tint);color:var(--gold-ink);font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-left:8px;vertical-align:middle}
 .al-kind{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink)}
 /* ---- Value a work ---- */
@@ -1170,7 +1175,8 @@ a.auc:hover .auc-name{color:var(--gold-ink)}
   .rail-nav{padding:14px 0 0;display:flex;flex-direction:column;gap:2px}
   .rail-nav button{
     display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--r-md);
-    color:var(--ink-60);transition:all var(--t-fast) var(--ease);min-height:44px;
+    color:var(--ink-60);min-height:44px;
+    transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease);
   }
   /* Sentence case in Source Sans, not tracked-out small caps: the handoff's
      sidebar reads as a list of places, not as a set of labels. */
@@ -1277,6 +1283,52 @@ a.auc:hover .auc-name{color:var(--gold-ink)}
   .topblock .sc-media img{height:100%}
   .topblock .hero-head{font-size:23px}
 }
+
+/* ============================================================
+   PRESS FEEDBACK
+
+   `-webkit-tap-highlight-color:transparent` at the top of this file
+   removes the system's own tap flash, so every tappable thing has to
+   supply its own. These rows did not: an audit found 0 of 29 tappables
+   on Today, 1 of 268 on Artists and 0 of 19 on Market with any press
+   state at all. Tapping an artist gave no acknowledgement for the ~95ms
+   it takes to render the next screen, which is what read as lag.
+
+   `.arow` had :hover, which does not exist on a touchscreen.
+
+   This block sits at the end of the sheet deliberately, so it wins over
+   the :hover rules declared earlier for the same elements.
+
+   transition:none makes the press land instantly; letting go hands back
+   to each element's own transition, so the release still eases out.
+   feedback.md: acknowledge input in the interface, at the moment of it.
+   ============================================================ */
+button.arow:active,
+button.mrow:active,
+button.wrow:active,
+button.mf-link:active,
+a.ares:active{background:var(--gold-tint);transition:none}
+
+/* A small tracked-out text button: dim it rather than fill it. */
+.more-link:active{opacity:.5;transition:none}
+
+/* Scales as well as tints, so a save that is already on still answers. */
+.mark:active{color:var(--gold-ink);transform:scale(.88);transition:none}
+
+/* Picture-led cards are mostly image, so a tint behind them barely shows.
+   Dimming the whole card is the clearer answer, and it is what the hero
+   on Today needed most: it is the largest tap target in the app and had
+   no press state at all. */
+.hero-link:active,
+.sc:active{opacity:.68;transition:none}
+
+.dayrow:active,
+a.auc:active{background:var(--gold-tint);transition:none}
+
+/* The segmented control answered a tap only by redrawing after the
+   re-render. Dimming is distinct from the gold-tint it uses for the
+   selected segment, so press and selection stay legible apart. */
+.seg button:active{opacity:.55;transition:none}
 </style>
 
 <div class="app" id="app">
