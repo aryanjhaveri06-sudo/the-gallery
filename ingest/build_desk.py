@@ -401,6 +401,12 @@ def main():
                 "price": r["price_inr"], "price_usd": r["price_usd"],
                 "currency": r["currency"], "price_native": r["price_native"],
                 "chain": chain_of.get(r["id"]),
+                "provenance": r["provenance"] or None,
+                # What `notes` holds depends on the house: Pundole's writes the
+                # condition there, Christie's exhibitions and literature, Bonhams
+                # the condition-report link. AstaGuru's is the catalogue essay
+                # and is not for a record row.
+                "notes": (r["notes"] or None) if r["house"] != "AstaGuru" else None,
                 "sold": bool(r["sold"]),
                 "above_high": bool(r["est_high_inr"] and r["price_inr"]
                                    and r["price_inr"] > r["est_high_inr"]),

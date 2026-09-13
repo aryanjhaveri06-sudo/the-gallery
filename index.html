@@ -532,6 +532,18 @@ button.row:active{background:var(--gold-tint)}
 .rp-arrow{color:var(--ink-50)}
 .rp-move{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--ink-60)}
 .rp-move.up{color:var(--gold-ink)}
+/* ---- the works lead: a strip of the artist's best-known results ---- */
+.hero-strip{display:flex;gap:14px;overflow-x:auto;padding:18px 0 6px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hero-strip::-webkit-scrollbar{display:none}
+.hero-strip a{flex:0 0 auto;scroll-snap-align:start;text-decoration:none;color:inherit;max-width:min(360px,80vw)}
+.hero-strip img{display:block;height:220px;width:auto;max-width:100%;object-fit:contain;background:var(--surface);border-radius:4px}
+.hero-strip .hc{margin-top:8px;font-size:12px;color:var(--ink-60);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero-strip .hc b{color:var(--ink);font-weight:600}
+@media (max-width:767px){.hero-strip img{height:170px}}
+.arow .av,.prof .pav{position:relative;overflow:hidden}
+.arow .av img,.prof .pav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.rec-prov{font-size:12.4px;color:var(--ink-60);margin-top:7px;line-height:1.5}
+.rec-prov b{font-weight:600;color:var(--ink-50);letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;margin-right:4px}
 /* ---- alerts ---- */
 .bell-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--divider);border-radius:var(--r-md);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-60);background:transparent;white-space:nowrap}
 .bell-btn[aria-pressed="true"]{border-color:var(--gold);color:var(--gold-ink);background:var(--gold-tint)}
@@ -1785,6 +1797,7 @@ function buildArtists() {
         sale: r.lot ? "Lot " + r.lot : "",
         est: r.est || "Estimate not published",
         price: r.price || "—", native: r.native || null, resold: !!r.resold,
+        prov: r.prov || null, more: r.more || null,
         up: !!r.above, nat: !!r.nat, url: r.url
       })),
       repeats: a.repeats || [],
@@ -2303,6 +2316,39 @@ const houseTag = h => `<span class="house" data-h="${esc(h)}">${esc(h)}</span>`;
 /* An overseas result is quoted by the trade in the currency it was set in;
    the rupee figure above it is the ECB rate on the sale day. */
 const nativeTag = n => n ? `<div class="native tnum">${esc(n)}</div>` : "";
+/* Provenance and the house's own notes (condition at Pundole's, exhibitions and
+   literature at Christie's), under a record. Nothing invented: absent is absent. */
+const provLines = r => (r.prov ? `<div class="rec-prov"><b>Provenance</b>${esc(r.prov)}</div>` : "")
+  + (r.more ? `<div class="rec-prov">${esc(r.more)}</div>` : "");
+/* A bigger picture than the thumbnail, where the house will give one. Saffronart
+   only has 159px, Pundole's only the 1.5 MB scan — both are ranked down when
+   the strip is chosen, so it is mostly AstaGuru, Christie's and Bonhams. */
+function heroUrl(u) {
+  u = safeUrl(u);                         // the matrix feeds objects and javascript: here
+  if (!u) return "";
+  if (u.includes("_aucres.")) return u.replace("_aucres.", "_thumb.");
+  if (u.startsWith("https://www.christies.com/img/lotimages/")) return u + (u.includes("?") ? "&" : "?") + "w=800";
+  if (u.startsWith("https://images1.bonhams.com/image?")) return u + "&width=800";
+  return u;
+}
+const HERO_WEIGHT = { "Saffronart": 0.3, "Pundole's": 0.6 };
+function heroWorks(a, n) {
+  return (a.records || []).map(r => ({ r, v: lotValue(r.price) })).filter(x => safeUrl(x.r.image) && x.v)
+    .map(x => ({ r: x.r, w: x.v * (HERO_WEIGHT[x.r.house] || 1) }))
+    .sort((x, y) => y.w - x.w).slice(0, n).map(x => x.r);
+}
+function heroStrip(a) {
+  const works = heroWorks(a, 6);
+  if (!works.length) return "";
+  return `<div class="hero-strip">${works.map(r => `
+    <a href="${safeUrl(r.url) || "#"}" target="_blank" rel="noopener noreferrer">
+      <img src="${esc(heroUrl(r.image))}" alt="${esc(r.work)}" decoding="async" onerror="this.parentNode.style.display='none'">
+      <div class="hc"><b>${esc(r.work)}</b> \u00b7 ${esc(r.price)} \u00b7 ${esc(r.house)}, ${esc(r.date.slice(-2) ? r.date : "")}</div>
+    </a>`).join("")}</div>`;
+}
+/* Initials stay underneath: the picture sits on top once it arrives, and is
+   removed if it never does, so a slow house never leaves a blank circle. */
+const faceOf = a => { const w = heroWorks(a, 1)[0]; return esc(initials(a.name)) + (w ? `<img src="${esc(thumbUrl(safeUrl(w.image)))}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""); };
 /* One work, two or more sales. The chain reads left to right, oldest first. */
 function repeatRow(c) {
   const path = c.sales.map(x => `<span class="rp-sale"><span class="tnum">${esc(fmtDate(x.date))}</span> ${houseTag(x.house)} <b class="tnum">${esc(x.sold ? (x.price || "—") : "unsold")}</b></span>`).join('<span class="rp-arrow">→</span>');
@@ -2890,7 +2936,7 @@ function artistListRows() {
     const d = a.stats.delta ? parseFloat(a.stats.delta) : null;
     const dir = d == null ? "" : d > 0 ? "\u2191" : d < 0 ? "\u2193" : "\u2192";
     return `<button class="arow${sel ? " on" : ""}" data-open-artist="${k}">
-      <span class="av">${esc(initials(a.name))}</span>
+      <span class="av">${faceOf(a)}</span>
       <span class="ab">
         <span class="an">${esc(a.name)}</span>
         <span class="ay">${[a.years, a.movement].filter(Boolean).map(esc).join(" \u00b7 ")}</span>
@@ -2973,6 +3019,7 @@ function viewDossier(embedded) {
         <div class="rec-top">${houseTag(r.house)}<span class="row-meta tnum">${esc(r.date)}</span></div>
         <div class="rec-work">${esc(r.work)}</div>
         <div class="rec-med">${esc(r.medium)}${r.sale ? " \u00b7 " + esc(r.sale) : ""}${r.nat ? ' \u00b7 <span style="color:var(--gold-ink)">Art Treasure, non-exportable</span>' : ""}</div>
+        ${provLines(r)}
         <div class="rec-foot">
           <div><div class="rec-est tnum">${r.est.charAt(0) === "\u20b9" ? "Est. " + esc(r.est) : esc(r.est)}</div>
             ${r.up ? '<div class="pill up" style="margin-top:7px"><span class="dot"></span>above high estimate</div>' : ""}${r.resold ? '<div class="pill" style="margin-top:7px"><span class="dot"></span>sold more than once</div>' : ""}</div>
@@ -3006,7 +3053,7 @@ function viewDossier(embedded) {
   return `
     <div class="view-head dossier-head" ${embedded ? 'style="padding-left:0;padding-right:0"' : ""}>
       <div class="prof">
-        <span class="pav">${esc(initials(a.name))}</span>
+        <span class="pav">${faceOf(a)}</span>
         <span class="pb">
           <h1>${esc(a.name)}</h1>
           <span class="py">${[a.years, a.movement].filter(Boolean).map(esc).join(" \u00b7 ")}</span>
@@ -3016,6 +3063,7 @@ function viewDossier(embedded) {
       </div>
       <div style="margin-top:12px">${bellButton(S.artist)}</div>
       ${watchSheet(S.artist)}
+      ${heroStrip(a)}
     </div>
     <div class="view-body" ${embedded ? 'style="padding-left:0"' : ""}>
       <div class="sec">${sectionHead("Market card")}
@@ -4772,6 +4820,7 @@ function renderValueResults() {
         <div class="rec-top">${houseTag(l.h)}<span class="row-meta tnum">${esc(fmtDate(l.d))}</span></div>
         <div class="rec-work">${esc(l.t || "Untitled")}</div>
         <div class="rec-med">${esc([l.s, l.y ? "painted " + l.y : null].filter(Boolean).join(" \u00b7 "))}</div>
+        ${l.v ? `<div class="rec-prov"><b>Provenance</b>${esc(l.v)}</div>` : ""}
         <div class="rec-foot">
           <div class="rec-est tnum">${l.e ? "Est. " + esc(inrShort(l.e[0]) + "\u2013" + inrShort(l.e[1])) : "Estimate not published"}${v ? ` \u00b7 ${v} estimate` : ""}</div>
           <div class="rec-price tnum ${v === "above" ? "up" : ""}">${esc(inrShort(l.p))}</div>

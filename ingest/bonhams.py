@@ -23,6 +23,7 @@ Usage:  python3 ingest/bonhams.py [--limit N]
 """
 
 import argparse
+import html as htmllib
 import json
 import re
 import sys
@@ -97,6 +98,21 @@ def split_styled(styled):
     return artist, title
 
 
+# "<b>Provenance</b><br />Property from a private collection, USA.<br /><br />Nandalal
+# Bose (1882–1966), one of..." — the block ends at the first blank line or the
+# next bold heading; what follows is the catalogue essay, not provenance.
+_PROV = re.compile(r"<b>\s*Provenance\s*</b>\s*(?:<br\s*/?>)*(.*?)(?:<br\s*/?>\s*<br\s*/?>|<b>|$)", re.S | re.I)
+
+
+def provenance_of(footnotes):
+    m = _PROV.search(footnotes or "")
+    if not m:
+        return ""
+    text = re.sub(r"<br\s*/?>", " \u00b7 ", m.group(1))
+    text = re.sub(r"<[^>]+>", "", text)
+    return re.sub(r"\s+", " ", htmllib.unescape(text)).strip(" \u00b7")[:600]
+
+
 def _amt(v):
     try:
         n = float(v)
@@ -151,7 +167,9 @@ def ingest_sale(con, sale):
             (to_inr(price, rate_usd) if ccy != "USD" else price) if sold else None,
             ccy, lo, hi, price if sold else None,
             sold, None, 0, prem,
-            None, None, (l.get("image") or {}).get("url"),
+            provenance_of(l.get("footnotes")),
+            ("Condition report on request: " + l["conditionReportUrl"]) if l.get("conditionReportUrl") else None,
+            (l.get("image") or {}).get("url"),
             f"{BASE}/auction/{sale['id']}/lot/{lot_no}/{l.get('slug') or ''}/",
         ))
         kept += 1

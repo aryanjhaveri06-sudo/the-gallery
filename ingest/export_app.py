@@ -172,6 +172,8 @@ def main():
                 "price": inr(r["price"]),
                 "native": native(r.get("currency"), r.get("price_native")),
                 "resold": bool(r.get("chain")),
+                "prov": (r.get("provenance") or "")[:400] or None,
+                "more": (("Condition: " if r["house"] == "Pundole's" else "") + (r.get("notes") or ""))[:400] or None,
                 "above": r["above_high"],
                 "nat": r["non_exportable"],
                 "url": r["url"],
@@ -280,7 +282,7 @@ def write_lots(path):
     con = connect()
     rows = []
     for r in con.execute("""SELECT artist_key, sale_date, house, medium, size, price_inr,
-                                   est_low_inr, est_high_inr, year, title, url, image_url
+                                   est_low_inr, est_high_inr, year, title, url, image_url, provenance
                             FROM lot WHERE sold=1 AND price_inr IS NOT NULL
                               AND artist_key IS NOT NULL AND sale_date IS NOT NULL"""):
         q, m = sq_inches(r["size"]), medium_class(r["medium"])
@@ -291,7 +293,7 @@ def write_lots(path):
         if r["est_low_inr"] and r["est_high_inr"]:
             row["e"] = [r["est_low_inr"], r["est_high_inr"]]
         for k, v in (("y", r["year"]), ("t", (r["title"] or "")[:80]), ("s", r["size"]),
-                     ("u", r["url"]), ("i", r["image_url"])):
+                     ("u", r["url"]), ("i", r["image_url"]), ("v", (r["provenance"] or "")[:300])):
             if v:
                 row[k] = v
         rows.append(row)

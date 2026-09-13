@@ -85,11 +85,13 @@ jobs:
             python3 bonhams.py    --limit 2
           fi
 
-      - name: Fill Saffronart medium and size
+      - name: Fill Saffronart medium, size and provenance; Christie's provenance
         run: |
-          # Resumable and capped, so it chips away nightly instead of running for
-          # hours. Lots that already have a medium are skipped.
-          cd ingest && python3 enrich_saffronart.py --limit 250 || true
+          # Resumable and capped, so they chip away nightly instead of running
+          # for hours. A lot is visited once; '' provenance means "none published".
+          cd ingest
+          python3 enrich_saffronart.py --limit 250 || true
+          python3 enrich_christies.py --limit 250 || true
 
       - name: Refresh the diary
         env:

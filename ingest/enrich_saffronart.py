@@ -54,7 +54,20 @@ def parse_detail(page):
             size = f"{d.group(1)} x {d.group(2)} in"
 
     non_export = 1 if re.search(r"NON[- ]EXPORTABLE", flat, re.I) else 0
-    return medium, size, non_export
+    return medium, size, non_export, provenance_of(flat)
+
+
+# "PROVENANCE Acquired from The Guild, Mumbai Private Collection, Maharashtra
+# Category: Painting" — the block runs from the heading to the next label.
+_PROV = re.compile(r"PROVENANCE\s*\n?(.*?)(?:\n\s*(?:Category|Style|Estimate|Winning|Lot|EXHIBITED|PUBLISHED|CONDITION)\b|$)", re.S | re.I)
+
+
+def provenance_of(flat):
+    m = _PROV.search(flat)
+    if not m:
+        return ""                                  # '' = looked, none published
+    lines = [re.sub(r"\s+", " ", l).strip() for l in m.group(1).split("\n")]
+    return " \u00b7 ".join(l for l in lines if l)[:600]
 
 
 def main():
@@ -69,8 +82,10 @@ def main():
 
     con = connect()
 
+    # Two reasons to visit a lot: no medium yet, or no provenance looked for
+    # yet (NULL; '' means the page was read and had none).
     where = ["house = 'Saffronart'",
-             "(medium IS NULL OR medium = '')",
+             "((medium IS NULL OR medium = '') OR provenance IS NULL)",
              "url LIKE '%PostWork%'"]
     params = []
     if args.artist:
@@ -102,12 +117,14 @@ def main():
         except Exception as e:
             skipped += 1
             continue
-        medium, size, non_export = parse_detail(page)
+        medium, size, non_export, prov = parse_detail(page)
         if not (medium or size):
             skipped += 1
+            con.execute("UPDATE lot SET provenance=COALESCE(provenance, ?) WHERE id=?", (prov, r["id"]))
             continue
-        con.execute("UPDATE lot SET medium=?, size=?, non_exportable=? WHERE id=?",
-                    (medium, size, non_export, r["id"]))
+        con.execute("UPDATE lot SET medium=COALESCE(NULLIF(medium,''), ?), size=COALESCE(NULLIF(size,''), ?), "
+                    "non_exportable=?, provenance=? WHERE id=?",
+                    (medium, size, non_export, prov, r["id"]))
         filled += 1
         if i % 25 == 0:
             con.commit()
