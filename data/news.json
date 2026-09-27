@@ -1,9 +1,25 @@
 {
- "generated_at": "2026-09-26T23:13:05+00:00",
+ "generated_at": "2026-09-27T23:24:11+00:00",
  "on_market": [
   {
+   "date": "2026-09-27",
+   "source": "puck.news",
+   "headline": "The Milk Sculptor & Mumbai’s Runaway Sale",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMiggFBVV95cUxOaFRSZkhQWklNcVF6djc1cm12NjhjMEhJbWJwWE1ja25WVC14cVhmMFpDNzdFRzhSTGRzeHZVamlMb3REMm1QQWhDRklOd0ZOUEdkS3BweVV1MDE5TkpLU0MwNmRWS1hJNFVTLTZyT0JtNVVDQ1FkT3RuSnV3MDdFWXB3?oc=5",
+   "image": null
+  },
+  {
+   "date": "2026-09-27",
+   "source": "Asia Sentinel",
+   "headline": "Indian Gond tribal artist hits surprise $2.15m record at Pundole",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOdk9UeWd2Z0E0d3pEcUtrWnZ3dmlnWnRXOEdHbHdPQ1JjeE9qZlI5UGI5cVZIOFE4NEdrVkFpVXdlRFhYTmtUNlVrNWltZ1RocV9Cb0ZFZm5UeTZaQngzTl9GUEFVek1ZTUNjT1NjSjBpdzRtRDVOb2VZeW9nU2czN0ZaUW1VWmhkU0xCUA?oc=5",
+   "image": null
+  },
+  {
    "date": "2026-09-26",
-   "source": "The New Indian Express",
+   "source": "newindianexpress.com",
    "headline": "Delhi’s iconic monuments, heritage sites to host second India Art, Architecture & Design Biennale",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMi5AFBVV95cUxNQm5mR0ZhSEdBeHpnZERpTDZhQV9kSTB0cU84VVpxSjdnR1FyOEZ0bW5lcmtDYy1tZ293amM4Z1ViNlpRN055WFJzbGV0X29RWVFVTkdzczd4RFU0Q1Q3aEUyVkllTmJNMzM1ZjZZQWcySTJQTUVCVXVTSk1JNDY2TWJfYWJ5UDQzT2tlLTA0bnZOV2l5dTRQVWxYZmFFeGtsSWlud0RLZlducEZXUDJ3ZXFNTVZKSFdOX3drU3FoYmVVdHJyZjhuek52dEpDY1dpeWdLYmp3MmNOY2tmQVV5TnZlODDSAfIBQVVfeXFMTjduX2xtWWdjeV9LbVBKbUpJODZEeDRKYVpnODM1cXVZN1hrUDFPMlpRX3dPQW1ZU3VFV2tnMzhyblJGbk52MXpwNTcwS3dmM2Q3MUVLeGxITVdzUVR6UXNPVGpKWkYzWkh3WEpsUmM3TXJYN1lzaEZqaHNvMlFtU1dVVnZHYkNNeENyS2tiVE1ldjgwYTBPa1dIOGFVUXBMVjBiQ1ZlVTlFMlEyUmlWN0xvaDRDSEktamNLUkJxZG5WbGZTSmZpT2UxblBZclVubTZkXzFHY2VnUDhscDZ0OC1kN0s5MTU1OWprY2dMZ2VBMEE?oc=5",
@@ -51,14 +67,6 @@
   },
   {
    "date": "2026-09-25",
-   "source": "TheWire.in",
-   "headline": "Saffronart Records INR 250.58 Crores Across Autumn Auctions, Extending Strong Momentum Through 2026",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxONld3QUYybkN2OHFod3g0V2xHcDVUeXljc2dQbmpweV9ibUVjOFdsOF8wTVJOdzFfYkpxUXJrTEw0SUI2SUJxczNHbnVPYjltUGFZQU9uN3NhdUJyWFp1YTdJTkNqNlU4dkE0YlpYZjFncnRDUFF6SEJWZ01LaU12eG9MLTQ2U3NNaHdaMmFJbWJCZW1UbmhyM2FRU1cxWHFHeDk1M244S05PbEM0R2ZzYmtWMFVqcGlTSXBNcFpKTGNEaUQzWHdneXd1RHRIMzNFaEh6WEhFakvSAdgBQVVfeXFMTjZXd0FGMm5DdjhxaHd4NFdsR3A1VHl5Y3NnUG5qcHlfYm1FYzhXbDhfME1STncxX2JKcVFya0xMNElCNklCcXMzR251T2I5bVBhWUFPbjdzYXVCclhadWE3SU5DajZVOHZBNGJaWGYxZ3J0Q1BRekhCVmdNS2lNdnhvTC00NlNzTWh3WjJhSW1iQmVtVG5ocjNhUVNXMVhxR3g5NTNuOEtOT2xDNEdmc2JrVjBVanBpU0lwTXBaSkxjRGlEM1h3Z3l3dUR0SDMzRWhIelhIRWpL?oc=5",
-   "image": null
-  },
-  {
-   "date": "2026-09-25",
    "source": "The Hindu",
    "headline": "Works by Isha Valentine, Vidhya Venkatappa on display at MKF Museum of Art",
    "why": "Bengaluru-based artists Isha Valentine and Vidhya Venkatappa are currently showcasing their works at MKF Museum of Art",
@@ -67,7 +75,7 @@
   },
   {
    "date": "2026-09-24",
-   "source": "dcourier.com",
+   "source": "Prescott Daily Courier",
    "headline": "Raymond Chee, Sr. Named Best of Show at 28th Prescott Indian Art Market",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxORUdiSGZNZjZ0aE1zbmlFbGFaQk5xZnJhdE1PNUVnSWp2c1NmZUtHUFNuNWxaMFJBajM3WnFwbTMwa2praGFjX2J1eHRid2EyclVNeHFIVEZvTVpIMTBSeldwVHBoTnV6M0lPMGJTWjNmLWtjYjBrc2ZfVXNfcDZBQVFoTC1wWkxNVjBTRVRPUnJWOU5LcXBlNHhIalpCUzZia3diUXc4T0luSVR1NFllLTZweVhKR1EzZXBlSU9YZV81NzNvRm5hR1dRNnBINDY4amt4TnNmdVNHUUlmVHFmNFJsbw?oc=5",
@@ -82,14 +90,6 @@
    "image": null
   },
   {
-   "date": "2026-09-24",
-   "source": "The Hindu",
-   "headline": "Yugdeepak Soni brings the centuries-old pichwai tradition to Forum Art Gallery, Chennai",
-   "why": "Yugdeepak’s works celebrate the devotional art of Nathdwara, featuring vibrant scenes of Lord Krishna and symbolic motifs that reflect seasonal…",
-   "url": "https://www.thehindu.com/entertainment/art/yugdeepak-soni-brings-the-centuries-old-pichwai-tradition-to-forum-art-gallery-chennai/article71467859.ece",
-   "image": "https://th-i.thgim.com/public/news/national/karnataka/qdo4pz/article71467864.ece/alternates/LANDSCAPE_1200/Baramasa%20II%20-%2042%20X%2033.jpg"
-  },
-  {
    "date": "2026-09-22",
    "source": "The Times of India",
    "headline": "Kolkata art auction brings Indian masters to global collectors",
@@ -99,6 +99,22 @@
   }
  ],
  "wider": [
+  {
+   "date": "2026-09-27",
+   "source": "ARTnews",
+   "headline": "“From Monet and Manet to Money”: A Berlin Museum Spotlights the Dealer Who Made Impressionism an International Sensation",
+   "why": "“Cassirer: Breakthrough of Impressionism” is on view at Berlin’s Alte Nationalgalerie.",
+   "url": "https://www.artnews.com/art-in-america/aia-reviews/paul-cassirer-berlin-alte-nationalgalerie-impressionism-1234799643/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
+  },
+  {
+   "date": "2026-09-26",
+   "source": "artnet News",
+   "headline": "In the Hot Seat! Are Monumental Armory Show Sculptures Copies?",
+   "why": "Lucia Hierro’s chairs at the New York fair have sparked a dispute with another artist over originality. The post In the Hot Seat! Are Monumental…",
+   "url": "https://news.artnet.com/market/lucia-hierro-kuril-chto-armory-show-giant-chairs-2816132",
+   "image": null
+  },
   {
    "date": "2026-09-26",
    "source": "Hyperallergic",
@@ -178,22 +194,6 @@
    "why": "It’s a big year for Independent 20th Century, Independent contemporary art fair’s more art-historically minded sister.",
    "url": "https://www.artnews.com/list/art-news/market/highlights-independent-20th-century-art-fair-1234799390/",
    "image": "https://www.artnews.com/wp-content/uploads/2026/09/Jackson-Park_web-copy.jpg?w=1024"
-  },
-  {
-   "date": "2026-09-25",
-   "source": "Artforum",
-   "headline": "Artistic Director, Theme Announced for Fifth Thailand Biennale",
-   "why": "The Thai Ministry of Culture has named jiradej-pornpilai meemalai: BAAN NOORG as the artistic director of the Fifth Thailand Biennale, ArtReview…",
-   "url": "https://www.artforum.com/news/artistic-director-named-for-fifth-thailand-biennale-1234759814/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/09/0.-as-a-group_.png?w=650"
-  },
-  {
-   "date": "2026-09-25",
-   "source": "The Art Newspaper",
-   "headline": "Bogotá's Artbo fair remains boutique and local—is that enough?",
-   "why": "Exhibitor numbers for the fair's 2026 edition are still down from pre-pandemic levels, and its collectors and galleries are largely from Colombia",
-   "url": "https://www.theartnewspaper.com/2026/09/25/amid-a-crowded-fair-calendar-colombias-artbo-remains-boutique-and-local",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/c531797e67529cdb64e5b8796bd43af36f5e9cee-1680x1476.png?w=140"
   }
  ]
 }
