@@ -1,6 +1,14 @@
 {
- "generated_at": "2026-11-06T09:53:35+00:00",
+ "generated_at": "2026-11-07T00:24:01+00:00",
  "on_market": [
+  {
+   "date": "2026-11-06",
+   "source": "NewsBytes",
+   "headline": "Arpita Singh: The artist who brings Indian stories to life",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMikwFBVV95cUxOQjhVdm5XTlFhdlR6UVRlWFg3QjRsMHFDX3FZWXdFcmtrX0lmRndIRWg3S3hZOVNjUHotNlYyRXFZNnFoTk5UOHNDWTBHUFBmYWFxcDI1LTUyNVhSZ1NmQ0doOVdfVWxPWWhyVjg3cEd4amdoaXJCUVRjMHd5cGZKMU45MEhuMjdjYkhEMTRteEVjZjQ?oc=5",
+   "image": null
+  },
   {
    "date": "2026-11-06",
    "source": "The Hindu",
@@ -14,7 +22,7 @@
    "source": "Forbes India",
    "headline": "How the Vaziranis built Saffronart into much more than an auction house",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxNN2JlUkJDdHQxZkpsbGdKX1ZWc0ZUM1RpcWplaUh4RzU0SDQ1RVQ1enlHYUxKRVZZUzFJWEFORWoyR05YTXRIR0VIb2N1V0dDcjQ3VVFMTDJYX2UtVVBDNmE2X1FVczAtdE8zTUdwQW41ZU9OZVptbEttRVVyTmFSb081azZ2dVhnSFRvaHJrbTc1WXd2VnREQ3JoWnJQRWNScGZDQThPcXc5SVZROFdYSTN1YkMxY3I3elQ3cFBXZTYxQdIBwgFBVV95cUxNN2JlUkJDdHQxZkpsbGdKX1ZWc0ZUM1RpcWplaUh4RzU0SDQ1RVQ1enlHYUxKRVZZUzFJWEFORWoyR05YTXRIR0VIb2N1V0dDcjQ3VVFMTDJYX2UtVVBDNmE2X1FVczAtdE8zTUdwQW41ZU9OZVptbEttRVVyTmFSb081azZ2dVhnSFRvaHJrbTc1WXd2VnREQ3JoWnJQRWNScGZDQThPcXc5SVZROFdYSTN1YkMxY3I3elQ3cFBXZTYxQQ?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMivAFBVV95cUxObEJJdUp1ZmRXNDlmYVltX2VfNnNzbDJZeHNITUJ3cVdZbHZ2WHpOUVlSZGJpbG84aGNMenFES1N0bnhBOVN5d2V3eEZybVBCYmVCaXUwYzc4Y09wdUFhNFlZN2t4cVMwMnNZTk1EZEFRQnBXVUpkVy1mbS14MXRmdm5NMDBMc0JUcXVMM2dSZmhncE1OM3lDa0N2blY4YjEyWXNiZHhQUkJRRkNpMDdLQlpQbVBIcmNFRlVOdtIBwgFBVV95cUxNN2JlUkJDdHQxZkpsbGdKX1ZWc0ZUM1RpcWplaUh4RzU0SDQ1RVQ1enlHYUxKRVZZUzFJWEFORWoyR05YTXRIR0VIb2N1V0dDcjQ3VVFMTDJYX2UtVVBDNmE2X1FVczAtdE8zTUdwQW41ZU9OZVptbEttRVVyTmFSb081azZ2dVhnSFRvaHJrbTc1WXd2VnREQ3JoWnJQRWNScGZDQThPcXc5SVZROFdYSTN1YkMxY3I3elQ3cFBXZTYxQQ?oc=5",
    "image": null
   },
   {
@@ -74,14 +82,6 @@
    "image": null
   },
   {
-   "date": "2026-11-02",
-   "source": "Artsy",
-   "headline": "India Art Fair announces more than 120 exhibitors for 2027 edition.",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPaEI0ZUxnTDdjSktVa3lzd19SdFQ1UUZ3ZERyUFpldjhfMURhM3BoOXNucExXbWQ5RnFaQWxMeTl0R1JFeHZUS2NZM1VOM1pXYUtpWExIQWx3X1RjWXhnd1ZYQ1FQbGhuWGVGWkRUeU9Dd3REYXNZMXlTYU5kMzktbFpzS2p0REgwYl9oeXVhRVlBTUxkcWdrQXpybHhwYlU?oc=5",
-   "image": null
-  },
-  {
    "date": "2026-10-30",
    "source": "Christie's Press",
    "headline": "Christie's Presents its Hong Kong Annual Sale of Indian, Himalayan and Southeast Asian Art: A distinguished, fresh-to-market selection spanning a millennium of artistic heritage",
@@ -101,99 +101,99 @@
  "wider": [
   {
    "date": "2026-11-06",
+   "source": "ARTnews",
+   "headline": "A New Hudson Valley Art Space Promises to Be As Accessible as It Is In Flux",
+   "why": "Branchline in Katonah, New York, opens November 6 with an exhibition 'Line Break' of Indigenous artists.",
+   "url": "https://www.artnews.com/art-news/news/branchline-gochman-family-collection-opening-1234805014/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
+  },
+  {
+   "date": "2026-11-06",
    "source": "Artforum",
-   "headline": "$3 Million Georgia O’Keeffe Found Under Pile of Coats Heads to Auction",
-   "why": "An early Georgia O’Keeffe work discovered in a closet in Manhattan’s East Village in 2022 is bound for the auction block. O’Keeffe’s Near Abiquiu…",
-   "url": "https://www.artforum.com/news/georgia-okeeffe-found-hidden-in-closet-bound-for-auction-1234763146/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/11/new-okeeffe-lobo-peak-1024x418.jpg.webp?w=650"
+   "headline": "ICA Miami Names Gensler As Architect For New Wing",
+   "why": "The ICA Miami has selected Gensler as the architect to renovate the building they acquired in 2024. The 30,000 square foot building will house the…",
+   "url": "https://www.artforum.com/news/ica-miami-names-gensler-architect-for-new-wing-1234763229/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/12dfd32c3b7a4e1244ed43b72f6fc848.jpg?w=650"
   },
   {
-   "date": "2026-11-05",
-   "source": "artnet News",
-   "headline": "Iris van Herpen Is Fashioning a New Reality",
-   "why": "Iris van Herpen is a fashion designer, but it’s a title that barely captures the scope of her imagination. Her practice reaches far beyond the…",
-   "url": "https://news.artnet.com/multimedia/iris-van-herpen-is-fashioning-a-new-reality-2830385",
-   "image": null
-  },
-  {
-   "date": "2026-11-05",
-   "source": "Artforum",
-   "headline": "After Galliano Disaster, Met Raises Eyebrows with Replacement Costume Institute Show",
-   "why": "Just two months after Metropolitan Museum of Art’s Costume Institute canceled its planned spring 2027 John Galliano show in response to a firestorm…",
-   "url": "https://www.artforum.com/news/met-raises-eyebrows-with-replacement-costume-institute-show-1234763135/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/11/GettyImages-2165420952.jpg?w=650"
-  },
-  {
-   "date": "2026-11-05",
-   "source": "artnet News",
-   "headline": "Yoshitomo Nara’s Cartoon Girls Are Back in New York, Armed and Somewhat Dangerous",
-   "why": "The Japanese superstar has landed at David Zwirner with almost 100 works. Prepare for lines. The post Yoshitomo Nara’s Cartoon Girls Are Back in New…",
-   "url": "https://news.artnet.com/art-world/yoshitomo-nara-new-york-david-zwirner-2832826",
-   "image": null
-  },
-  {
-   "date": "2026-11-05",
+   "date": "2026-11-06",
    "source": "Hyperallergic",
-   "headline": "It’s Time to Talk About Classism in the Art World",
-   "why": "In his memoiristic new book, photographer Mark Alice Durant weaves his personal experiences into a larger rebuke of the economic inequality that…",
-   "url": "https://hyperallergic.com/its-time-to-talk-about-classism-in-the-art-world/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/Confessions-of-a-Working-Class-Artist_03_Mark-Alice-Durant_Jacob-Lawrence-1.jpg"
+   "headline": "The Jewish Sisters in Renoir’s “Pink and Blue”",
+   "why": "Author Catherine Ostler follows the lives of the two cherubic girls, whose rarefied lives in an elite, artistic French family would be toppled by the…",
+   "url": "https://hyperallergic.com/the-jewish-sisters-in-renoirs-pink-and-blue/",
+   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/Pink-and-Blue_History-and-Art-Collection_Alamy-2.jpg"
   },
   {
-   "date": "2026-11-05",
+   "date": "2026-11-06",
+   "source": "Artforum",
+   "headline": "Pablo Helguera to Lead New School’s Vera List Center",
+   "why": "The Vera List Center for Art and Politics (VLC) at the New School, New York, has announced artist and educator Pablo Helguera as its new director…",
+   "url": "https://www.artforum.com/news/pablo-helguera-to-lead-new-school-vera-list-center-1234763219/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/pablo-helguera.jpg.webp?w=650"
+  },
+  {
+   "date": "2026-11-06",
+   "source": "Hyperallergic",
+   "headline": "Pablo Helguera to Helm the New School’s Vera List Center",
+   "why": "Upon his appointment, the artist reflected on the urgency he feels to “make sense of rapidly unfolding events, question prevailing narratives, and…",
+   "url": "https://hyperallergic.com/pablo-helguera-to-helm-the-new-schools-vera-list-center/",
+   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/DSC00245.jpg"
+  },
+  {
+   "date": "2026-11-06",
    "source": "The Art Newspaper",
-   "headline": "Ex-husband of Brent Sikkema sentenced to life in prison over murder-for-hire killing",
-   "why": "Daniel Sikkema, who was married to Brent Sikkema for 15 years, had been convicted of orchestrating his grisly 2024 murder",
-   "url": "https://www.theartnewspaper.com/2026/11/05/daniel-sikkema-sentenced-brent-sikkema-murder",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/3f09761f6621b4cb23073341ef14830eedc53589-2000x1500.jpg?w=140"
+   "headline": "Whitney Museum selects a staff curator and a stage director to lead 2028 biennial",
+   "why": "Meg Onli, who works at the museum and co-curated the 2024 Whitney Biennial, will collaborate with the choreographer and performing arts director Zack…",
+   "url": "https://www.theartnewspaper.com/2026/11/06/whitney-biennial-2028-curators-meg-onli-zack-winokur",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/f517e4504cef47ea4ae125a601c3a0dbca3f2a4c-2000x2499.jpg?w=140"
   },
   {
-   "date": "2026-11-05",
+   "date": "2026-11-06",
    "source": "ARTnews",
-   "headline": "Sweden Returns Benin Bronze Trove to Nigeria, Indigenous Remains to Bolivia",
-   "why": "Seventy-seven objects belonging to the Kallawaya people, including human remains, are also set to be received by the Archaeological Museum in La Paz…",
-   "url": "https://www.artnews.com/art-news/news/sweden-returns-benin-bronze-nigeria-indigenous-remains-bolivia-1234804791/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/GettyImages-1241646698.jpg?w=1024"
+   "headline": "President Trump Moves to Make Oval Office a Public Monument",
+   "why": "In his second term, Trump made it a priority to redecorate both the Oval Office and the Cabinet Room",
+   "url": "https://www.artnews.com/art-news/news/trump-proclamation-seeks-oval-office-national-monument-1234804961/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/GettyImages-2303717159.jpg?w=1024"
   },
   {
-   "date": "2026-11-05",
-   "source": "ARTnews",
-   "headline": "Trump Convenes Final Review for Triumphal Arch, Seeks Immediate Start on Construction",
-   "why": "Trump’s planned 250-foot-tall triumphal arch could win approval today, after he bulldozed a mountain of opposition to secure a final review.",
-   "url": "https://www.artnews.com/art-news/news/trump-convenes-final-review-for-triumphal-arch-1234804804/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/GettyImages-2300894874.jpg?w=1024"
-  },
-  {
-   "date": "2026-11-05",
-   "source": "ARTnews",
-   "headline": "Paris Court Orders Sotheby’s to Return Nazi-Looted Pissarro Painting to Jewish Heirs",
-   "why": "Seven heirs of banker Salomon Flavian said they were left out of a deal agreeing to the painting’s sale at Sotheby’s.",
-   "url": "https://www.artnews.com/art-news/news/paris-court-rules-sothebys-return-nazi-looted-pissarro-1234804806/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/09/Claude-Pissarro-Duquesne-Sothebys.jpeg?w=1024"
-  },
-  {
-   "date": "2026-11-05",
-   "source": "ARTnews",
-   "headline": "Archaeologists Discover Vast Ice Age Cave Art Hiding in Plain Sight",
-   "why": "The find sheds new light on population sizes and regional artistic expression during the Paleolithic.",
-   "url": "https://www.artnews.com/art-news/news/archaeologists-find-ice-age-cave-art-hiding-in-plain-sight-1234804778/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/urn_cambridge.org_id_binary-alt_20261022184619-62399-optimisedImage-png-S0003598X26104475_figAb.jpg?w=900"
-  },
-  {
-   "date": "2026-11-05",
-   "source": "Hyperallergic",
-   "headline": "Met Gala's New Theme Is the Biggest Recession Indicator Yet",
-   "why": "Brace yourself for A-listers strutting down the red carpet in everyday garb like jeans, T-shirts, and \"humble, even 'disposable' materials.\"",
-   "url": "https://hyperallergic.com/met-galas-new-theme-is-the-biggest-recession-indicator-yet/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/Screenshot-2026-11-05-at-2.22.10---PM-copy.png"
-  },
-  {
-   "date": "2026-11-05",
+   "date": "2026-11-06",
    "source": "Artforum",
-   "headline": "Museum Wiesbaden to Return Ten Colonial-Era Skulls to Indonesia",
-   "why": "The Museum Wiesbaden will repatriate ten human skulls held in its collection to Indonesia, marking the first instance of a German institution…",
-   "url": "https://www.artforum.com/news/museum-wiesbaden-returns-ten-skulls-to-indonesia-1234763125/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/11/GettyImages-2199618733-e1793910751724.jpg?w=650"
+   "headline": "Blood, Toil, Tears, and Sweat: Miles Greenberg’s WAR",
+   "why": "“Across the line, then in line, then out of line: This was my progression through WAR ”",
+   "url": "https://www.artforum.com/columns/blood-toil-tears-and-sweat-miles-greenbergs-war-performance-1234763208/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/BFA_56527_8299563.jpg?w=650"
+  },
+  {
+   "date": "2026-11-06",
+   "source": "Artforum",
+   "headline": "Art Basel Miami Beach Rolls Out $4,500 “Premium Discovery” Pass",
+   "why": "Art Basel Miami Beach has unveiled a “Premium Discovery” pass. Available for one- and two-day increments, and priced at $3,600 and $4,500…",
+   "url": "https://www.artforum.com/news/art-basel-miami-beach-unveils-4500-premium-discovery-pass-1234763204/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/09/art-basel-miami-beach.jpg?w=650"
+  },
+  {
+   "date": "2026-11-06",
+   "source": "Hyperallergic",
+   "headline": "Meg Onli and Zack Winokur to Curate 2028 Whitney Biennial",
+   "why": "Having co-curated the 2024 Biennial, Onli returns to the next edition with Winokur, who founded the American Modern Opera Company.",
+   "url": "https://hyperallergic.com/meg-onli-and-zack-winokur-to-curate-2028-whitney-biennial/",
+   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/whitney2028biennial0818-copy-1.jpeg"
+  },
+  {
+   "date": "2026-11-06",
+   "source": "artnet News",
+   "headline": "French Court Investigates Fraud Claims by Picasso’s Heirs",
+   "why": "Plus, Daniel Sikkema sentenced to life in prison, India Art Fair announces exhibitors, and more industry intel. The post French Court Investigates…",
+   "url": "https://news.artnet.com/market/industry-intel-nov-6-2833004",
+   "image": null
+  },
+  {
+   "date": "2026-11-06",
+   "source": "ARTnews",
+   "headline": "Andy Warhol’s ‘Camouflage’ Portraits Inspired Piaget’s New Limited-Edition Watch",
+   "why": "This is the second time the watchmaker has collaborated with the Warhol Foundation.",
+   "url": "https://www.artnews.com/art-news/news/andy-warhol-piaget-camouflage-watch-1234804925/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/piaget-andy-warhol-camouflage-watch.webp?w=1000"
   }
  ]
 }
