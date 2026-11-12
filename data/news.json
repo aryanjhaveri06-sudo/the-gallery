@@ -1,12 +1,28 @@
 {
- "generated_at": "2026-11-12T02:11:10+00:00",
+ "generated_at": "2026-11-12T10:18:28+00:00",
  "on_market": [
   {
-   "date": "2026-11-11",
-   "source": "Artnet",
-   "headline": "Art of the Islamic and Indian Worlds including Rugs and Carpets",
+   "date": "2026-11-12",
+   "source": "Hindustan Times",
+   "headline": "For a week from November 13, Kolkata will turn into a giant exhibition space",
+   "why": "DAG’s The City as a Museum festival will feature exhibitions, performances and film screenings across 10 venues",
+   "url": "https://www.hindustantimes.com/lifestyle/art-culture/for-a-week-from-november-13-kolkata-will-turn-into-a-giant-exhibition-space-101794281462565.html",
+   "image": "https://www.hindustantimes.com/ht-img/img/2026/11/10/1600x900/logo/DAG_1794282231964_ofm2_1794282253681_rNbe_aebcc995-f27e-4d84-9a39-68bac45759c8_pvWU.jpg"
+  },
+  {
+   "date": "2026-11-12",
+   "source": "theoptimist.news",
+   "headline": "Takshanam At NGMA Delhi: Free Passes, Art For Sale",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOcWhHZVZzei1OcUJkNEtDekRnV0FRUm5sZ2VtNTd4bXdGZnhqQTFLdGE5Z2xRdW1UZGQ1bmZFclFLa3llUGxQV3JPeXpUaW0wYVR0bGJuTkxtTXl1aG1FWG9yU2lOMzFyUnpUVndJR3dRa21NY18wd3o2TDJxSUlEc1B3YXFkUEFOUEwzUjFMYlg2Y1Eycnk3RzhSY091MjdGenhfSmIzbXMyTjBQWVRkYkZmYndqbXE0UXItUFB3ZGFZUXJkMjBJSEd5b01KbFU?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9oaVFuZXhTMVczanlLMWJkSFlmaVNJUzZPQ3RIcHpfSkEtN1FkN0RYLVN3bWJRb29DSVcwZm5iSFhRMmM4eTVCR25GZlpQMTdna1pfdHNxVUNmYko1Tm1ROUpublY4UGZkZG1JNkJvYlE?oc=5",
+   "image": null
+  },
+  {
+   "date": "2026-11-12",
+   "source": "Time Out Worldwide",
+   "headline": "Art Walk in India: Sketch 12 bazaars with The Art Curry",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPb2Nya0dKaE1SdndHWnlJd0JkMGt3ZW14SDc2QWtCYlctTUJBN0JVT2JvNlA1N1E2c1psSVkzY1FqSlh3NF9udTRhdWtBckNCYUlTQmMyZ2xST0NsWXJITWtYZktaUkk3NFgxVkJMQTBrb21ENFl1YlVMS2E4NFVwQlpRbk4yZkZ2NTh1VG1vOS0taWxtOFlXRy1RUUFETnd0THVpUFBJLWp4eHg2b2JJ?oc=5",
    "image": null
   },
   {
@@ -27,6 +43,14 @@
   },
   {
    "date": "2026-11-11",
+   "source": "The Hindu",
+   "headline": "A digital canvas without borders: AI, folk art converge in Chennai exhibit",
+   "why": "Art, technology and heritage converge in two interactive experiences that invite visitors to create a shared digital canvas and explore AI portraits…",
+   "url": "https://www.thehindu.com/entertainment/art/a-digital-canvas-without-borders/article71685289.ece",
+   "image": "https://th-i.thgim.com/public/life-and-style/food/y30eq6/article71685311.ece/alternates/LANDSCAPE_1200/Bogota1_%C2%A9MaximeTouroute.jpg"
+  },
+  {
+   "date": "2026-11-11",
    "source": "ETV Bharat",
    "headline": "Arpita Singh, Iconic Figure Of Contemporary Indian Art, Has Breathed Her Last At Age 89",
    "why": "",
@@ -42,30 +66,6 @@
    "image": "https://th-i.thgim.com/public/life-and-style/x4oce4/article71677334.ece/alternates/LANDSCAPE_1200/%E2%80%98The%20Ramayana%E2%80%99%20as%20a%20typeface.png"
   },
   {
-   "date": "2026-11-10",
-   "source": "The Hindu",
-   "headline": "Arpita Singh: in the solitude of her studio",
-   "why": "The artist, who passed away earlier today at the age of 89, was a strong feminist voice in Indian art and found freedom in her work till the very end",
-   "url": "https://www.thehindu.com/entertainment/art/arpita-singh-artist-tribute-delhi-studio-portrait-of-an-artist-extract/article71682495.ece",
-   "image": "https://th-i.thgim.com/public/life-and-style/pj8rt3/article71682474.ece/alternates/LANDSCAPE_1200/Arpita%20Singh.png"
-  },
-  {
-   "date": "2026-11-10",
-   "source": "The Hindu",
-   "headline": "CIMA Art Mela brings accessible art to Delhi this week",
-   "why": "The Centre of International Modern Art (CIMA) is hosts ing the CIMA Art Mela from November 12–17 at the India Habitat Centre’s Visual Arts Gallery…",
-   "url": "https://www.thehindu.com/entertainment/art/cima-art-mela-brings-accessible-art-to-delhi-this-week/article71660251.ece",
-   "image": "https://th-i.thgim.com/public/news/national/karnataka/4639f7/article71660270.ece/alternates/LANDSCAPE_1200/ASHOKE%20MULLICK.jpg"
-  },
-  {
-   "date": "2026-11-08",
-   "source": "Open Magazine",
-   "headline": "Mumbai Mélange: Where Art Meets Fashion and Showbiz",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQRE41WVFSSnBnWjNhSHFjUWtfaEZJRWZNcE1fakxIWl9hNjVpUE5Nd2xnYkY2Q2RMNGNmelZGS1RPZHdhcHhVU1ZDTVZOQXpka1JselJNM1hacW5qdDV5aTlWQWhNSXZ6ZkhKM0RjS0NBQkRZR2pZVExiblRhZThiQjQ2NURMZDlPTFBkOHlpZHdrZkdsLVZJZ0tiYw?oc=5",
-   "image": null
-  },
-  {
    "date": "2026-10-26",
    "source": "ARTnews.com",
    "headline": "Indian Artist Jogen Chowdhury Has Died, $80 M. Klimt Heads to Christie’s, and More: Morning Links for October 26, 2026",
@@ -79,14 +79,6 @@
    "headline": "Mt Kearsarge Indian Museum Autumn Auction Fundraiser",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMivgFBVV95cUxOOWZ6NWFZS2Z0aWVuY3hGWHVWeGVxaENqbGRHYkFQUEpiUnFrQVpZbHljWWQwN0JwaDhJU0w2eG5yZFA1NWRBWlAxdjBESURtbklhaWdTSTB1MEhBUGszbWd6N3dVb0lCQ2NqTWV4eEEzQXRCc3BBTGp6MVp0VWt5SnhVY3RDR3lRaHZfYVRXOVVxcTd4TjVWdVczM1RYZFRsZ0NGeDJDREs5Y1NXaDhJZ0l5QzJzcFdPbF9HMV9n?oc=5",
-   "image": null
-  },
-  {
-   "date": "2026-10-22",
-   "source": "The Times of India",
-   "headline": "An 11th-12th-century Vishnu sculpture from India's Pala era entered a Swiss collection, sold at a 1973 au",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMiowNBVV95cUxNNWNmYmVzOE8zT3J6LUVpcXVQOGhxTzhpQ29aNlF0cUw1WVctU05ydEczajhUNDFoMFJ1dnJ0dlk0VTdsTGFMRVZDaDhTdGxSWk40OFNQTlRsMURQaTRaY0ZSZlBiNkxHMWFIR1E0RTVCSFpJeC16Q3RURkI1bEZVQ1c3elVwbDlwQXpRTjRWZmE3TWpieUhZWGlMRXU3QUsxenVkUFM5MnRvWVR4MlpPVXZNZ3RPRlotSHAxd1pqaEo0WXhBWFJwNXdqVXo5VlRPLUhkVm0xQWdITkUtVTl1QjdBME82Ykc1dWZUUGVEUHRfU2lMb0lYZU1OeFV4Y1lGdDZnR3JNM1hmT29rR0c1ejJ5UnFuWTRUNTItRGI3Qm1WRTd1ZUdqQkRuSjNyazh1SkVEUDNqZjRHWHg4S3dqdm5tYjRpZkwyQU52T1NzWkNONVlZUmsxdkYzdHF3Y2J1b3B2YTdNRnNTQW5TYUN3eF9OQ1F0Q2lreExlakl5NkJMRzkza2JNOFk4OWxWdlVDYkZLWTliUHJxUVBlWHNwVzhZRdIBqANBVV95cUxOc0xsTWZINE9iQkFnMEt1aVdXbFN6bDZ6SDRUY3Z0U3I3Rkt3blRYWkhkNVhFRWppUllHSEt1eko4S3p6LWdlSm81a0YyQTBtcEE4Nm5jc2I5QnlEeURqbVRMcmJBa0NtQUp4dEt1YXVnY0xvMEtpWTgxSllId29MenFEamRvT3B4SG1WT092eXdFQkh4bk8wWEpJbTNiSHBxdmx6S210RHdHcUQyNnRiT0tNa3hROGxJd1dNZXU2Wl9oLVdnTGl0cFJpUFVfR21IUVNnaWhzYU5TRlptTzllTTRVcl9aTHVJeU5zaEJLbGlSaGZNS1BPZTZoa0IzczZGR1V6blNjcmR0emtVRDd1aXJ5ZEd4MDQ0MDMxT0hWX0wwbE0tYm1iRXlNX0pxX3VycDJ3UHpiNEJKWHduY3hsS1lmcXJqRVR1TGx3TFJYSEpDNERJanVhUkI1WXkxUmJFNEVsX2VzcmpTWEJDcVNoM0FPVEd4SDJaR2xZbS1NMndieExwcjlzbUhZQ0FwWWg2X0RRRGVSLUZoQUZ6ZlRkYlJZWWFPWkZn?oc=5",
    "image": null
   },
   {
