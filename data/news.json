@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-15T09:58:12+00:00",
+ "generated_at": "2026-11-16T00:11:42+00:00",
  "on_market": [
   {
    "date": "2026-11-13",
@@ -43,6 +43,14 @@
   },
   {
    "date": "2026-11-12",
+   "source": "India Today",
+   "headline": "From the India Today archives (1988) | Arpita Singh and the new era of artists",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxQVDJVamJNU0JVdG1GVHVUVWIwc3NQOTcwenVXQXRWY0h5Znp3VjVzRjZlMS15eDhhOFVGM0g0b0lyY0oza2NISVZHQktZaDY1aGV1Y2VrT2ZKOGQtR2VRWGE0bmM2My1XMXU2WkNrOXM2Z1o2bldMZTVZWHptcTJhVU92cGYwXzNaa1B2d3lrVGYtM3FlcDYtbENOQng5LUxCNGNfZy0wcnZzR3h2a3dBT3RXR284QVpXNUYwejN5OWIwTDZKUXlEQ1BycmE1YlRoVmZrUS1mcUhMc1BWUmxuVUFYc9IB4wFBVV95cUxQVDJVamJNU0JVdG1GVHVUVWIwc3NQOTcwenVXQXRWY0h5Znp3VjVzRjZlMS15eDhhOFVGM0g0b0lyY0oza2NISVZHQktZaDY1aGV1Y2VrT2ZKOGQtR2VRWGE0bmM2My1XMXU2WkNrOXM2Z1o2bldMZTVZWHptcTJhVU92cGYwXzNaa1B2d3lrVGYtM3FlcDYtbENOQng5LUxCNGNfZy0wcnZzR3h2a3dBT3RXR284QVpXNUYwejN5OWIwTDZKUXlEQ1BycmE1YlRoVmZrUS1mcUhMc1BWUmxuVUFYcw?oc=5",
+   "image": null
+  },
+  {
+   "date": "2026-11-12",
    "source": "Economic Times",
    "headline": "The new trends reshaping India's art market",
    "why": "Art Mumbai is back, showcasing a wider array of international exhibitors while highlighting the evolution of art collections. With community…",
@@ -50,20 +58,12 @@
    "image": "https://img.etimg.com/photo/msid-135763914,imgsize-99656.cms"
   },
   {
-   "date": "2026-11-11",
-   "source": "The Times of India",
-   "headline": "Expo to explore Bengal’s art history at Alipore Museum",
+   "date": "2026-11-12",
+   "source": "theoptimist.news",
+   "headline": "Takshanam At NGMA Delhi: Free Passes, Art For Sale",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMixwFBVV95cUxNUnhMenpzR2w5amR0YTktc0FoUzg4dVJVamZNdW93ckpBTXhDMW9jX19kSHJ3Yms5VW1WYUtCX3FyVEdnZTljRWtMN3lWaGdSTHFMSHZoTjVYSkxBNmQtZGZCT3EyMmJiZGU5TDZoSHdxVW1yZVpWeG0wOE85SlBXaEJqcUs5dWdWSGFMNG0xS0p5SlFZS3Fhd2tpak13aVRoa3JGOE1nUHNoU1M5VzRTZG10WXJLVTdrOHZiaHd5UGJWZG1aVE930gHMAUFVX3lxTE5sRkxVZEdsR24tRjh1SDd0eEFWT0ZYakd2NkxYS1RCMXMyT1doSk9JU2djQ2pncnBoc1JjYTBlN0NKUGZqX3N1dm1jeXA5Wko2a0h3RUtFaXd4U0twVmZYdkR3Y1ljRmZNVGlzazhnU2RLZXFOTFFjLWVxX2lQSU5Iby1tTFJoUkg1U1ZNczExamdNZ2dQVnktVU5SWEJGZWxadkhKd3J0ajZJalVVb3UySllET2t0cW12eWZsckw1UXF6Zkd0V0FEc0VFaA?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9oaVFuZXhTMVczanlLMWJkSFlmaVNJUzZPQ3RIcHpfSkEtN1FkN0RYLVN3bWJRb29DSVcwZm5iSFhRMmM4eTVCR25GZlpQMTdna1pfdHNxVUNmYko1Tm1ROUpublY4UGZkZG1JNkJvYlE?oc=5",
    "image": null
-  },
-  {
-   "date": "2026-11-11",
-   "source": "The Hindu",
-   "headline": "A digital canvas without borders: AI, folk art converge in Chennai exhibit",
-   "why": "Art, technology and heritage converge in two interactive experiences that invite visitors to create a shared digital canvas and explore AI portraits…",
-   "url": "https://www.thehindu.com/entertainment/art/a-digital-canvas-without-borders/article71685289.ece",
-   "image": "https://th-i.thgim.com/public/life-and-style/food/y30eq6/article71685311.ece/alternates/LANDSCAPE_1200/Bogota1_%C2%A9MaximeTouroute.jpg"
   },
   {
    "date": "2026-11-06",
@@ -83,6 +83,14 @@
   }
  ],
  "wider": [
+  {
+   "date": "2026-11-15",
+   "source": "The Art Newspaper",
+   "headline": "Lotus L. Kang wins Canada’s top art prize, the Sobey Art Award",
+   "why": "The Toronto-born artist, whose work spans photography, sculpture and installation, will receive C$100,000 ($70,000)",
+   "url": "https://www.theartnewspaper.com/2026/11/15/lotus-l-kang-wins-2026-sobey-art-award-canadian-prize",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/4fb4babe21c040efac74119d8ab7023a5559cef2-2000x1333.jpg?w=140"
+  },
   {
    "date": "2026-11-14",
    "source": "ARTnews",
@@ -170,14 +178,6 @@
    "why": "We take a closer look at some of the top lots from the Modern Art and Contemporary Art I sales at Palais Dorotheum this month. The post Dorotheum…",
    "url": "https://news.artnet.com/art-world/dorotheum-modern-art-contemporary-art-2834913",
    "image": null
-  },
-  {
-   "date": "2026-11-13",
-   "source": "Hyperallergic",
-   "headline": "At NYC’s ADAA Art Fair, Unlimited Shrimp and $2K Diebenkorns",
-   "why": "The Art Dealers Association of America’s chummy five-day show returns to the Upper East Side after quietly canceling last fall’s edition.",
-   "url": "https://hyperallergic.com/at-nycs-adaa-art-fair-unlimited-shrimp-and-2k-diebenkorns/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/IMG_9796.jpeg"
   }
  ]
 }
