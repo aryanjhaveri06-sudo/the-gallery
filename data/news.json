@@ -1,6 +1,14 @@
 {
- "generated_at": "2026-11-16T00:11:42+00:00",
+ "generated_at": "2026-11-16T10:14:19+00:00",
  "on_market": [
+  {
+   "date": "2026-11-16",
+   "source": "The Hindu",
+   "headline": "Science in the art museum: Federico Carò of The Met on studying Indian artworks",
+   "why": "The researcher on how scientific analysis continues to reshape our understanding of art",
+   "url": "https://www.thehindu.com/entertainment/art/federico-caro-the-met-research-preserving-indian-art/article71540486.ece",
+   "image": "https://th-i.thgim.com/public/incoming/6y144n/article71699305.ece/alternates/LANDSCAPE_1200/collage%2021.jpg"
+  },
   {
    "date": "2026-11-13",
    "source": "The Art Journal",
@@ -16,14 +24,6 @@
    "why": "How Vikram Goyal’s baithak in Mayfair made a case for conversation-led exhibitions and stories from India that travel across cultures",
    "url": "https://www.thehindu.com/entertainment/art/vikram-goyal-wings-amp-tales-many-lives-of-ramayana-mayfair-london-repousse-sam-dalrymple/article71697533.ece",
    "image": "https://th-i.thgim.com/public/life-and-style/cvtglr/article71699303.ece/alternates/LANDSCAPE_1200/2.png"
-  },
-  {
-   "date": "2026-11-13",
-   "source": "The Hindu",
-   "headline": "Science in the art museum: Federico Carò of The Met on studying Indian artworks",
-   "why": "The researcher on how scientific analysis continues to reshape our understanding of art",
-   "url": "https://www.thehindu.com/entertainment/art/federico-caro-the-met-research-preserving-indian-art/article71540486.ece",
-   "image": "https://th-i.thgim.com/public/incoming/2w7ifm/article71699305.ece/alternates/LANDSCAPE_1200/collage%2021.jpg"
   },
   {
    "date": "2026-11-13",
@@ -74,15 +74,63 @@
    "image": null
   },
   {
-   "date": "2026-10-26",
-   "source": "ARTnews.com",
-   "headline": "Indian Artist Jogen Chowdhury Has Died, $80 M. Klimt Heads to Christie’s, and More: Morning Links for October 26, 2026",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPUnBUUFBDUy1WMFJOUnF4NklnNFYyM1JDaXliZDRIdGFvRkFxTmhzUDFRNk5QNVBiNDhVeW1PWHkxeTlSQ0s0VEZ3WF85QUJlMDd6V3E4MC1JZVY5ZmcxTTNMMmxIU0lCOWNyb0pBU2lLQVE3ZU41TS1PbXdLR3FPcXlnbFFDU3dzVlppYm93Qjk1Zw?oc=5",
-   "image": null
+   "date": "2026-10-17",
+   "source": "The Hindu",
+   "headline": "AstaGuru’s ShowKeen exhibition in Hyderabad: Husain, Souza, Raza, and more",
+   "why": "After Mumbai and Delhi, online auction house AstaGuru brings its first showcase to the city, featuring modern and Indian contemporary art, alongside…",
+   "url": "https://www.thehindu.com/entertainment/art/astagurus-showkeen-exhibition-in-hyderabad-husain-souza-raza-and-more/article71582561.ece",
+   "image": "https://th-i.thgim.com/public/incoming/3ek8w8/article71582997.ece/alternates/LANDSCAPE_1200/Thota%20Vaikuntam-collage%201.jpg"
   }
  ],
  "wider": [
+  {
+   "date": "2026-11-16",
+   "source": "artnet News",
+   "headline": "Your New York Auction Week Outlook",
+   "why": "Bank of America's Drew Watson joins the podcast to talk about how collector priorities are shifting and market confidence is growing. The post Your…",
+   "url": "https://news.artnet.com/multimedia/art-market-minute-nov-16-2837256",
+   "image": null
+  },
+  {
+   "date": "2026-11-16",
+   "source": "The Art Newspaper",
+   "headline": "Frieze Artist Award reimagines endangered Lebanese site",
+   "why": "Dala Nasser's installation re-creates a Muslim shrine built on Roman ruins",
+   "url": "https://www.theartnewspaper.com/2026/11/16/frieze-artist-award-reimagines-endangered-lebanese-site",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/20d2ae0a2b0f5dd118800a486fc5e3531332035c-3000x2001.jpg?w=140"
+  },
+  {
+   "date": "2026-11-16",
+   "source": "The Art Newspaper",
+   "headline": "Seven shows to see in the UAE during Frieze Abu Dhabi",
+   "why": "From a photography festival in Sharjah to maritime trade artefacts at the Louvre Abu Dhabi, our pick of what to visit outside the fair",
+   "url": "https://www.theartnewspaper.com/2026/11/16/exhibitions-to-see-in-the-uae-during-frieze-abu-dhabi",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/4f2d3dc8a129a4da369c8a22d628fa232677b76c-1417x2126.jpg?rect=0,730,1417,1233&w=140"
+  },
+  {
+   "date": "2026-11-16",
+   "source": "artnet News",
+   "headline": "What Makes Magritte So Mesmerizing? Inside One Rare Painting’s Visual Trickery",
+   "why": "It's hitting the block for the first time this month. The post What Makes Magritte So Mesmerizing? Inside One Rare Painting’s Visual Trickery…",
+   "url": "https://news.artnet.com/art-world/3-things-magritte-lami-de-lordre-sothebys-2835678",
+   "image": null
+  },
+  {
+   "date": "2026-11-16",
+   "source": "The Art Newspaper",
+   "headline": "Nomad art and design fair lands at Abu Dhabi’s Modernist former airport terminal",
+   "why": "The itinerant fair returns to the city for a second time with an ambitious edition expanding to 50 exhibitors",
+   "url": "https://www.theartnewspaper.com/2026/11/16/nomad-art-and-design-fair-lands-at-abu-dhabis-modernist-former-airport-terminal",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/be85aa572009fa2e475733f6a48a988649199c79-3307x2480.jpg?w=140"
+  },
+  {
+   "date": "2026-11-16",
+   "source": "ARTnews",
+   "headline": "Sotheby’s $180 M. Van Gogh Sale Faces Eleventh-Hour Nazi-Era Restitution Claim",
+   "why": "A claim from the heirs of its former Jewish owner has complicated one of the biggest auctions of the year.",
+   "url": "https://www.artnews.com/art-news/news/sothebys-van-gogh-180-million-restitution-claim-1936-sale-1234806093/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/Chataigniers-en-fleurs-Van-Gogh-Sothebys.png?w=1024"
+  },
   {
    "date": "2026-11-15",
    "source": "The Art Newspaper",
@@ -129,54 +177,6 @@
    "headline": "From $10K to a Cool $1M—Here’s What Your Money Can Buy at the ADAA Fair",
    "why": "The fair may have a new name, but the art is as enticing as ever. The post From $10K to a Cool $1M—Here’s What Your Money Can Buy at the ADAA Fair…",
    "url": "https://news.artnet.com/market/adaa-fair-report-2026-2836514",
-   "image": null
-  },
-  {
-   "date": "2026-11-13",
-   "source": "ARTnews",
-   "headline": "Whitney Museum Is Selling a de Kooning Painting Just Three Years After Receiving It",
-   "why": "The painting was once owned by the museum's former president, David Solinger.",
-   "url": "https://www.artnews.com/art-news/market/whitney-museum-de-kooning-yellow-river-christies-auction-1234805966/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/whitney-de-kooning.png?w=1024"
-  },
-  {
-   "date": "2026-11-13",
-   "source": "ARTnews",
-   "headline": "Former Philadelphia Museum of Art Executive Charged $30K to Company Cards",
-   "why": "Latasha Harling, the museum’s former chief people and diversity officer, pleaded guilty to receiving stolen property, averting a trial that had been…",
-   "url": "https://www.artnews.com/art-news/news/former-philadelphia-museum-executive-credit-card-charges-1234805960/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/03/GettyImages-2247591634.jpg?w=1024"
-  },
-  {
-   "date": "2026-11-13",
-   "source": "artnet News",
-   "headline": "She Wanted to Be Shocked. Inside Storied Art Dealer Ileana Sonnabend’s Collection",
-   "why": "Her heirs are staging a blockbuster show in Rome and selling art in New York. The post She Wanted to Be Shocked. Inside Storied Art Dealer Ileana…",
-   "url": "https://news.artnet.com/market/ileana-sonnabend-christies-auction-rome-exhibition-2834995",
-   "image": null
-  },
-  {
-   "date": "2026-11-13",
-   "source": "The Art Newspaper",
-   "headline": "The late Los Angeles artist Betye Saar receives heartfelt send-off at the Getty Center",
-   "why": "The memorial highlighted how she made artists as well as art",
-   "url": "https://www.theartnewspaper.com/2026/11/13/betye-saar-memorial-event-getty-center",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/e89af7ab16f4cc4ecda56cf679d923c118e79440-2000x1333.jpg?w=140"
-  },
-  {
-   "date": "2026-11-13",
-   "source": "artnet News",
-   "headline": "Kehinde Wiley Owes Rent on New York Apartment, Suit Alleges",
-   "why": "The portrait painter's landlord is seeking at least $36,000. The post Kehinde Wiley Owes Rent on New York Apartment, Suit Alleges appeared first on…",
-   "url": "https://news.artnet.com/art-world/kehinde-wiley-rent-lawsuit-2834710",
-   "image": null
-  },
-  {
-   "date": "2026-11-13",
-   "source": "artnet News",
-   "headline": "Dorotheum Brings Together Modernist Masters and Postwar Heavyweights in Vienna",
-   "why": "We take a closer look at some of the top lots from the Modern Art and Contemporary Art I sales at Palais Dorotheum this month. The post Dorotheum…",
-   "url": "https://news.artnet.com/art-world/dorotheum-modern-art-contemporary-art-2834913",
    "image": null
   }
  ]
