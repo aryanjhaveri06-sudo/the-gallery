@@ -1,6 +1,14 @@
 {
- "generated_at": "2026-11-18T02:42:59+00:00",
+ "generated_at": "2026-11-18T10:44:05+00:00",
  "on_market": [
+  {
+   "date": "2026-11-18",
+   "source": "Local Samosa",
+   "headline": "In a Record Breaking Year for Indian Art Sales, CIMA Art Mela has Let Newest Collectors Buy Original Work From Rs. 5000",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1VTGZVaEdrR0drTHVNLTdIMWdNd0lwZW1Cb1c5V0VTZHJlM3RyZjN5LUtaX19kU09qeTBoaXd5Nkg4aGV1VXBlMHlrNFJIaXlXazVhSzM5bndJQUZ1cjNlSHJ6cHZkVUZoclBXN1FWYlJEMGvSAXNBVV95cUxNVUxmVWhHa0dHa0x1TS03SDFnTXdJcGVtQm9XOVdFU2RyZTN0cmYzeS1LWl9fZFNPankwaGl3eTZIOGhldVVwZTB5azRSSGl5V2s1YUszOW53SUFGdXIzZUhyenB2ZFVGaHJQVzdRVmJSRDBr?oc=5",
+   "image": null
+  },
   {
    "date": "2026-11-17",
    "source": "The Hindu",
@@ -85,26 +93,50 @@
  "wider": [
   {
    "date": "2026-11-18",
+   "source": "The Art Newspaper",
+   "headline": "Kandinsky record and trove consigned by Jeff Koons buoy Christie's 20th-century sale in New York",
+   "why": "The house made $521m with an 88% sell-through rate, a marked improvement on last year's equivalent sale",
+   "url": "https://www.theartnewspaper.com/2026/11/18/kandinsky-record-and-a-trove-consigned-by-jeff-koons-buoy-christies-solid-20th-century-evening-sale-in-new-york",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/d8fdc436103f4b1b23f98536bac2188ca87a8a83-1584x990.jpg?w=140"
+  },
+  {
+   "date": "2026-11-18",
    "source": "artnet News",
-   "headline": "$44.6M Modigliani Sculpture Steals the Show at Phillips",
-   "why": "Bidding for the stone head injected drama to an otherwise brisk auction that hauled in $104.4 million. The post $44.6M Modigliani Sculpture Steals…",
-   "url": "https://news.artnet.com/market/phillips-contemporary-auction-modigliani-2026-2838121",
+   "headline": "Companion Piece to Famed ‘Ugly Duchess’ Could Fetch $10.5M",
+   "why": "Plus, Taylor Swift's Eras Tour gets the museum treatment, a revealing Edward Hopper biography, and more art world matters. The post Companion Piece…",
+   "url": "https://news.artnet.com/artnet-bulletin/companion-ugly-duchess-sale-2837972",
+   "image": null
+  },
+  {
+   "date": "2026-11-18",
+   "source": "The Art Newspaper",
+   "headline": "Modigliani sculpture heads Phillips's New York evening sale at $44.6m",
+   "why": "The Modern and contemporary art auction totalled $104.4m, a 55% improvement on last year, with only one lot by Anselm Kiefer left unsold",
+   "url": "https://www.theartnewspaper.com/2026/11/18/modigliani-heads-phillipss-new-york-evening-sale-at-446m",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/3b9b9e5e0d4fcaf65b7e14ef8a6a206677e06464-11648x8736.jpg?w=140"
+  },
+  {
+   "date": "2026-11-18",
+   "source": "artnet News",
+   "headline": "$85.8M Kandinsky, $82.3M Klimt Propel Mixed $626.6M Christie’s Sale",
+   "why": "Buyers were selective, and many lots went for below their estimates. The post $85.8M Kandinsky, $82.3M Klimt Propel Mixed $626.6M Christie’s Sale…",
+   "url": "https://news.artnet.com/art-world/85-8m-kandinsky-82-3m-klimt-propel-mixed-626-6m-christies-sale-2838270",
    "image": null
   },
   {
    "date": "2026-11-18",
    "source": "ARTnews",
-   "headline": "A Wassily Kandinsky Sold by the Nahmads Fetches $85.8 M. at Christie’s, Notching a New Auction High",
-   "why": "The painting was guaranteed to fetch a record-setting price.",
-   "url": "https://www.artnews.com/art-news/market/wassily-kandinsky-nahmads-christies-new-auction-high-1234806466/",
-   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
+   "headline": "The Most Expensive Works by Gustav Klimt Sold at Auction",
+   "why": "Christie's added another top result to the list on Tuesday, when it sold the 1915-1916 landscape Litzlbergkeller for $82.3 million.",
+   "url": "https://www.artnews.com/list/art-news/market/gustav-klimt-most-expensive-works-sold-at-auction-1234801492/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/10/Sothebys_Elisabeth-Lederer-copy.jpg?w=1024"
   },
   {
    "date": "2026-11-18",
    "source": "artnet News",
-   "headline": "Kandinsky Painting Sells for $85.8 Million at Christie’s, a New Auction Record",
-   "why": "The Russian artist is having a banner year at auction; another work sold last month at Christie's in London for $41.8 million. The post Kandinsky…",
-   "url": "https://news.artnet.com/market/kandinsky-record-85-8-million-christies-2837796",
+   "headline": "$44.6M Modigliani Sculpture Steals the Show at Phillips",
+   "why": "Bidding for the stone head injected drama to an otherwise brisk auction that hauled in $104.4 million. The post $44.6M Modigliani Sculpture Steals…",
+   "url": "https://news.artnet.com/market/phillips-contemporary-auction-modigliani-2026-2838121",
    "image": null
   },
   {
@@ -154,30 +186,6 @@
    "why": "The line also includes ready-to-wear fashion, accessories, and handbags.",
    "url": "https://www.artnews.com/art-news/news/louis-vuitton-keith-haring-fragrances-1234806425/",
    "image": "https://www.artnews.com/wp-content/uploads/2026/11/LOUIS_VUITTON_THE_KEITH_HARING_COLLECTION.jpg?w=1024"
-  },
-  {
-   "date": "2026-11-17",
-   "source": "Hyperallergic",
-   "headline": "Olivia Reavey's Impromptu Sensuality",
-   "why": "Everything is a treasured scrap for Reavey to pull from in her unorthodox black-and-white photography.",
-   "url": "https://hyperallergic.com/olivia-reaveys-impromptu-sensuality/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/IMG_2153.jpg"
-  },
-  {
-   "date": "2026-11-17",
-   "source": "Hyperallergic",
-   "headline": "Meet Natalie White, Photography’s Giant Polaroid Whisperer",
-   "why": "The artist is among the few shooting on the company’s 20x24, creating otherworldly double-exposure self-portraits with a rapidly dwindling stock of…",
-   "url": "https://hyperallergic.com/meet-natalie-white-photographys-giant-polaroid-whisperer/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/1A-copy.JPG"
-  },
-  {
-   "date": "2026-11-17",
-   "source": "Artforum",
-   "headline": "TEFAF Maastricht Announces 2027 Line Up",
-   "why": "TEFAF Maastricht, the European Fine Art Foundation’s Dutch art fair, has shared its 2027 lineup. It will take place at Maastricht’s MECC, a major…",
-   "url": "https://www.artforum.com/news/tefaf-maastricht-announces-2027-participants-1234763751/",
-   "image": "https://www.artforum.com/wp-content/uploads/2020/03/article00_large-152.jpg?w=650"
   }
  ]
 }
