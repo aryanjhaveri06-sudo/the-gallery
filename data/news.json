@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-23T11:15:53+00:00",
+ "generated_at": "2026-11-24T05:05:50+00:00",
  "on_market": [
   {
    "date": "2026-11-22",
@@ -27,6 +27,14 @@
   },
   {
    "date": "2026-11-21",
+   "source": "Foro3D",
+   "headline": "Art Mumbai consolidates global interest in the Indian art market",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNc1pDRGtTSUFjS3JrLWJMQ3FVZ0J6Yi1ucUJlS0lJWDlpcUZZZXJjaWhkd3ZqWFhUbnRvb29JWkxGZGExR0pUck9iWThhdGtOWjczU2RQSDVpUjQ4SVhXRXd0TzB4dTdaSXllOXIyS0pXVE96NGxIMWU2Y0dQel9pb1loMERJQXp5cER2M1BkZm9XTE9vMVpheUtQdTlZUHJmOGhXLTVZRG1Qc0U5SjYybw?oc=5",
+   "image": null
+  },
+  {
+   "date": "2026-11-21",
    "source": "Firstpost",
    "headline": "India Biennale 2026: Contemporary art gets public-private partnership model in the country",
    "why": "",
@@ -43,10 +51,10 @@
   },
   {
    "date": "2026-11-20",
-   "source": "Outlook Luxe",
-   "headline": "Art Mumbai 2026: The Standout Works And Indian Artists From The Fair",
+   "source": "Hyperallergic",
+   "headline": "An Indian Tribal Artist Hits the Mainstream at Sotheby's Auction",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMisgFBVV95cUxNejFCVVpCdGc3SjBfSy1aV0pBRko0bVlzQlBxU2ZCOWxveTF5YkoxWEdfMnZ2T3o5VzI2bEtzUVVvMk9RWmVKYjRHc1NoWEZGYzdOWTVhek03dWIyWVUwaFJRcDBpMXBqM28xZklaempFdmtqdWtWMkFlX3RuVGp4WmxETnV5TmNyQWE0Z0Ftb1B1NnFqeXdQS05yNElrMHNKbTRFVWtUSzRTSk5ibUd3VEVn0gG_AUFVX3lxTE4zdklGNkcxRzNxU2NtUlhMa0g4ZUpLdEdSV241aE1EZURiZE9TQXltYm9GU25GRmw2ZnpPWnlZMm4xSG9tVXpjNXhpTU53Yk1IR3I2ODVEZERyWjJtcncwWHEzRGdOd0JDZUpSY0V1M3pZZ3hIdjlZaEJvT0F5czVheFhUZlp0QUI2MV9ickFhdktBTFBwcDR6QXlDV0hlWko3NU0tUUc3WC04bGRfVmdfVGstQWRmRFNwUDA0ajAw?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNS0trWHhwVEYxQkFkcjdHQ25LWWpzYjAwS2QxYXEyekpyeEFtUlplVHNUMXByUDlUSGVVbjBVd294ZXFJV1c2Y0JMMkhKTnI0YmhaNUpSVFQ5T3lOT1dXUV9vMzh3R3cxMmRXMVU1VTBYTE42N2libmg3SlY3UndnY05kbVBLS2FBNzZKY2NzVzlJWVRC?oc=5",
    "image": null
   },
   {
@@ -88,112 +96,104 @@
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMic0FVX3lxTE1VTGZVaEdrR0drTHVNLTdIMWdNd0lwZW1Cb1c5V0VTZHJlM3RyZjN5LUtaX19kU09qeTBoaXd5Nkg4aGV1VXBlMHlrNFJIaXlXazVhSzM5bndJQUZ1cjNlSHJ6cHZkVUZoclBXN1FWYlJEMGvSAXNBVV95cUxNVUxmVWhHa0dHa0x1TS03SDFnTXdJcGVtQm9XOVdFU2RyZTN0cmYzeS1LWl9fZFNPankwaGl3eTZIOGhldVVwZTB5azRSSGl5V2s1YUszOW53SUFGdXIzZUhyenB2ZFVGaHJQVzdRVmJSRDBr?oc=5",
    "image": null
-  },
-  {
-   "date": "2026-11-13",
-   "source": "The Manila Times",
-   "headline": "Apollo Art Auctions Presents Fine Islamic and Indian Art: Masterpieces of Metalwork, Arms and Mughal Jewellery",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMijwJBVV95cUxNcm44b1gxTVNvMVpBSW9VVmNKTTI5bGlndWFVZHNEMUZJR0NfTGFPYkJYMndoNnFoYmIwY1NuOFRxUVh5S2dfNFdveEp6MDNTNU5pZnpIN2E2MkkwZG9xWDlXcGx2RVFHUGZGSHFWNmNybFc4RFZOWThORjdkZ3g2Nmp2X2Q5Vy1mVDZaeHR0ckdqMWs3LXB2VVRhdFlqZVNYUVdMM09rODc3cmZjb1hNQTBnWF9jcENWaGVxWVk5TWhUdF8zLWtmaWhZZm55NndOTVJjRmFuNmU5R2s2bTBXRzZhUnE0cWdzRmdwQlZHM29wbmxnbDlZcll5TVlhR3Q3ZDFKYTl4dUdMLWI1SS1r0gGUAkFVX3lxTE9vaWZNajVxQk80TVIwYzhTeUU0M3NNWFVibEhscmJOekxGQ09NcWNDNUhXTVNZOWJqRnp1Tm1zWDh4c0k4NEFVX1lUUDZ5ZFBBNGZUQUNqR3ZpNjBsa0NZR0IzaG9NYUQ3clZHdUNIbG5Idk4wdW9tZGNuaTJ3MGNHV1l4bXlIaUl3OHBLWklNcHlVUDRVaEVkcWdCNjI0SFZySmxBWnRzYlp0UjFOaUgyMC10UVJScEtlYnJCam14aFBycWFCbXBOR2tYVVZud21kQ2NocjBzNE95Q3Rfbjc1c3VjRnRCcTRabElCVGtpS0FLenl6XzJaNGRzTTZhOEVJUkxlSTVfVkVrQjVlblRNRDJSVw?oc=5",
-   "image": null
   }
  ],
  "wider": [
   {
-   "date": "2026-11-23",
-   "source": "Hyperallergic",
-   "headline": "Miami Through the GTA VI Looking-Glass",
-   "why": "A conversation with artists misael soto and Leo Castañeda, ANGA looks back on a year of activism at the Venice Biennale, and more.",
-   "url": "https://hyperallergic.com/miami-through-the-gta-vi-looking-glass/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/image--7-.png"
-  },
-  {
-   "date": "2026-11-23",
-   "source": "Hyperallergic",
-   "headline": "Inside Edward Said’s World",
-   "why": "A new film about the Palestinian thinker, reviewed by a former students of his, and when does a documentary become an art performance?",
-   "url": "https://hyperallergic.com/inside-edward-saids-world/",
-   "image": "https://storage.ghost.io/c/51/f8/51f871d8-b6be-4a73-b958-0ca4fff0110a/content/images/2026/11/IMG_5585.jpeg"
-  },
-  {
-   "date": "2026-11-23",
+   "date": "2026-11-24",
    "source": "The Art Newspaper",
-   "headline": "Abu Dhabi markets itself to global elites—can its public art biennial reach local communities?",
-   "why": "Elvira Dyangani Ose’s exhibition, the biennial's second edition, questions contested definitions of home and probes at difficult subjects",
-   "url": "https://www.theartnewspaper.com/2026/11/23/abu-dhabi-markets-itself-to-global-elites-but-its-public-art-biennial-wants-to-reach-local-communities",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/c5d78b68876e4fac1ca162b447da99713b555132-1920x2879.jpg?w=140"
+   "headline": "Efforts to save I.M. Pei’s Dallas City Hall likely headed to referendum",
+   "why": "Local officials want to bulldoze Pei’s bold, inverted pyramid design and its surrounding plaza, which features sculptures by Henry Moore and Marta Pan",
+   "url": "https://www.theartnewspaper.com/2026/11/23/im-pei-dallas-city-hall-demolition-preservation-henry-moore-marta-pan",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/b862278fba47cfe5f9dadec62c18155173d7ae9f-2000x1333.jpg?w=140"
+  },
+  {
+   "date": "2026-11-23",
+   "source": "artnet News",
+   "headline": "Nan Goldin’s London Show Is a Beautiful, Brutal Reckoning With Loss",
+   "why": "The photographer's Hayward Gallery outing offers velvet-lined film chambers and raw images of mortality. The post Nan Goldin’s London Show Is a…",
+   "url": "https://news.artnet.com/art-world/nan-goldin-hayward-gallery-2840855",
+   "image": null
+  },
+  {
+   "date": "2026-11-23",
+   "source": "artnet News",
+   "headline": "A $32M De Kooning Heads to Miami",
+   "why": "Lévy Gorvy Dayan targets Art Basel-bound collectors with a 1970s rarity. The post A $32M De Kooning Heads to Miami appeared first on Artnet News .",
+   "url": "https://news.artnet.com/market/de-kooning-painting-art-basel-miami-2840916",
+   "image": null
+  },
+  {
+   "date": "2026-11-23",
+   "source": "artnet News",
+   "headline": "What to See at Art Miami, Context, and Aqua This Year",
+   "why": "Shepard Fairey receives a lifetime award, Lucy Sparrow opens a felt laundromat, and Aqua celebrates two decades this December. The post What to See…",
+   "url": "https://news.artnet.com/art-world/art-miami-context-aqua-2839619",
+   "image": null
+  },
+  {
+   "date": "2026-11-23",
+   "source": "Artforum",
+   "headline": "Russian Strikes On Kyiv and Odesa Damage Landmarks And Cultural Heritage Sites",
+   "why": "Ukraine’s Ministry of Culture reported on November 20 that Russian strikes had damaged cultural heritage sites in the cities of Kyiv and Odesa…",
+   "url": "https://www.artforum.com/news/russian-strikes-kyiv-odesa-landmarks-heritage-sites-1234764108/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/1280px-St_Volodymyrs_Cathedral.jpg?w=650"
   },
   {
    "date": "2026-11-23",
    "source": "ARTnews",
-   "headline": "Lucy Sante Talks About What Collage Enables That Writing Can’t",
-   "why": "She started making collages long before she established herself as a writer.",
-   "url": "https://www.artnews.com/art-in-america/columns/lucy-sante-interview-collage-1234806243/",
+   "headline": "Since 2020, the Canon Has Grown Bigger Than Ever Before. Will Museums and the Market Continue to Listen?",
+   "why": "Experts gathered during Art Week NYC to discuss the art world since 2020.",
+   "url": "https://www.artnews.com/art-news/news/2020s-expanding-canon-art-week-nyc-1234807332/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/DSC02712.jpg?w=1024"
+  },
+  {
+   "date": "2026-11-23",
+   "source": "Artforum",
+   "headline": "Sophie O’Brien Named Senior Curator, Exhibitions, at MCA Australia",
+   "why": "The Museum of Contemporary Art Australia (MCA) in Sydney has announced Sophie O’Brien as its new senior curator of exhibitions. O’Brien joins the…",
+   "url": "https://www.artforum.com/news/sophie-obrien-senior-curator-exhibitions-at-mca-australia-1234764007/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/sophie-obrien.jpg?w=650"
+  },
+  {
+   "date": "2026-11-23",
+   "source": "ARTnews",
+   "headline": "Faurschou Ends Its Public Exhibition Program as Its New York Space Heads for Demolition",
+   "why": "After four decades, Faurschou's public shows are over.",
+   "url": "https://www.artnews.com/art-news/news/faurschou-foundation-ends-shows-sells-new-york-building-1234807321/",
    "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
   },
   {
    "date": "2026-11-23",
-   "source": "artnet News",
-   "headline": "Frieze Abu Dhabi Sells Big, and Early",
-   "why": "Plus, surprises from New York's auctions and artists call for a boycott of Art Basel Miami Beach The post Frieze Abu Dhabi Sells Big, and Early…",
-   "url": "https://news.artnet.com/multimedia/frieze-abu-dhabi-sells-big-and-early-2840039",
-   "image": null
-  },
-  {
-   "date": "2026-11-23",
-   "source": "The Art Newspaper",
-   "headline": "Chile’s first Anglican church to host a new museum",
-   "why": "As part of a 50-year lease agreement, Destino Valparaíso—which houses the Immigrant Museum across the street—will oversee the management and…",
-   "url": "https://www.theartnewspaper.com/2026/11/23/chile-first-anglican-church-becomes-museum",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/74b59bdc8384f8ee0e05a800a485d77f178203e5-2000x1500.jpg?w=140"
-  },
-  {
-   "date": "2026-11-23",
-   "source": "artnet News",
-   "headline": "Who’s Going to Art Basel Hong Kong 2027? Here’s the Exhibitor Lineup",
-   "why": "The art fair's lineup is in, featuring 232 exhibitors from more than 40 countries, including 31 newcomers. The post Who’s Going to Art Basel Hong…",
-   "url": "https://news.artnet.com/market/2027-art-basel-hong-kong-exhibitor-list-2839786",
-   "image": null
+   "source": "ARTnews",
+   "headline": "Lynette Yiadom-Boakye and Anne Imhof Make Vogue’s 2026 Best-Dressed List",
+   "why": "The list also included dancer Devon Teuscher and architect Sumayya Vally.",
+   "url": "https://www.artnews.com/art-news/news/lynette-yiadom-boakye-anne-imhof-vogue-best-dressed-list-1234807360/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
   },
   {
    "date": "2026-11-23",
    "source": "ARTnews",
-   "headline": "Art Basel Hong Kong Lines Up 232 Exhibitors and a New Floor Plan for Its 2027 Edition",
-   "why": "The fair will also feature 31 first-time exhibitors.",
-   "url": "https://www.artnews.com/art-news/market/art-basel-hong-kong-2027-exhibitor-list-1234807256/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/Print_approx_21_x_14_cm_ABHK26__Encounters__Public_Interactions___HiRes.jpg?w=1024"
+   "headline": "13th-Century Carving Stolen by Art Thief ‘Eric the Belgian’ Recovered in the UK",
+   "why": "The so-called \"gentleman thief\" was known for robbing churches and monasteries in rural Spain in the 1970s and '80s.",
+   "url": "https://www.artnews.com/art-news/news/13th-century-carving-stolen-art-thief-eric-the-belgian-recovered-uk-1234807344/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/IMG-20261120-WA0004.jpg?w=1024"
   },
   {
    "date": "2026-11-23",
-   "source": "The Art Newspaper",
-   "headline": "Flooding in southwestern US underlines risks of Trump administration’s reduction of Bears Ears National Monument",
-   "why": "Recent floods in the Four Corners region of the southwest posed relatively little immediate risk to archaeological sites, but exposed risks due to…",
-   "url": "https://www.theartnewspaper.com/2026/11/22/flooding-us-southwest-bears-ears-national-monument-trump-admin",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/0a3320473506c409c4ad2e8bc112e046bc79105f-2000x892.jpg?w=140"
+   "source": "Artforum",
+   "headline": "Jonathas de Andrade Wins 2026 Eye Art & Film Prize",
+   "why": "Amsterdam’s Eye Filmmuseum has named Brazilian artist Jonathas de Andrade the twelfth winner of the Eye Art & Film Prize, an annual €30,000 (about…",
+   "url": "https://www.artforum.com/news/jonathas-de-andrade-wins-twelfth-eye-art-film-prize-1234764011/",
+   "image": "https://www.artforum.com/wp-content/uploads/2026/11/Jonathas-de-Andrade-c-Jessica-Bernardo.webp?w=650"
   },
   {
-   "date": "2026-11-22",
+   "date": "2026-11-23",
    "source": "ARTnews",
-   "headline": "Carolina Herrera’s Wes Gordon and Oribe’s Daniel Kaner on Collecting as a Personal Passion and a Creative Practice",
-   "why": "Gordon and Kaner reveal how they've build their own collections, and what inspires their work in the fashion and beauty world.",
-   "url": "https://www.artnews.com/art-news/news/wes-gordon-daniel-kaner-carolina-herrera-oribe-art-week-nyc-2026-1234806633/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/Hub-Day-2-WWD-From-the-Collection-to-the-Runway-Wes-Gordon-and-Daniel-Kaner-with-Jenny-B-Fine__Photo-Christopher-Garcia-Valle_DSC07169.jpg.jpg?w=1024"
-  },
-  {
-   "date": "2026-11-21",
-   "source": "artnet News",
-   "headline": "Who Won New York’s $2.44 Billion Art Week?",
-   "why": "The total haul eclipsed last year's, and records were set, but it remains a complicated market. The post Who Won New York’s $2.44 Billion Art Week?…",
-   "url": "https://news.artnet.com/market/who-won-new-yorks-2-44-billion-art-week-2823850",
-   "image": null
-  },
-  {
-   "date": "2026-11-21",
-   "source": "ARTnews",
-   "headline": "Art Advisor Sophia Cohen on How the Next Generation of Collectors Is Approaching the Art Market",
-   "why": "Cohen, formerly of Gavin Brown's enterprise and Gagosian, launched Siren Projects in 2024.",
-   "url": "https://www.artnews.com/art-news/news/sophia-cohen-siren-projects-art-week-nyc-1234807155/",
-   "image": "https://www.artnews.com/wp-content/uploads/2026/11/Hub-Day-1-The-Next-Generation-of-Art-Collectors-Sophia-Cohen-with-Sarah-Douglas__Photo-Christopher-Garcia-Valle_DSC06379.jpg.jpg?w=1024"
+   "headline": "Friedrich Christian Flick, Art Collector and Scion of German Industrialists with Nazi Past, Dies at 82",
+   "why": "Flick reportedly died after suffering injuries from a fall days earlier.",
+   "url": "https://www.artnews.com/art-news/news/friedrich-christian-flick-collection-dead-82-1234807322/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/1249556176-e1795458622756.jpg?w=1024"
   }
  ]
 }
