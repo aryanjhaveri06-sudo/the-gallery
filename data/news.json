@@ -1,6 +1,14 @@
 {
- "generated_at": "2026-11-24T13:02:15+00:00",
+ "generated_at": "2026-11-25T03:48:55+00:00",
  "on_market": [
+  {
+   "date": "2026-11-24",
+   "source": "Arizona Foothills Magazine",
+   "headline": "S’edav Va’aki Museum to Host 49th Annual Indian Market",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxQWUhNc2V6d29YUHA0OE5OZTZyemRiZGk0dDVrWWsxVkRidlFqSVNTMUFLdTg2dTBIUDdpajA0SFJwU1daQ0lELUsyOW5ndlZFd1N5UU50OHg0U3cxNllpam5QUHo2TXdpQlViVndrRFVCc1FIUzhGT1BnZjhNNE1Ca3VOYWJuREdpZXhzUzYzZ01PaVZvQnhpRzVEZnUtZTM2STFDRDJBcWgzZXBxdEhPSDJrQjdEc2M?oc=5",
+   "image": null
+  },
   {
    "date": "2026-11-24",
    "source": "AltBollywood.com",
@@ -39,14 +47,6 @@
    "headline": "Discovering the history of Indian Modern art",
    "why": "",
    "url": "https://news.google.com/rss/articles/CBMihwFBVV95cUxQNGxid2QtUHg2clF3bVd3VlJ3R1V1cnZLdTdUXzVuLUVUWDBRN25XWm9NamsweXFsNnZOYlJPVm5QMW5OMG9KSzRGeENMZUFqVDZFRnZFeTMzejlKTS1CY21kSkZBWmxQcW16X2xvY3Q2N2xyT1dhSjVQSGFLUjI2MjFscmNXaEHSAZQBQVVfeXFMTmtiVVJpR25sLWpSZ3cyQUdEcDNrVmxnUTA5MFNqdUhPTDNEbTQ4Qmktb1A0X0U0R2xjSHl6bVdPU2Q1X2lmZ3NxNENabTAwWGpfaUZtUVlQSllYNzVvRWg4WUV5QkgtQklEdDZoNkkxdVJaN3QwbUZHNVhJMWYtQW90TnA5RThWcFZPMGtqa1dmalRQUQ?oc=5",
-   "image": null
-  },
-  {
-   "date": "2026-11-21",
-   "source": "Foro3D",
-   "headline": "Art Mumbai consolidates global interest in the Indian art market",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNc1pDRGtTSUFjS3JrLWJMQ3FVZ0J6Yi1ucUJlS0lJWDlpcUZZZXJjaWhkd3ZqWFhUbnRvb29JWkxGZGExR0pUck9iWThhdGtOWjczU2RQSDVpUjQ4SVhXRXd0TzB4dTdaSXllOXIyS0pXVE96NGxIMWU2Y0dQel9pb1loMERJQXp5cER2M1BkZm9XTE9vMVpheUtQdTlZUHJmOGhXLTVZRG1Qc0U5SjYybw?oc=5",
    "image": null
   },
   {
@@ -101,99 +101,99 @@
  "wider": [
   {
    "date": "2026-11-24",
+   "source": "The Art Newspaper",
+   "headline": "Grand Theft Auto VI takes over Miami, including its art destinations",
+   "why": "Rockstar Games collaborated with the Wynwood Walls museum ahead of the blockbuster game's release, and has replicated (but renamed) the Pérez, Bass…",
+   "url": "https://www.theartnewspaper.com/2026/11/24/grand-theft-auto-vi-takes-over-miami-art-institutions",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/54908254a5d82c303eb4582ccb48e5f7f00e4dba-2000x1125.jpg?w=140"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "artnet News",
+   "headline": "Trailblazing Museum Director Thelma Golden Is Leaving Her Post",
+   "why": "A transformative force in American art, she is stepping down after 21 years at the helm. The post Trailblazing Museum Director Thelma Golden Is…",
+   "url": "https://news.artnet.com/art-world/thelma-golden-steps-down-studio-museum-2841588",
+   "image": null
+  },
+  {
+   "date": "2026-11-24",
+   "source": "artnet News",
+   "headline": "Miami’s Newest Art Fair Is Betting That Less Is More",
+   "why": "InScope capped its roster for the inaugural edition, betting on the idea that close looking trumps crowds. The post Miami’s Newest Art Fair Is…",
+   "url": "https://news.artnet.com/art-world/inscope-miami-beach-2839704",
+   "image": null
+  },
+  {
+   "date": "2026-11-24",
    "source": "ARTnews",
-   "headline": "A New Museum in Georgia’s Wine Country Shows Another Side of the Country’s Art History",
-   "why": "The Kvareli Foundation for Contemporary Art opens with a survey of unofficial Georgian art amid an ongoing government crackdown on civil society.",
-   "url": "https://www.artnews.com/art-news/news/kvareli-foundation-for-contemporary-art-georgia-opening-1234807297/",
+   "headline": "Thelma Golden To Step Down From Role as Director of Studio Museum in Harlem",
+   "why": "The announcement coincides with Golden's 20th anniversary in the role, which she assumed in 2006, and just one year after the museum reopened in a…",
+   "url": "https://www.artnews.com/art-news/artists/thelma-golden-to-step-down-director-studio-museum-in-harlem-1234807621/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/StudioMuseuminHarlem_ThelmaGolden_Photo-JulieSkarratt.jpeg?w=1024"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "ARTnews",
+   "headline": "Bukhara Biennial Unveils ‘The Long Welcome’ Theme and Names First Artists",
+   "why": "The exhibition is scheduled for September 3 through November 21.",
+   "url": "https://www.artnews.com/art-news/news/bukhara-biennial-theme-first-artists-1234807593/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/12.-Ark-of-Bukhara.jpg?w=1024"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "The Art Newspaper",
+   "headline": "Frida Kahlo-inspired health initiative and Ukrainian veterans exhibition among winners of prize celebrating innovative cultural projects",
+   "why": "Five non-profit cultural organisations from across Europe have won the 2026 Art Explora awards, enjoying a share of €180,000 in total prize funds",
+   "url": "https://www.theartnewspaper.com/2026/11/24/frida-kahlo-inspired-health-initiative-ukrainian-veterans-exhibition-among-winners-art-explora-awards",
+   "image": "https://cdn.sanity.io/images/cxgd3urn/production/86a874cc2021a73f66fdb593d239874b4651fc5d-5102x3406.jpg?w=140"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "artnet News",
+   "headline": "Long-Lost Max Oppenheimer Painting Just Sold for a Record $3.91M",
+   "why": "The work set a new auction high for the Viennese painter. The post Long-Lost Max Oppenheimer Painting Just Sold for a Record $3.91M appeared first on…",
+   "url": "https://news.artnet.com/market/work-of-the-week-max-oppenheimer-auction-record-2841289",
+   "image": null
+  },
+  {
+   "date": "2026-11-24",
+   "source": "ARTnews",
+   "headline": "Iraq’s Museums Are Finally Opening Their Doors Again",
+   "why": "In Baghdad alone, the National Museum, the Abbasid Palace, and the Shamash Museum are slowly opening up to the world.",
+   "url": "https://www.artnews.com/art-news/news/iraq-museums-reopen-national-museum-1234807536/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/GettyImages-1607848.jpg?w=1024"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "artnet News",
+   "headline": "Alexander Aizenshtadt, a Painter of People and the Zeitgeist",
+   "why": "A forthcoming book from Rizzoli delves into the life and work of the pioneering Russian-French artist. The post Alexander Aizenshtadt, a Painter of…",
+   "url": "https://news.artnet.com/art-world/alexander-aizenshtadt-rizzoli-2841295",
+   "image": null
+  },
+  {
+   "date": "2026-11-24",
+   "source": "ARTnews",
+   "headline": "EVA International Announces Theme for 50th Anniversary Edition in 2027",
+   "why": "Director Matt Packer will step down in spring 2028 after 10 years.",
+   "url": "https://www.artnews.com/art-news/news/eva-international-announces-details-1234807519/",
+   "image": "https://www.artnews.com/wp-content/uploads/2026/11/eva-international.png?w=1024"
+  },
+  {
+   "date": "2026-11-24",
+   "source": "ARTnews",
+   "headline": "Dora Maar’s Paris Apartment Is For Sale, Picasso Wall Drawings and All",
+   "why": "The artist's home has been listed for about $3.1 million.",
+   "url": "https://www.artnews.com/art-news/news/dora-maar-paris-apartment-sale-picasso-wall-drawings-1234807368/",
    "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
   },
   {
    "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "Fatbergs, pigeons and Pankhurst: rebranded London Museum opens new £437m home",
-   "why": "Previously known as the Museum of London and based at London Wall, the new museum displays 2,000 years of the capital's history",
-   "url": "https://www.theartnewspaper.com/2026/11/24/fatbergs-pigeons-and-pankhurst-rebranded-london-museum-opens-new-£437m-home",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/ad4aed5b86644e23c72541ae29638a52702c81ab-8968x5515.jpg?w=140"
-  },
-  {
-   "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "UK government blocks export of 17th-century British landscape painting",
-   "why": "The painting from 1662 depicts the Llannerch Park country estate in northeast Wales, and is valued at £550,000",
-   "url": "https://www.theartnewspaper.com/2026/11/24/uk-government-blocks-export-of-17th-century-british-landscape-painting",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/74cb65833d11c103c018fdbe19ce9bdaa112381e-1439x1000.jpg?w=140"
-  },
-  {
-   "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "From the margins to the mainstream: the growing market for illustration art",
-   "why": "Works by Norman Rockwell and his peers are winning collectors, museums and million-dollar auction prices",
-   "url": "https://www.theartnewspaper.com/2026/11/24/from-the-margins-to-the-mainstream-the-growing-market-for-illustration-art",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/687e68d25187dbb4c24fa765967886f656022b64-1080x1122.jpg?w=140"
-  },
-  {
-   "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "Exhibition celebrates Delftware, the Dutch art form that became the ‘Ikea of its day’",
-   "why": "Show in The Hague looks at the craft, creativity and global influences behind the Netherlands’ best-known cultural export",
-   "url": "https://www.theartnewspaper.com/2026/11/24/exhibition-celebrates-delftware-the-dutch-art-form-that-became-the-ikea-of-its-day",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/d147169d55b8f67ba8c4516e89ba2f8e1c55679e-835x1114.jpg?w=140"
-  },
-  {
-   "date": "2026-11-24",
    "source": "artnet News",
-   "headline": "That Time John Berger Was in ‘Grand Theft Auto’",
-   "why": "Plus, a fact-check of Yoshitomo Nara's eye-popping attendance stats and a peep at the new James Turrell. The post That Time John Berger Was in ‘Grand…",
-   "url": "https://news.artnet.com/artnet-bulletin/john-berger-grand-theft-auto-nov-24-2840937",
+   "headline": "Anish Kapoor, Huma Bhabha, and Precious Okoyomon Lead 2027 Bukhara Biennial Lineup",
+   "why": "Curated by architect Kulapat Yantrasast, the event will feature around 60 projects. The post Anish Kapoor, Huma Bhabha, and Precious Okoyomon Lead…",
+   "url": "https://news.artnet.com/art-world/bukhara-biennial-2027-artists-2841210",
    "image": null
-  },
-  {
-   "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "US affordable artists' housing initiatives hobbled by uneven regulation and oversight",
-   "why": "Recent and ongoing projects in Colorado and California illustrate the challenges faced by well-meaning organisations",
-   "url": "https://www.theartnewspaper.com/2026/11/24/affordable-artists-housing-initiatives-patchwork-regulation-oversight",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/ec50312e724da94d14cf434acd403f9dd3b882b7-2000x2667.jpg?w=140"
-  },
-  {
-   "date": "2026-11-24",
-   "source": "The Art Newspaper",
-   "headline": "Efforts to save I.M. Pei’s Dallas City Hall likely headed to referendum",
-   "why": "Local officials want to bulldoze Pei’s bold, inverted pyramid design and its surrounding plaza, which features sculptures by Henry Moore and Marta Pan",
-   "url": "https://www.theartnewspaper.com/2026/11/23/im-pei-dallas-city-hall-demolition-preservation-henry-moore-marta-pan",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/b862278fba47cfe5f9dadec62c18155173d7ae9f-2000x1333.jpg?w=140"
-  },
-  {
-   "date": "2026-11-23",
-   "source": "artnet News",
-   "headline": "Nan Goldin’s London Show Is a Beautiful, Brutal Reckoning With Loss",
-   "why": "The photographer's Hayward Gallery outing offers velvet-lined film chambers and raw images of mortality. The post Nan Goldin’s London Show Is a…",
-   "url": "https://news.artnet.com/art-world/nan-goldin-hayward-gallery-2840855",
-   "image": null
-  },
-  {
-   "date": "2026-11-23",
-   "source": "artnet News",
-   "headline": "A $32M De Kooning Heads to Miami",
-   "why": "Lévy Gorvy Dayan targets Art Basel-bound collectors with a 1970s rarity. The post A $32M De Kooning Heads to Miami appeared first on Artnet News .",
-   "url": "https://news.artnet.com/market/de-kooning-painting-art-basel-miami-2840916",
-   "image": null
-  },
-  {
-   "date": "2026-11-23",
-   "source": "artnet News",
-   "headline": "What to See at Art Miami, Context, and Aqua This Year",
-   "why": "Shepard Fairey receives a lifetime award, Lucy Sparrow opens a felt laundromat, and Aqua celebrates two decades this December. The post What to See…",
-   "url": "https://news.artnet.com/art-world/art-miami-context-aqua-2839619",
-   "image": null
-  },
-  {
-   "date": "2026-11-23",
-   "source": "Artforum",
-   "headline": "Russian Strikes On Kyiv and Odesa Damage Landmarks And Cultural Heritage Sites",
-   "why": "Ukraine’s Ministry of Culture reported on November 20 that Russian strikes had damaged cultural heritage sites in the cities of Kyiv and Odesa…",
-   "url": "https://www.artforum.com/news/russian-strikes-kyiv-odesa-landmarks-heritage-sites-1234764108/",
-   "image": "https://www.artforum.com/wp-content/uploads/2026/11/1280px-St_Volodymyrs_Cathedral.jpg?w=650"
   }
  ]
 }
