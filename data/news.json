@@ -1,6 +1,14 @@
 {
- "generated_at": "2026-11-27T03:11:57+00:00",
+ "generated_at": "2026-11-27T11:25:06+00:00",
  "on_market": [
+  {
+   "date": "2026-11-27",
+   "source": "Bold Outline",
+   "headline": "‘Sacred, Wild & Imagined’, Featuring Works by Amrita Sher-Gil, M.F. Husain, Sakti Burman and Others, at Art & Beyond, Defence Colony, New Delhi",
+   "why": "",
+   "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQc3Z1eVpMMmVURm1YVldPMEM4QzV1V0NZOEJsR0xUUGkyTk1DbXZVbUlqb19HcHRISnRhWEdtbVZmQUFfRi1OVlN1MGNiV0VqaVp2Ukk0cnlMMGppUjViR1hXWlNzSVNyUEJ1ZjBzX3h4REVINmFGQVZsVUlZeThHSThiR0FiMkdsMTBmTlByM29HUGg4cGJuX1VNSnY2QndhU2ZiRWlCcVdHOGJINlJlYmdLMnlNSDllMEdYMThBMGd4MW9tb08wY19QaUp6VnpZZXVxWVFuME5Bd2hwdHVTdnpLclhINGVt?oc=5",
+   "image": null
+  },
   {
    "date": "2026-11-26",
    "source": "Wisevoter",
@@ -10,12 +18,20 @@
    "image": null
   },
   {
-   "date": "2026-11-25",
-   "source": "www.pib.gov.in",
-   "headline": "India wins the Visitors’ Lion for Best National Participation at the 61st Venice Art Biennale",
+   "date": "2026-11-26",
+   "source": "Bold Outline",
+   "headline": "‘Pause / Ponder’ A Group Exhibition Featuring Six Contemporary Indian Artists",
    "why": "",
-   "url": "https://news.google.com/rss/articles/CBMiaEFVX3lxTE9Cejk1RWJSemxGTEttR3ZmOEVoRWVaOWtyczI1QW1XUjNrQVprc2FReDZfOTVBR0steUtHTHdoMTdnTnhhX0l6ajN1RHJtSTQ5c2RjM1pQcG1NcGFoR1lDWW5fdVdtaEVJ?oc=5",
+   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxQOVByQWRkSnZJaVlGVmV5MlIyb2c2eGJiVE9HVjZfX0wyeXFxWUVkcm1mRXFhdTNqaWhFMjNRa0ZHV0w4b0w1bWdxSEVHZW9vLTlqek9qZzk3ZHhRN0pZODlEdldyU1FGdTZSOWt1NEtoVlI5dklNZmJuaVhhRUhSTEk5S2JJRGQ5S0JwVDRkcjlBZjVWWE5DOC0tcUFxQQ?oc=5",
    "image": null
+  },
+  {
+   "date": "2026-11-25",
+   "source": "The Indian Express",
+   "headline": "India Pavilion wins at Venice Biennale 2026",
+   "why": "",
+   "url": "https://indianexpress.com/article/lifestyle/art-and-culture/india-pavilion-visitors-lions-biennale-2026-10978798/",
+   "image": "https://images.indianexpress.com/2026/11/From-left-Alwar-Balasubramaniam-Skarma-Sonam-Tashi-curator-Amin-Jaffer-Sumakshi-Singh-Asim-Waqif-and-Ranjani-Shettar.jpg"
   },
   {
    "date": "2026-11-25",
@@ -58,22 +74,6 @@
    "image": "https://th-i.thgim.com/public/incoming/wk198u/article71737980.ece/alternates/LANDSCAPE_1200/stepwell2.jpg"
   },
   {
-   "date": "2026-11-25",
-   "source": "The Hindu",
-   "headline": "Indian Photo Festival 2026 returns to Hyderabad: Here’s what to expect",
-   "why": "The 12th edition, which begins at the State Gallery of Art on November 26, will feature exhibitions, artist talks, workshops, and portfolio reviews",
-   "url": "https://www.thehindu.com/entertainment/art/indian-photo-festival-2026-returns-to-hyderabad-heres-what-to-expect/article71738330.ece",
-   "image": "https://th-i.thgim.com/public/incoming/anoguv/article71738337.ece/alternates/LANDSCAPE_1200/08_Shanti__Hyderabad.jpg"
-  },
-  {
-   "date": "2026-11-24",
-   "source": "AltBollywood.com",
-   "headline": "ART MUMBAI 2026 Reports Strong Sales: What the Fourth Edition Revealed About India's Art Market",
-   "why": "",
-   "url": "https://news.google.com/rss/articles/CBMingFBVV95cUxNZUhGRnVCYTloUGs0X3NhRlhZYU5EQnJITllGX05HeVRZdnlYY0NmdXdCZ1B0bDQwa0hqMGIzV0JGZzFhUGhkaVo5dzF3THNxR2ZNNkZVUVdFelNtVjdZTW9JMG9Rc1ZOX3pmVmtfelItZUFTa0tqM3lCOXBaUm5RdE9zLXI5VTZCa3RKdXV0OXcyc0xwbjdPOUtCQWdrZw?oc=5",
-   "image": null
-  },
-  {
    "date": "2026-11-22",
    "source": "CNBC TV18",
    "headline": "Jogen Chowdhury, MF Husain works drive Pundole auction to ₹12.7 crore",
@@ -100,11 +100,43 @@
  ],
  "wider": [
   {
+   "date": "2026-11-27",
+   "source": "ARTnews",
+   "headline": "Carroll Dunham Calls His Filthy Formalism “Abstraction with a Hard-On”",
+   "why": "Ahead of his Miami retrospective, the artist and his allies help a skeptic understand his work.",
+   "url": "https://www.artnews.com/art-in-america/features/carroll-dunham-ica-miami-laurie-simmons-1234807999/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
+  },
+  {
+   "date": "2026-11-27",
+   "source": "ARTnews",
+   "headline": "Batima Zaurbekova’s Textiles Meld Traditional Kazakh Techniques with Modernist Influences, Defying Easy Categorization",
+   "why": "The 80-year-old artist is the subject of a major retrospective at the Abylkhan Kasteyev National Museum of Arts.",
+   "url": "https://www.artnews.com/art-news/artists/batima-zaurbekova-retrospective-almaty-kazakhstan-1234807853/",
+   "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
+  },
+  {
+   "date": "2026-11-27",
+   "source": "artnet News",
+   "headline": "Are Friedrich Kunath’s Luscious Landscapes Sincere or Ironic? Yes!",
+   "why": "The German painter is bringing his slippery romanticism to the ICA Miami. The post Are Friedrich Kunath’s Luscious Landscapes Sincere or Ironic? Yes!…",
+   "url": "https://news.artnet.com/art-world/friedrich-kunath-ica-miami-2842251",
+   "image": null
+  },
+  {
+   "date": "2026-11-27",
+   "source": "artnet News",
+   "headline": "The Real Gallerist Behind Natalie Portman Film ‘The Gallerist’",
+   "why": "Dealer Rob Dimin dishes on his role advising the art world romp—without spoilers! The post The Real Gallerist Behind Natalie Portman Film ‘The…",
+   "url": "https://news.artnet.com/art-world/the-gallerist-movie-portman-ortega-2841860",
+   "image": null
+  },
+  {
    "date": "2026-11-26",
    "source": "ARTnews",
    "headline": "Rare Marie Antoinette ‘Breast Bowl’ Hammers for $2.47 M. in Paris, Surpassing Top Estimate",
    "why": "The rare “nipple bowl” is one of four such bowls that was made for the French queen’s \"pleasure dairy\" near the Château de Versailles.",
-   "url": "https://www.artnews.com/artnews/news/marie-antoinette-breast-bowl-hammers-past-estimate-rare-1234808074/",
+   "url": "https://www.artnews.com/art-news/market/marie-antoinette-breast-bowl-hammers-past-estimate-rare-1234808074/",
    "image": "https://www.artnews.com/wp-content/themes/vip/pmc-artnews-2019/assets/public/lazyload-fallback.gif"
   },
   {
@@ -162,38 +194,6 @@
    "why": "The current director of Berlin's Brücke-Museum will take up overall artistic responsibility for both Swiss institutions on 1 August 2027",
    "url": "https://www.theartnewspaper.com/2026/11/26/lisa-marei-schmidt-appointed-director-kunstmuseum-bern-zentrum-paul-klee",
    "image": "https://cdn.sanity.io/images/cxgd3urn/production/7af3e43fa34145452d9fc8050e8ecf8e0d24afa2-3655x2480.jpg?w=140"
-  },
-  {
-   "date": "2026-11-26",
-   "source": "The Art Newspaper",
-   "headline": "Pair accused of murdering South African artist and curator Tamlin Blake appear in court as art scene mourns",
-   "why": "The artist was a well-loved member of Riebeek-West’s community of artists",
-   "url": "https://www.theartnewspaper.com/2026/11/26/pair-accused-of-murdering-south-african-artist-and-curator-tamlin-blake-appear-in-court-as-art-scene-mourns",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/f2f5762fa0627df512b5243cbe04ca1c2834f165-1067x1422.jpg?w=140"
-  },
-  {
-   "date": "2026-11-26",
-   "source": "The Art Newspaper",
-   "headline": "Museums finding new ways to measure wellness initiatives’ value",
-   "why": "Evaluation tools are helping staff assess wellbeing programmes in Seattle, while a medical journal calls for greater attention to access…",
-   "url": "https://www.theartnewspaper.com/2026/11/26/museums-wellness-initiatives-qualitative-quantitative-analysis-frye-art-museum-seattle",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/5793fa94bcbabf6ed31869855585ad40a1a5f628-2000x1333.jpg?w=140"
-  },
-  {
-   "date": "2026-11-26",
-   "source": "artnet News",
-   "headline": "At This Caribbean Art Fair, Sales Are Not Really the Point",
-   "why": "Backed by a luxe resort, Fuze aims to build Bahamas's art scene. The post At This Caribbean Art Fair, Sales Are Not Really the Point appeared first…",
-   "url": "https://news.artnet.com/market/fuze-art-fair-baha-mar-2835743",
-   "image": null
-  },
-  {
-   "date": "2026-11-25",
-   "source": "The Art Newspaper",
-   "headline": "An archaeological take on ancient rituals in the heart of a legendary Berlin nightclub",
-   "why": "The artists Ala Roushan and Charles Stankievech leveraged AI to bring a 4,000-year old ritual into Berghain",
-   "url": "https://www.theartnewspaper.com/2026/11/25/ala-roushan-charles-stankievech-exhibition-berghain-nightclub-berlin-house-autotelic-foundation",
-   "image": "https://cdn.sanity.io/images/cxgd3urn/production/d717cc8fcfb2d31f7707d21a9aa09c5d91edefc9-2000x1500.jpg?w=140"
   }
  ]
 }
